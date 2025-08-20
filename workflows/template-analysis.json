@@ -1,0 +1,20 @@
+{
+  "title": "Build an Interactive AI Agent with Chat Interface and Multiple Tools",
+  "description": "Interactive AI agent with chat interface, multiple tools, and memory",
+  "features": [
+    "Chat Interface",
+    "AI Agent",
+    "Multiple Tools",
+    "Memory",
+    "Session Management",
+    "Tool Calling"
+  ],
+  "nodes": [
+    "n8n-nodes-base.webhook",
+    "n8n-nodes-langchain.agent",
+    "n8n-nodes-langchain.toolCode",
+    "n8n-nodes-base.code",
+    "n8n-nodes-base.respondToWebhook"
+  ],
+  "workflow": null
+}
