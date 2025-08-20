@@ -1,13 +1,15 @@
 {
   "name": "AI Research Analyst with Multiple Models",
-  "description": "Advanced research agent using multiple AI models and data sources",
   "nodes": [
     {
       "id": "webhook_trigger",
       "name": "Research Request",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 1.1,
-      "position": [250, 400],
+      "position": [
+        250,
+        400
+      ],
       "parameters": {
         "path": "research-analyst",
         "method": "POST"
@@ -18,7 +20,10 @@
       "name": "Research Planning (GPT-4)",
       "type": "n8n-nodes-base.openAi",
       "typeVersion": 1,
-      "position": [450, 400],
+      "position": [
+        450,
+        400
+      ],
       "parameters": {
         "model": "gpt-4",
         "prompt": "You are a research planning AI. Create a comprehensive research plan for: {{ $json.topic }}\n\nOutput JSON with:\n{\n  \"research_questions\": [\"question1\", \"question2\"],\n  \"search_terms\": [\"term1\", \"term2\"],\n  \"data_sources_needed\": [\"web\", \"weather\", \"academic\"],\n  \"analysis_approach\": \"description\"\n}",
@@ -31,7 +36,10 @@
       "name": "Parse Research Plan",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [650, 400],
+      "position": [
+        650,
+        400
+      ],
       "parameters": {
         "mode": "runOnceForEachItem",
         "jsCode": "try {\n  const response = $input.item.json.message || $input.item.json.choices?.[0]?.message?.content;\n  const plan = JSON.parse(response);\n  \n  return {\n    json: {\n      ...plan,\n      original_topic: $('webhook_trigger').item.json.topic,\n      research_depth: $('webhook_trigger').item.json.depth || 'standard'\n    }\n  };\n} catch (error) {\n  return {\n    json: {\n      research_questions: ['What is ' + $('webhook_trigger').item.json.topic + '?'],\n      search_terms: [$('webhook_trigger').item.json.topic],\n      data_sources_needed: ['web'],\n      original_topic: $('webhook_trigger').item.json.topic\n    }\n  };\n}"
@@ -42,7 +50,10 @@
       "name": "Start Parallel Research",
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
-      "position": [850, 400],
+      "position": [
+        850,
+        400
+      ],
       "parameters": {
         "batchSize": 1,
         "options": {}
@@ -53,7 +64,10 @@
       "name": "Web Research (Apify)",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.1,
-      "position": [1050, 200],
+      "position": [
+        1050,
+        200
+      ],
       "parameters": {
         "method": "POST",
         "url": "https://api.apify.com/v2/acts/apify~google-search-scraper/run-sync-get-dataset-items",
@@ -76,7 +90,10 @@
       "name": "Deep Content Scraping",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.1,
-      "position": [1050, 350],
+      "position": [
+        1050,
+        350
+      ],
       "parameters": {
         "method": "POST",
         "url": "https://api.firecrawl.dev/v0/crawl",
@@ -99,7 +116,10 @@
       "name": "GPT-4 Analysis",
       "type": "n8n-nodes-base.openAi",
       "typeVersion": 1,
-      "position": [1250, 250],
+      "position": [
+        1250,
+        250
+      ],
       "parameters": {
         "model": "gpt-4-turbo",
         "prompt": "Analyze the research data for: {{ $('parse_plan').item.json.original_topic }}\n\nWeb Research Results: {{ JSON.stringify($('web_research').item.json, null, 2) }}\n\nProvide detailed analysis focusing on:\n1. Key findings\n2. Data quality assessment\n3. Identified trends\n4. Potential gaps",
@@ -112,7 +132,10 @@
       "name": "DeepSeek Analysis",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.1,
-      "position": [1250, 400],
+      "position": [
+        1250,
+        400
+      ],
       "parameters": {
         "method": "POST",
         "url": "https://api.deepseek.com/chat/completions",
@@ -123,7 +146,7 @@
         "headerParameters": {
           "parameters": [
             {
-              "name": "Authorization", 
+              "name": "Authorization",
               "value": "Bearer {{ $env.DEEPSEEK_API_KEY }}"
             },
             {
@@ -137,9 +160,12 @@
     {
       "id": "gemini_synthesis",
       "name": "Gemini Synthesis",
-      "type": "n8n-nodes-base.httpRequest", 
+      "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.1,
-      "position": [1250, 550],
+      "position": [
+        1250,
+        550
+      ],
       "parameters": {
         "method": "POST",
         "url": "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key={{ $env.GOOGLE_AI_API_KEY }}",
@@ -162,7 +188,10 @@
       "name": "Generate Final Report",
       "type": "n8n-nodes-base.openAi",
       "typeVersion": 1,
-      "position": [1450, 400],
+      "position": [
+        1450,
+        400
+      ],
       "parameters": {
         "model": "gpt-4",
         "prompt": "Create a comprehensive research report for: {{ $('parse_plan').item.json.original_topic }}\n\nResearch Plan: {{ JSON.stringify($('parse_plan').item.json, null, 2) }}\n\nGPT-4 Analysis: {{ $('gpt4_analysis').item.json.message }}\n\nDeepSeek Technical Analysis: {{ $('deepseek_analysis').item.json.choices?.[0]?.message?.content }}\n\nGemini Synthesis: {{ $('gemini_synthesis').item.json.candidates?.[0]?.content?.parts?.[0]?.text }}\n\nGenerate a well-structured research report with:\n1. Executive Summary\n2. Key Findings\n3. Technical Analysis\n4. Cross-Model Consensus\n5. Recommendations\n6. Areas for Further Research",
@@ -175,7 +204,10 @@
       "name": "Format Research Output",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3,
-      "position": [1650, 400],
+      "position": [
+        1650,
+        400
+      ],
       "parameters": {
         "mode": "manual",
         "assignments": [
@@ -206,7 +238,7 @@
           },
           {
             "name": "data_sources",
-            "type": "array", 
+            "type": "array",
             "value": "[\"Web Search\", \"Firecrawl\", \"Multiple AI Models\"]"
           }
         ]
@@ -217,7 +249,10 @@
       "name": "Return Research",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
-      "position": [1850, 400],
+      "position": [
+        1850,
+        400
+      ],
       "parameters": {
         "responseMode": "json"
       }
@@ -225,42 +260,130 @@
   ],
   "connections": {
     "webhook_trigger": {
-      "main": [[{"node": "research_planner", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "research_planner",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "research_planner": {
-      "main": [[{"node": "parse_plan", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "parse_plan",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "parse_plan": {
-      "main": [[{"node": "parallel_research", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "parallel_research",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "parallel_research": {
       "main": [
         [
-          {"node": "web_research", "type": "main", "index": 0},
-          {"node": "deep_web_scraping", "type": "main", "index": 0}
+          {
+            "node": "web_research",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "deep_web_scraping",
+            "type": "main",
+            "index": 0
+          }
         ]
       ]
     },
     "web_research": {
-      "main": [[{"node": "gpt4_analysis", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "gpt4_analysis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "deep_web_scraping": {
-      "main": [[{"node": "deepseek_analysis", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "deepseek_analysis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "gpt4_analysis": {
-      "main": [[{"node": "gemini_synthesis", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "gemini_synthesis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "deepseek_analysis": {
-      "main": [[{"node": "gemini_synthesis", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "gemini_synthesis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "gemini_synthesis": {
-      "main": [[{"node": "final_report", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "final_report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "final_report": {
-      "main": [[{"node": "format_output", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "format_output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "format_output": {
-      "main": [[{"node": "respond", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {}
