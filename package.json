@@ -19,7 +19,8 @@
     "prisma-generate": "prisma generate",
     "mcp-create": "node scripts/n8n-mcp-complete-orchestrator.js create",
     "mcp-clean": "node scripts/n8n-mcp-complete-orchestrator.js clean",
-    "clean-instance": "node scripts/clean-n8n-instance.js"
+    "clean-instance": "node scripts/clean-n8n-instance.js",
+    "enhanced-create": "node scripts/n8n-mcp-firecrawl-orchestrator.js create"
   },
   "keywords": [
     "n8n",
