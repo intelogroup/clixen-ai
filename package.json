@@ -20,7 +20,8 @@
     "mcp-create": "node scripts/n8n-mcp-complete-orchestrator.js create",
     "mcp-clean": "node scripts/n8n-mcp-complete-orchestrator.js clean",
     "clean-instance": "node scripts/clean-n8n-instance.js",
-    "enhanced-create": "node scripts/n8n-mcp-firecrawl-orchestrator.js create"
+    "enhanced-create": "node scripts/n8n-mcp-firecrawl-orchestrator.js create",
+    "create-telegram-agent": "node scripts/create-telegram-agent-workflow.js"
   },
   "keywords": [
     "n8n",

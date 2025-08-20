@@ -1,0 +1,505 @@
+{
+  "name": "Telegram AI Assistant - Weather, News & Events",
+  "nodes": [
+    {
+      "name": "Telegram_Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        250,
+        300
+      ],
+      "parameters": {
+        "updates": [
+          "message",
+          "edited_message"
+        ]
+      },
+      "webhookId": "telegram-webhook-1755663381194"
+    },
+    {
+      "name": "Message_Router",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        450,
+        300
+      ],
+      "parameters": {
+        "mode": "expression",
+        "outputsAmount": 3,
+        "options": {
+          "conditions": [
+            {
+              "outputKey": "weather",
+              "conditionValue": "={{ $json.message.text.toLowerCase().includes(\"weather\") }}"
+            },
+            {
+              "outputKey": "news",
+              "conditionValue": "={{ $json.message.text.toLowerCase().includes(\"news\") }}"
+            },
+            {
+              "outputKey": "events",
+              "conditionValue": "={{ $json.message.text.toLowerCase().includes(\"events\") }}"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "AI_Agent_Central",
+      "type": "n8n-nodes-base.agent",
+      "typeVersion": 1.7,
+      "position": [
+        750,
+        300
+      ],
+      "parameters": {
+        "promptType": "define",
+        "text": "You are a helpful AI assistant for Telegram users. You help with:\n1. Weather information for any location\n2. Top news for any location\n3. Local events happening today\n4. Setting up daily email reports\n\nUser message: {{ $json.message.text }}\nUser ID: {{ $json.message.from.id }}\nChat ID: {{ $json.message.chat.id }}\n\nAnalyze the user's request and determine what information they need.\nExtract location (default: Everett, MA if not specified).\nIf they mention email, extract the email address for daily reports.\n\nRespond in a friendly, conversational tone.",
+        "options": {
+          "systemMessage": "You are integrated with weather, news, and events APIs. \nYou can also schedule daily email reports.\nAlways be helpful and provide accurate, timely information.\nStore user preferences in memory for personalization.",
+          "temperature": 0.7,
+          "maxTokens": 500
+        }
+      }
+    },
+    {
+      "name": "Weather_Tool",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1050,
+        100
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "=https://api.openweathermap.org/data/2.5/weather",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "q",
+              "value": "={{ $json.location || \"Everett,MA,US\" }}"
+            },
+            {
+              "name": "appid",
+              "value": "={{ $env.OPENWEATHER_API_KEY }}"
+            },
+            {
+              "name": "units",
+              "value": "imperial"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "News_Tool",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1050,
+        300
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "https://newsapi.org/v2/everything",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "q",
+              "value": "={{ $json.location || \"Everett Massachusetts\" }}"
+            },
+            {
+              "name": "apiKey",
+              "value": "={{ $env.NEWS_API_KEY }}"
+            },
+            {
+              "name": "sortBy",
+              "value": "publishedAt"
+            },
+            {
+              "name": "pageSize",
+              "value": "5"
+            },
+            {
+              "name": "from",
+              "value": "={{ $now.minus({days: 1}).toISO() }}"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Events_Tool",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1050,
+        500
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "https://serpapi.com/search",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "q",
+              "value": "={{ $json.location || \"Everett MA\" }} events today"
+            },
+            {
+              "name": "api_key",
+              "value": "={{ $env.SERP_API_KEY }}"
+            },
+            {
+              "name": "engine",
+              "value": "google_events"
+            },
+            {
+              "name": "hl",
+              "value": "en"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "PostgreSQL_Memory",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        750,
+        500
+      ],
+      "parameters": {
+        "operation": "upsert",
+        "schema": "public",
+        "table": "telegram_user_memory",
+        "columns": "user_id,chat_id,preferences,last_location,email,last_request,updated_at",
+        "columnToMatchOn": "user_id",
+        "valueToMatchOn": "={{ $json.message.from.id }}",
+        "dataMode": "defineBelow",
+        "columnsUi": {
+          "columns": [
+            {
+              "column": "user_id",
+              "value": "={{ $json.message.from.id }}"
+            },
+            {
+              "column": "chat_id",
+              "value": "={{ $json.message.chat.id }}"
+            },
+            {
+              "column": "preferences",
+              "value": "={{ JSON.stringify($json.preferences) }}"
+            },
+            {
+              "column": "last_location",
+              "value": "={{ $json.location || \"Everett, MA\" }}"
+            },
+            {
+              "column": "email",
+              "value": "={{ $json.extractedEmail || $json.existingEmail }}"
+            },
+            {
+              "column": "last_request",
+              "value": "={{ $json.message.text }}"
+            },
+            {
+              "column": "updated_at",
+              "value": "={{ $now.toISO() }}"
+            }
+          ]
+        },
+        "options": {
+          "queryBatching": "independently"
+        }
+      }
+    },
+    {
+      "name": "Response_Formatter",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1350,
+        300
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "code": "// Format the response based on what was requested\nconst items = $input.all();\nconst results = [];\n\nfor (const item of items) {\n  let response = '';\n  \n  // Weather Response\n  if (item.json.weather) {\n    const w = item.json.weather;\n    response += `🌤 **Weather in ${w.name}**\\n`;\n    response += `Temperature: ${w.main.temp}°F\\n`;\n    response += `Feels like: ${w.main.feels_like}°F\\n`;\n    response += `Conditions: ${w.weather[0].description}\\n`;\n    response += `Humidity: ${w.main.humidity}%\\n\\n`;\n  }\n  \n  // News Response\n  if (item.json.news && item.json.news.articles) {\n    response += `📰 **Top News**\\n`;\n    const articles = item.json.news.articles.slice(0, 3);\n    articles.forEach((article, i) => {\n      response += `${i + 1}. ${article.title}\\n`;\n      response += `   ${article.url}\\n\\n`;\n    });\n  }\n  \n  // Events Response\n  if (item.json.events && item.json.events.events_results) {\n    response += `📅 **Today's Events**\\n`;\n    const events = item.json.events.events_results.slice(0, 3);\n    events.forEach((event, i) => {\n      response += `${i + 1}. ${event.title}\\n`;\n      if (event.date) response += `   When: ${event.date.when}\\n`;\n      if (event.address) response += `   Where: ${event.address}\\n`;\n      response += `\\n`;\n    });\n  }\n  \n  // Email setup confirmation\n  if (item.json.emailSetup) {\n    response += `✅ Daily reports will be sent to: ${item.json.email}\\n`;\n    response += `You'll receive weather, news, and events every morning at 8 AM.\\n`;\n  }\n  \n  results.push({\n    json: {\n      chat_id: item.json.message.chat.id,\n      text: response || 'I can help you with weather, news, and events. Just ask!',\n      parse_mode: 'Markdown'\n    }\n  });\n}\n\nreturn results;"
+      }
+    },
+    {
+      "name": "Telegram_Reply",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1550,
+        300
+      ],
+      "parameters": {
+        "operation": "sendMessage",
+        "chatId": "={{ $json.chat_id }}",
+        "text": "={{ $json.text }}",
+        "additionalFields": {
+          "parse_mode": "Markdown",
+          "disable_web_page_preview": true
+        }
+      }
+    },
+    {
+      "name": "Schedule_Morning_Report",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        250,
+        700
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 8 * * *"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Morning_Report_Generator",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        550,
+        700
+      ],
+      "parameters": {
+        "operation": "select",
+        "schema": "public",
+        "table": "telegram_user_memory",
+        "returnAll": true,
+        "where": {
+          "conditions": [
+            {
+              "column": "email",
+              "condition": "NOT NULL",
+              "value": ""
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "name": "Email_Sender",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        850,
+        700
+      ],
+      "parameters": {
+        "fromEmail": "={{ $env.SMTP_FROM_EMAIL }}",
+        "toEmail": "={{ $json.email }}",
+        "subject": "Your Daily Update - Weather, News & Events for {{ $json.last_location }}",
+        "emailType": "html",
+        "htmlBody": "<!DOCTYPE html>\n<html>\n<head>\n  <style>\n    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }\n    h1 { color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px; }\n    h2 { color: #34495e; margin-top: 20px; }\n    .section { margin: 20px 0; padding: 15px; background: #f9f9f9; border-radius: 5px; }\n    .weather { background: #e8f4f8; }\n    .news { background: #fef9e7; }\n    .events { background: #f4e8f8; }\n    a { color: #3498db; text-decoration: none; }\n    a:hover { text-decoration: underline; }\n  </style>\n</head>\n<body>\n  <h1>🌅 Good Morning! Here's Your Daily Update</h1>\n  \n  <div class=\"section weather\">\n    <h2>🌤 Weather in {{ $json.last_location }}</h2>\n    <p><strong>Temperature:</strong> {{ $json.weather.temp }}°F</p>\n    <p><strong>Conditions:</strong> {{ $json.weather.description }}</p>\n    <p><strong>Humidity:</strong> {{ $json.weather.humidity }}%</p>\n  </div>\n  \n  <div class=\"section news\">\n    <h2>📰 Top News</h2>\n    {{ $json.news_html }}\n  </div>\n  \n  <div class=\"section events\">\n    <h2>📅 Today's Events</h2>\n    {{ $json.events_html }}\n  </div>\n  \n  <p style=\"margin-top: 30px; color: #7f8c8d; font-size: 12px;\">\n    You're receiving this because you subscribed via Telegram. \n    To unsubscribe, message /stop to our Telegram bot.\n  </p>\n</body>\n</html>",
+        "options": {
+          "allowUnauthorizedCerts": true
+        }
+      }
+    },
+    {
+      "name": "Error_Handler",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        750,
+        900
+      ],
+      "parameters": {}
+    }
+  ],
+  "connections": {
+    "Telegram_Trigger": {
+      "main": [
+        [
+          {
+            "node": "Message_Router",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message_Router": {
+      "main": [
+        [
+          {
+            "node": "AI_Agent_Central",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI_Agent_Central",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI_Agent_Central",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI_Agent_Central": {
+      "main": [
+        [
+          {
+            "node": "Weather_Tool",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "News_Tool",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Events_Tool",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "PostgreSQL_Memory",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Weather_Tool": {
+      "main": [
+        [
+          {
+            "node": "Response_Formatter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "News_Tool": {
+      "main": [
+        [
+          {
+            "node": "Response_Formatter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Events_Tool": {
+      "main": [
+        [
+          {
+            "node": "Response_Formatter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PostgreSQL_Memory": {
+      "main": [
+        [
+          {
+            "node": "Response_Formatter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Response_Formatter": {
+      "main": [
+        [
+          {
+            "node": "Telegram_Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule_Morning_Report": {
+      "main": [
+        [
+          {
+            "node": "Morning_Report_Generator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Morning_Report_Generator": {
+      "main": [
+        [
+          {
+            "node": "Email_Sender",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Error_Handler": {
+      "main": [
+        [
+          {
+            "node": "Telegram_Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": {}
+}
