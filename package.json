@@ -39,11 +39,19 @@
   "dependencies": {
     "@mendable/firecrawl-js": "^3.0.3",
     "@prisma/client": "^6.14.0",
+    "ajv": "^8.17.1",
+    "apify-client": "^2.15.0",
     "axios": "^1.6.5",
     "better-sqlite3": "^12.2.0",
     "chalk": "^4.1.2",
     "commander": "^11.1.0",
+    "got": "^14.4.7",
+    "joi": "^18.0.0",
     "n8n-mcp": "^2.10.4",
-    "prisma": "^6.14.0"
+    "natural": "^8.1.0",
+    "prisma": "^6.14.0",
+    "puppeteer": "^24.16.2",
+    "yup": "^1.7.0",
+    "zod": "^3.25.76"
   }
 }

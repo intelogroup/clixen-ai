@@ -28,7 +28,7 @@ const Database = require('better-sqlite3');
 require('dotenv').config();
 
 // Configuration
-const FIRECRAWL_API_KEY = process.env.FIRECRAWL_API_KEY || 'fc-8151e8e079894e93bf10c86c12f3eb06';
+const FIRECRAWL_API_KEY = process.env.FIRECRAWL_API_KEY;
 const N8N_API_KEY = process.env.N8N_API_KEY;
 const N8N_BASE_URL = process.env.N8N_BASE_URL;
 
