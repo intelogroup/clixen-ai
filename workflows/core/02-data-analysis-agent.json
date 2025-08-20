@@ -1,0 +1,108 @@
+{
+  "name": "Data Analysis Agent Workflow",
+  "nodes": [
+    {
+      "id": "schedule_trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [250, 300],
+      "parameters": {
+        "rule": {
+          "cronExpression": "0 9 * * *"
+        }
+      }
+    },
+    {
+      "id": "fetch_data",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [450, 300],
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.DATA_SOURCE_URL }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth"
+      }
+    },
+    {
+      "id": "data_analysis_agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1,
+      "position": [650, 300],
+      "parameters": {
+        "model": "claude-3-opus",
+        "prompt": "Analyze the provided data and generate insights. Focus on trends, anomalies, and actionable recommendations.",
+        "tools": ["code_interpreter", "chart_generator", "statistical_analysis"],
+        "temperature": 0.3,
+        "maxTokens": 2000
+      }
+    },
+    {
+      "id": "generate_report",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [850, 300],
+      "parameters": {
+        "functionCode": "const report = {\n  title: 'Daily Data Analysis Report',\n  date: new Date().toISOString().split('T')[0],\n  insights: $json.analysis,\n  recommendations: $json.recommendations || [],\n  charts: $json.visualizations || [],\n  summary: $json.executive_summary\n};\nreturn report;"
+      }
+    },
+    {
+      "id": "send_report",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [1050, 300],
+      "parameters": {
+        "toEmail": "={{ $env.REPORT_RECIPIENTS }}",
+        "subject": "Daily Analysis Report - {{ $json.date }}",
+        "emailType": "html",
+        "message": "={{ $json.summary }}"
+      }
+    }
+  ],
+  "connections": {
+    "schedule_trigger": {
+      "main": [
+        [
+          {
+            "node": "fetch_data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "fetch_data": {
+      "main": [
+        [
+          {
+            "node": "data_analysis_agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "data_analysis_agent": {
+      "main": [
+        [
+          {
+            "node": "generate_report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "generate_report": {
+      "main": [
+        [
+          {
+            "node": "send_report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

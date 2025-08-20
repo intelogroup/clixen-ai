@@ -1,0 +1,139 @@
+{
+  "name": "Content Generation Agent Workflow",
+  "nodes": [
+    {
+      "id": "webhook_trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [250, 300],
+      "parameters": {
+        "path": "generate-content",
+        "method": "POST"
+      }
+    },
+    {
+      "id": "validate_input",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [450, 300],
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.content_type }}",
+              "operation": "isNotEmpty"
+            },
+            {
+              "value1": "={{ $json.topic }}",
+              "operation": "isNotEmpty"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "research_agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1,
+      "position": [650, 200],
+      "parameters": {
+        "model": "gpt-4-turbo",
+        "prompt": "Research the topic: {{ $json.topic }}. Gather relevant information, statistics, and current trends.",
+        "tools": ["web_search", "wikipedia", "news_api"],
+        "temperature": 0.5
+      }
+    },
+    {
+      "id": "content_agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1,
+      "position": [850, 300],
+      "parameters": {
+        "model": "claude-3-opus",
+        "prompt": "Create {{ $json.content_type }} content about {{ $json.topic }}. Use the research data provided. Make it engaging and informative.",
+        "tools": ["text_formatter", "seo_optimizer", "grammar_checker"],
+        "temperature": 0.8,
+        "maxTokens": 3000
+      }
+    },
+    {
+      "id": "quality_check_agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1,
+      "position": [1050, 300],
+      "parameters": {
+        "model": "gpt-4",
+        "prompt": "Review the content for quality, accuracy, and engagement. Score it and provide improvement suggestions.",
+        "temperature": 0.3
+      }
+    },
+    {
+      "id": "save_content",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2,
+      "position": [1250, 300],
+      "parameters": {
+        "operation": "insert",
+        "table": "generated_content",
+        "columns": "topic,content_type,content,quality_score,created_at"
+      }
+    }
+  ],
+  "connections": {
+    "webhook_trigger": {
+      "main": [
+        [
+          {
+            "node": "validate_input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "validate_input": {
+      "main": [
+        [
+          {
+            "node": "research_agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "research_agent": {
+      "main": [
+        [
+          {
+            "node": "content_agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "content_agent": {
+      "main": [
+        [
+          {
+            "node": "quality_check_agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "quality_check_agent": {
+      "main": [
+        [
+          {
+            "node": "save_content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "name": "n8n-core-workflows-testing",
+  "version": "1.0.0",
+  "description": "Battle-tested n8n core workflows with agent nodes",
+  "scripts": {
+    "test": "node scripts/test-workflows.js",
+    "validate": "node scripts/validate-workflows.js",
+    "deploy": "node scripts/deploy-workflows.js",
+    "import": "node scripts/import-workflow.js",
+    "export": "node scripts/export-workflow.js",
+    "benchmark": "node scripts/benchmark.js"
+  },
+  "keywords": [
+    "n8n",
+    "workflows",
+    "automation",
+    "agent-nodes",
+    "testing"
+  ],
+  "author": "Terragon Labs",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "dotenv": "^16.3.1"
+  },
+  "dependencies": {
+    "axios": "^1.6.5",
+    "chalk": "^5.3.0",
+    "commander": "^11.1.0"
+  }
+}

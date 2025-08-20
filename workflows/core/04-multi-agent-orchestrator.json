@@ -1,0 +1,168 @@
+{
+  "name": "Multi-Agent Orchestrator Workflow",
+  "description": "Orchestrates multiple AI agents for complex task decomposition and parallel processing",
+  "nodes": [
+    {
+      "id": "webhook_trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [250, 400],
+      "parameters": {
+        "path": "orchestrate",
+        "method": "POST"
+      }
+    },
+    {
+      "id": "task_analyzer",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1,
+      "position": [450, 400],
+      "parameters": {
+        "model": "gpt-4",
+        "prompt": "Analyze the incoming task and break it down into subtasks. Determine which agents are needed.",
+        "temperature": 0.3
+      }
+    },
+    {
+      "id": "task_router",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 1,
+      "position": [650, 400],
+      "parameters": {
+        "dataPropertyName": "taskType",
+        "values": {
+          "string": [
+            {
+              "name": "research",
+              "value": "research"
+            },
+            {
+              "name": "analysis",
+              "value": "analysis"
+            },
+            {
+              "name": "generation",
+              "value": "generation"
+            },
+            {
+              "name": "validation",
+              "value": "validation"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "research_agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1,
+      "position": [850, 200],
+      "parameters": {
+        "model": "gpt-4-turbo",
+        "prompt": "Conduct thorough research on the given topic",
+        "tools": ["web_search", "arxiv", "wikipedia"],
+        "temperature": 0.5
+      }
+    },
+    {
+      "id": "analysis_agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1,
+      "position": [850, 350],
+      "parameters": {
+        "model": "claude-3-opus",
+        "prompt": "Perform deep analysis on the provided data",
+        "tools": ["code_interpreter", "data_analyzer"],
+        "temperature": 0.3
+      }
+    },
+    {
+      "id": "generation_agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1,
+      "position": [850, 500],
+      "parameters": {
+        "model": "claude-3-opus",
+        "prompt": "Generate high-quality content based on requirements",
+        "tools": ["text_generator", "code_generator"],
+        "temperature": 0.7
+      }
+    },
+    {
+      "id": "validation_agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1,
+      "position": [850, 650],
+      "parameters": {
+        "model": "gpt-4",
+        "prompt": "Validate and quality-check all outputs",
+        "tools": ["fact_checker", "grammar_checker"],
+        "temperature": 0.2
+      }
+    },
+    {
+      "id": "result_aggregator",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 2,
+      "position": [1050, 400],
+      "parameters": {
+        "mode": "combine",
+        "combinationMode": "mergeByPosition"
+      }
+    },
+    {
+      "id": "final_synthesis",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1,
+      "position": [1250, 400],
+      "parameters": {
+        "model": "gpt-4",
+        "prompt": "Synthesize all agent outputs into a coherent final result",
+        "temperature": 0.4
+      }
+    },
+    {
+      "id": "response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1450, 400],
+      "parameters": {
+        "respondWith": "json"
+      }
+    }
+  ],
+  "connections": {
+    "webhook_trigger": {
+      "main": [[{"node": "task_analyzer", "type": "main", "index": 0}]]
+    },
+    "task_analyzer": {
+      "main": [[{"node": "task_router", "type": "main", "index": 0}]]
+    },
+    "task_router": {
+      "main": [
+        [{"node": "research_agent", "type": "main", "index": 0}],
+        [{"node": "analysis_agent", "type": "main", "index": 0}],
+        [{"node": "generation_agent", "type": "main", "index": 0}],
+        [{"node": "validation_agent", "type": "main", "index": 0}]
+      ]
+    },
+    "research_agent": {
+      "main": [[{"node": "result_aggregator", "type": "main", "index": 0}]]
+    },
+    "analysis_agent": {
+      "main": [[{"node": "result_aggregator", "type": "main", "index": 1}]]
+    },
+    "generation_agent": {
+      "main": [[{"node": "result_aggregator", "type": "main", "index": 2}]]
+    },
+    "validation_agent": {
+      "main": [[{"node": "result_aggregator", "type": "main", "index": 3}]]
+    },
+    "result_aggregator": {
+      "main": [[{"node": "final_synthesis", "type": "main", "index": 0}]]
+    },
+    "final_synthesis": {
+      "main": [[{"node": "response", "type": "main", "index": 0}]]
+    }
+  }
+}
