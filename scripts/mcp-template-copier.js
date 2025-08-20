@@ -322,7 +322,7 @@ const eventList = eventsData.events.map(e => \`• \${e.time}: \${e.name} at \${
 return {
     tool: 'events',
     data: eventsData,
-    response: \`🎉 Events in \${location} today (\\${today}):\\n\${eventList}\`
+    response: \`🎉 Events in \${location} today (\${today}):\\n\${eventList}\`
 };`
                     },
                     id: 'events-tool',
