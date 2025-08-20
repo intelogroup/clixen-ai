@@ -16,7 +16,10 @@
     "prisma-orchestrate": "node scripts/n8n-prisma-orchestrator.js create",
     "prisma-validate-intent": "node scripts/n8n-prisma-orchestrator.js validate-intent",
     "search-nodes": "node scripts/n8n-prisma-orchestrator.js search-nodes",
-    "prisma-generate": "prisma generate"
+    "prisma-generate": "prisma generate",
+    "mcp-create": "node scripts/n8n-mcp-complete-orchestrator.js create",
+    "mcp-clean": "node scripts/n8n-mcp-complete-orchestrator.js clean",
+    "clean-instance": "node scripts/clean-n8n-instance.js"
   },
   "keywords": [
     "n8n",
@@ -32,6 +35,7 @@
     "dotenv": "^16.3.1"
   },
   "dependencies": {
+    "@mendable/firecrawl-js": "^3.0.3",
     "@prisma/client": "^6.14.0",
     "axios": "^1.6.5",
     "better-sqlite3": "^12.2.0",
