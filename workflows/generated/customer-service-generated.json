@@ -1,0 +1,290 @@
+{
+  "name": "AI Customer Service Agent",
+  "nodes": [
+    {
+      "id": "webhook",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [
+        250,
+        300
+      ],
+      "webhookId": "customer-service-ai",
+      "parameters": {
+        "path": "customer-service-ai",
+        "method": "POST",
+        "responseMode": "responseNode",
+        "options": {}
+      }
+    },
+    {
+      "id": "set_context",
+      "name": "Set Context",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3,
+      "position": [
+        450,
+        300
+      ],
+      "parameters": {
+        "mode": "manual",
+        "duplicateItem": false,
+        "assignments": [
+          {
+            "name": "customer_query",
+            "type": "string",
+            "value": "={{ $json.query }}"
+          },
+          {
+            "name": "customer_id",
+            "type": "string",
+            "value": "={{ $json.customer_id || 'anonymous' }}"
+          },
+          {
+            "name": "timestamp",
+            "type": "string",
+            "value": "={{ new Date().toISOString() }}"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ai_classifier",
+      "name": "AI Query Classifier",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [
+        650,
+        200
+      ],
+      "parameters": {
+        "operation": "text",
+        "modelId": "gpt-4",
+        "prompt": "Classify this customer query into one of these categories: technical_support, billing, general_inquiry, complaint, feedback. Query: {{ $json.customer_query }}\n\nRespond with only the category name.",
+        "maxTokens": 50,
+        "temperature": 0.3
+      }
+    },
+    {
+      "id": "switch",
+      "name": "Route by Category",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        850,
+        300
+      ],
+      "parameters": {
+        "mode": "expression",
+        "outputsAmount": 5,
+        "rules": [
+          {
+            "output": 0,
+            "operation": "contains",
+            "value": "={{ $json.message }}",
+            "value2": "technical_support"
+          },
+          {
+            "output": 1,
+            "operation": "contains",
+            "value": "={{ $json.message }}",
+            "value2": "billing"
+          },
+          {
+            "output": 2,
+            "operation": "contains",
+            "value": "={{ $json.message }}",
+            "value2": "general_inquiry"
+          },
+          {
+            "output": 3,
+            "operation": "contains",
+            "value": "={{ $json.message }}",
+            "value2": "complaint"
+          },
+          {
+            "output": 4,
+            "operation": "contains",
+            "value": "={{ $json.message }}",
+            "value2": "feedback"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ai_responder",
+      "name": "AI Response Generator",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [
+        1050,
+        300
+      ],
+      "parameters": {
+        "operation": "text",
+        "modelId": "gpt-4",
+        "prompt": "You are a helpful customer service agent. Provide a professional and helpful response to this query: {{ $('set_context').item.json.customer_query }}\n\nCategory: {{ $json.message }}\n\nProvide a clear, concise, and helpful response.",
+        "maxTokens": 500,
+        "temperature": 0.7
+      }
+    },
+    {
+      "id": "format_response",
+      "name": "Format Response",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3,
+      "position": [
+        1250,
+        300
+      ],
+      "parameters": {
+        "mode": "manual",
+        "assignments": [
+          {
+            "name": "response",
+            "type": "string",
+            "value": "={{ $json.message }}"
+          },
+          {
+            "name": "category",
+            "type": "string",
+            "value": "={{ $('ai_classifier').item.json.message }}"
+          },
+          {
+            "name": "customer_id",
+            "type": "string",
+            "value": "={{ $('set_context').item.json.customer_id }}"
+          },
+          {
+            "name": "processed_at",
+            "type": "string",
+            "value": "={{ new Date().toISOString() }}"
+          },
+          {
+            "name": "status",
+            "type": "string",
+            "value": "success"
+          }
+        ]
+      }
+    },
+    {
+      "id": "respond",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        1450,
+        300
+      ],
+      "parameters": {
+        "responseMode": "json",
+        "responseCode": 200
+      }
+    }
+  ],
+  "connections": {
+    "webhook": {
+      "main": [
+        [
+          {
+            "node": "set_context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "set_context": {
+      "main": [
+        [
+          {
+            "node": "ai_classifier",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ai_classifier": {
+      "main": [
+        [
+          {
+            "node": "switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "switch": {
+      "main": [
+        [
+          {
+            "node": "ai_responder",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "ai_responder",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "ai_responder",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "ai_responder",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "ai_responder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ai_responder": {
+      "main": [
+        [
+          {
+            "node": "format_response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "format_response": {
+      "main": [
+        [
+          {
+            "node": "respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionTimeout": 60,
+    "maxExecutionTime": 120,
+    "saveDataSuccessExecution": "all",
+    "saveDataErrorExecution": "all",
+    "saveManualExecutions": true
+  }
+}
