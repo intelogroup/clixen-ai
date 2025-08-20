@@ -8,7 +8,15 @@
     "deploy": "node scripts/deploy-workflows.js",
     "import": "node scripts/import-workflow.js",
     "export": "node scripts/export-workflow.js",
-    "benchmark": "node scripts/benchmark.js"
+    "benchmark": "node scripts/benchmark.js",
+    "orchestrate": "node scripts/n8n-workflow-orchestrator.js",
+    "validate-intent": "node scripts/n8n-workflow-orchestrator.js validate-intent",
+    "create-workflow": "node scripts/n8n-workflow-orchestrator.js create",
+    "setup-mcp": "node scripts/setup-n8n-mcp.js",
+    "prisma-orchestrate": "node scripts/n8n-prisma-orchestrator.js create",
+    "prisma-validate-intent": "node scripts/n8n-prisma-orchestrator.js validate-intent",
+    "search-nodes": "node scripts/n8n-prisma-orchestrator.js search-nodes",
+    "prisma-generate": "prisma generate"
   },
   "keywords": [
     "n8n",
@@ -24,8 +32,12 @@
     "dotenv": "^16.3.1"
   },
   "dependencies": {
+    "@prisma/client": "^6.14.0",
     "axios": "^1.6.5",
+    "better-sqlite3": "^12.2.0",
     "chalk": "^4.1.2",
-    "commander": "^11.1.0"
+    "commander": "^11.1.0",
+    "n8n-mcp": "^2.10.4",
+    "prisma": "^6.14.0"
   }
 }
