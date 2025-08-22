@@ -36,6 +36,8 @@ export default function AuthModal({ isOpen, onClose, mode, onModeChange }: AuthM
     setIsLoading(true)
     setError(null)
 
+    console.log('🔐 Starting authentication:', { mode, authMethod, email })
+
     try {
       if (authMethod === 'password') {
         if (mode === 'signup') {
@@ -47,6 +49,7 @@ export default function AuthModal({ isOpen, onClose, mode, onModeChange }: AuthM
             }
           })
           if (error) throw error
+          console.log('✅ Sign up successful:', data)
           setSuccess(true)
         } else {
           const { data, error } = await supabase.auth.signInWithPassword({
@@ -54,8 +57,10 @@ export default function AuthModal({ isOpen, onClose, mode, onModeChange }: AuthM
             password,
           })
           if (error) throw error
+          console.log('✅ Sign in successful:', data)
           
           // Successful login - redirect to dashboard
+          console.log('🔄 Redirecting to dashboard...')
           window.location.href = '/dashboard'
         }
       } else {
@@ -73,6 +78,7 @@ export default function AuthModal({ isOpen, onClose, mode, onModeChange }: AuthM
       }
     } catch (error) {
       const authError = error as AuthError
+      console.error('❌ Authentication error:', authError)
       setError(authError.message || 'An error occurred. Please try again.')
     } finally {
       setIsLoading(false)

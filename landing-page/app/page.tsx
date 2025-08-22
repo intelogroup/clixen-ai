@@ -1,12 +1,18 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Hero from '../components/Hero'
 import AuthModal from '../components/AuthModal'
 
 export default function Home() {
   const [showAuthModal, setShowAuthModal] = useState(false)
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signup')
+
+  useEffect(() => {
+    console.log('🏠 Home page loaded successfully')
+    console.log('🌐 Current URL:', window.location.href)
+    console.log('📱 User Agent:', navigator.userAgent)
+  }, [])
 
   const handleGetStarted = () => {
     setAuthMode('signup')
