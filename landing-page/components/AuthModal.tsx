@@ -2,22 +2,21 @@
 
 import { useState, useEffect } from 'react'
 import { X, Mail, ArrowRight, CheckCircle } from 'lucide-react'
-import { createBrowserClient } from '../lib/supabase'
+import { supabase } from '../lib/supabase'
 import type { AuthError } from '@supabase/supabase-js'
 
 interface AuthModalProps {
   isOpen: boolean
   onClose: () => void
+  mode: 'signin' | 'signup'
+  onModeChange: (mode: 'signin' | 'signup') => void
 }
 
-export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
+export default function AuthModal({ isOpen, onClose, mode, onModeChange }: AuthModalProps) {
   const [email, setEmail] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
-  const [mode, setMode] = useState<'signin' | 'signup'>('signup')
-  
-  const supabase = createBrowserClient()
 
   useEffect(() => {
     if (!isOpen) {
@@ -192,7 +191,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                   {mode === 'signup' ? 'Already have an account?' : "Don't have an account?"}{' '}
                   <button
                     type="button"
-                    onClick={() => setMode(mode === 'signup' ? 'signin' : 'signup')}
+                    onClick={() => onModeChange(mode === 'signup' ? 'signin' : 'signup')}
                     className="text-primary-600 hover:text-primary-700 font-medium"
                   >
                     {mode === 'signup' ? 'Sign in' : 'Sign up'}
