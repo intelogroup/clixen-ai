@@ -3,7 +3,7 @@
   "nodes": [
     {
       "parameters": {
-        "path": "/analytics/document",
+        "path": "/webhook/document-analytics",
         "method": "POST",
         "responseMode": "responseNode",
         "options": {}
@@ -284,24 +284,5 @@
       ]
     }
   },
-  "settings": {
-    "executionOrder": "v1",
-    "saveManualExecutions": true,
-    "callerPolicy": "workflowsFromSameOwner",
-    "errorWorkflow": "global-error-handler"
-  },
-  "staticData": null,
-  "tags": [
-    {
-      "name": "document-analytics",
-      "createdAt": "2024-01-01T00:00:00.000Z"
-    },
-    {
-      "name": "core-service",
-      "createdAt": "2024-01-01T00:00:00.000Z"
-    }
-  ],
-  "triggerCount": 0,
-  "updatedAt": "2024-01-01T00:00:00.000Z",
-  "versionId": "01"
+  "settings": {}
 }

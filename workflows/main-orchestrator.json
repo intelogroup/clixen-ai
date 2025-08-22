@@ -3,7 +3,7 @@
   "nodes": [
     {
       "parameters": {
-        "path": "/api/orchestrate",
+        "path": "/webhook/api/orchestrate",
         "method": "POST",
         "responseMode": "responseNode",
         "options": {
@@ -339,21 +339,5 @@
       ]
     }
   },
-  "settings": {
-    "executionOrder": "v1",
-    "saveManualExecutions": true,
-    "callerPolicy": "workflowsFromSameOwner",
-    "errorWorkflow": "global-error-handler"
-  },
-  "staticData": null,
-  "tags": [
-    {
-      "name": "orchestrator",
-      "createdAt": "2024-01-01T00:00:00.000Z"
-    },
-    {
-      "name": "core",
-      "createdAt": "2024-01-01T00:00:00.000Z"
-    }
-  ]
+  "settings": {}
 }
