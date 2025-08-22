@@ -1,9 +1,17 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { X, Mail, ArrowRight, CheckCircle } from 'lucide-react'
+import { X, Mail, CheckCircle, Loader2 } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import type { AuthError } from '@supabase/supabase-js'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Separator } from '@/components/ui/separator'
+import { cn } from '@/lib/utils'
 
 interface AuthModalProps {
   isOpen: boolean
@@ -110,146 +118,130 @@ export default function AuthModal({ isOpen, onClose, mode, onModeChange }: AuthM
     }
   }
 
-  if (!isOpen) return null
-
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
-      <div className="flex min-h-screen items-center justify-center p-4">
-        <div className="fixed inset-0 bg-black bg-opacity-50 transition-opacity" onClick={onClose}></div>
-        
-        <div className="relative bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
-          <button
-            onClick={onClose}
-            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
-          >
-            <X className="w-6 h-6" />
-          </button>
-
-          <div className="text-center mb-6">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">
-              {mode === 'signup' ? 'Start Your Free Trial' : 'Welcome Back'}
-            </h2>
-            <p className="text-gray-600">
-              {mode === 'signup' 
-                ? '100 free automations to get you started'
-                : 'Continue automating your business'
-              }
-            </p>
-          </div>
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle className="text-2xl font-bold text-center">
+            {mode === 'signup' ? 'Start Your Free Trial' : 'Welcome Back'}
+          </DialogTitle>
+          <p className="text-muted-foreground text-center">
+            {mode === 'signup' 
+              ? '100 free automations to get you started'
+              : 'Continue automating your business'
+            }
+          </p>
+        </DialogHeader>
 
           {success ? (
-            <div className="text-center py-8">
-              <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                Check Your Email
-              </h3>
-              <p className="text-gray-600 mb-6">
-                We sent you a magic link to {email}. Click it to complete your {mode === 'signup' ? 'signup' : 'signin'}.
-              </p>
-              <button
-                onClick={onClose}
-                className="btn-primary w-full"
-              >
-                Got it!
-              </button>
-            </div>
+            <Card>
+              <CardContent className="text-center py-8">
+                <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold mb-2">
+                  Check Your Email
+                </h3>
+                <p className="text-muted-foreground mb-6">
+                  We sent you a magic link to {email}. Click it to complete your {mode === 'signup' ? 'signup' : 'signin'}.
+                </p>
+                <Button onClick={onClose} className="w-full">
+                  Got it!
+                </Button>
+              </CardContent>
+            </Card>
           ) : (
             <>
               {/* Auth Method Toggle */}
-              <div className="flex rounded-lg bg-gray-100 p-1 mb-6">
-                <button
+              <div className="flex rounded-lg bg-muted p-1 mb-6">
+                <Button
                   type="button"
+                  variant={authMethod === 'password' ? 'default' : 'ghost'}
+                  size="sm"
                   onClick={() => setAuthMethod('password')}
-                  className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors ${
-                    authMethod === 'password'
-                      ? 'bg-white text-gray-900 shadow-sm'
-                      : 'text-gray-500 hover:text-gray-700'
-                  }`}
+                  className="flex-1"
                 >
                   Password
-                </button>
-                <button
+                </Button>
+                <Button
                   type="button"
+                  variant={authMethod === 'magic' ? 'default' : 'ghost'}
+                  size="sm"
                   onClick={() => setAuthMethod('magic')}
-                  className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors ${
-                    authMethod === 'magic'
-                      ? 'bg-white text-gray-900 shadow-sm'
-                      : 'text-gray-500 hover:text-gray-700'
-                  }`}
+                  className="flex-1"
                 >
                   Magic Link
-                </button>
+                </Button>
               </div>
 
               <form onSubmit={handleAuth} className="space-y-4">
-                <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                <div className="space-y-2">
+                  <Label htmlFor="email">
                     Email Address
-                  </label>
-                  <input
+                  </Label>
+                  <Input
                     id="email"
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
                     placeholder="testuser1@email.com"
                   />
                 </div>
 
                 {authMethod === 'password' && (
-                  <div>
-                    <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+                  <div className="space-y-2">
+                    <Label htmlFor="password">
                       Password
-                    </label>
-                    <input
+                    </Label>
+                    <Input
                       id="password"
                       type="password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required={authMethod === 'password'}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
                       placeholder="Demo123"
                     />
                   </div>
                 )}
 
                 {error && (
-                  <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm">
-                    {error}
-                  </div>
+                  <Card className="border-destructive">
+                    <CardContent className="pt-6">
+                      <p className="text-sm text-destructive">{error}</p>
+                    </CardContent>
+                  </Card>
                 )}
 
-                <button
+                <Button
                   type="submit"
                   disabled={isLoading || !email || (authMethod === 'password' && !password)}
-                  className="w-full btn-primary flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full"
                 >
                   {isLoading ? (
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                   ) : (
-                    <Mail className="w-5 h-5 mr-2" />
+                    <Mail className="w-4 h-4 mr-2" />
                   )}
                   {authMethod === 'password' 
                     ? (mode === 'signup' ? 'Create Account' : 'Sign In')
                     : (mode === 'signup' ? 'Send Magic Link' : 'Send Login Link')
                   }
-                </button>
+                </Button>
               </form>
 
               <div className="relative my-6">
                 <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-gray-300"></div>
+                  <Separator />
                 </div>
                 <div className="relative flex justify-center text-sm">
-                  <span className="px-4 bg-white text-gray-500">Or continue with</span>
+                  <span className="px-4 bg-background text-muted-foreground">Or continue with</span>
                 </div>
               </div>
 
-              <button
+              <Button
+                variant="outline"
                 onClick={handleGoogleAuth}
                 disabled={isLoading}
-                className="w-full btn-secondary flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full"
               >
                 <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
                   <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -258,33 +250,33 @@ export default function AuthModal({ isOpen, onClose, mode, onModeChange }: AuthM
                   <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
                 </svg>
                 Continue with Google
-              </button>
+              </Button>
 
               <div className="mt-6 text-center">
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-muted-foreground">
                   {mode === 'signup' ? 'Already have an account?' : "Don't have an account?"}{' '}
-                  <button
-                    type="button"
+                  <Button
+                    variant="link"
+                    size="sm"
                     onClick={() => onModeChange(mode === 'signup' ? 'signin' : 'signup')}
-                    className="text-primary-600 hover:text-primary-700 font-medium"
+                    className="p-0 h-auto font-medium"
                   >
                     {mode === 'signup' ? 'Sign in' : 'Sign up'}
-                  </button>
+                  </Button>
                 </p>
               </div>
 
               {mode === 'signup' && (
-                <div className="mt-4 text-xs text-gray-500 text-center">
+                <div className="mt-4 text-xs text-muted-foreground text-center">
                   By signing up, you agree to our{' '}
-                  <a href="/terms" className="text-primary-600 hover:text-primary-700">Terms of Service</a>{' '}
+                  <a href="/terms" className="text-primary hover:underline">Terms of Service</a>{' '}
                   and{' '}
-                  <a href="/privacy" className="text-primary-600 hover:text-primary-700">Privacy Policy</a>
+                  <a href="/privacy" className="text-primary hover:underline">Privacy Policy</a>
                 </div>
               )}
             </>
           )}
-        </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   )
 }
