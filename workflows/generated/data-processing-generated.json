@@ -1,0 +1,168 @@
+{
+  "name": "AI Data Processing Pipeline",
+  "nodes": [
+    {
+      "id": "schedule",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        250,
+        300
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "http_request",
+      "name": "Fetch Data",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        450,
+        300
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "https://api.example.com/data",
+        "options": {
+          "timeout": 10000
+        }
+      }
+    },
+    {
+      "id": "ai_analyzer",
+      "name": "AI Data Analyzer",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [
+        650,
+        300
+      ],
+      "parameters": {
+        "operation": "text",
+        "modelId": "gpt-4",
+        "prompt": "Analyze this data and provide insights:\n\n{{ JSON.stringify($json) }}\n\nProvide:\n1. Key patterns\n2. Anomalies\n3. Recommendations\n\nFormat as JSON.",
+        "maxTokens": 1000,
+        "temperature": 0.3
+      }
+    },
+    {
+      "id": "code",
+      "name": "Process Results",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        850,
+        300
+      ],
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Parse AI response and structure data\ntry {\n  const aiResponse = $input.item.json.message;\n  const parsed = JSON.parse(aiResponse);\n  \n  return {\n    json: {\n      insights: parsed,\n      original_data: $('http_request').item.json,\n      processed_at: new Date().toISOString(),\n      status: 'processed'\n    }\n  };\n} catch (error) {\n  return {\n    json: {\n      error: error.message,\n      raw_response: $input.item.json.message,\n      status: 'error'\n    }\n  };\n}"
+      }
+    },
+    {
+      "id": "store_results",
+      "name": "Store Results",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.3,
+      "position": [
+        1050,
+        300
+      ],
+      "parameters": {
+        "operation": "insert",
+        "table": "processed_data",
+        "columns": "data,insights,processed_at",
+        "options": {}
+      }
+    },
+    {
+      "id": "notify",
+      "name": "Send Notification",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1250,
+        300
+      ],
+      "parameters": {
+        "fromEmail": "n8n@example.com",
+        "toEmail": "team@example.com",
+        "subject": "Data Processing Complete",
+        "text": "Data has been processed successfully.\n\nInsights: {{ $json.insights }}",
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "schedule": {
+      "main": [
+        [
+          {
+            "node": "http_request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "http_request": {
+      "main": [
+        [
+          {
+            "node": "ai_analyzer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ai_analyzer": {
+      "main": [
+        [
+          {
+            "node": "code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "code": {
+      "main": [
+        [
+          {
+            "node": "store_results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "store_results": {
+      "main": [
+        [
+          {
+            "node": "notify",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionTimeout": 300,
+    "saveDataSuccessExecution": "all",
+    "saveDataErrorExecution": "all"
+  }
+}

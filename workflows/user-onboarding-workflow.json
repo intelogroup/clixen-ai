@@ -1,0 +1,293 @@
+{
+  "name": "User Onboarding Workflow - B2C Platform",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "/webhook/api/user/signup",
+        "responseMode": "onReceived",
+        "options": {
+          "rawBody": true,
+          "allowedOrigins": "*"
+        }
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook: User Signup",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        250,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Validate incoming user data from Supabase\nconst incomingData = $input.first().json;\n\n// Required fields validation\nconst requiredFields = ['user_id', 'email', 'created_at'];\nconst missingFields = [];\n\nfor (const field of requiredFields) {\n  if (!incomingData[field]) {\n    missingFields.push(field);\n  }\n}\n\nif (missingFields.length > 0) {\n  throw new Error(`Missing required fields: ${missingFields.join(', ')}`);\n}\n\n// Email validation\nconst emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;\nif (!emailRegex.test(incomingData.email)) {\n  throw new Error('Invalid email format');\n}\n\n// UUID validation for user_id\nconst uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;\nif (!uuidRegex.test(incomingData.user_id)) {\n  throw new Error('Invalid user_id format');\n}\n\n// Sanitize and structure data\nconst validatedUser = {\n  user_id: incomingData.user_id.trim(),\n  email: incomingData.email.toLowerCase().trim(),\n  full_name: incomingData.full_name ? incomingData.full_name.trim() : null,\n  avatar_url: incomingData.avatar_url || null,\n  created_at: incomingData.created_at,\n  metadata: incomingData.metadata || {},\n  validation_timestamp: new Date().toISOString(),\n  onboarding_status: 'started'\n};\n\nreturn validatedUser;"
+      },
+      "id": "validate-user-data",
+      "name": "Validate User Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        450,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "schema": "public",
+        "table": "user_sessions",
+        "columns": "user_id,session_token,expires_at,created_at,metadata",
+        "additionalFields": {}
+      },
+      "id": "create-user-session",
+      "name": "Create User Session",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        650,
+        200
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "supabase-main",
+          "name": "Supabase B2C Platform"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Generate session data for new user\nconst userData = $input.first().json;\nconst crypto = require('crypto');\n\n// Generate secure session token\nconst sessionToken = crypto.randomBytes(32).toString('hex');\n\n// Set session expiry (30 days from now)\nconst expiresAt = new Date();\nexpiresAt.setDate(expiresAt.getDate() + 30);\n\nconst sessionData = {\n  user_id: userData.user_id,\n  session_token: sessionToken,\n  expires_at: expiresAt.toISOString(),\n  created_at: new Date().toISOString(),\n  metadata: {\n    onboarding_session: true,\n    user_agent: userData.metadata?.user_agent || 'unknown',\n    ip_address: userData.metadata?.ip_address || 'unknown'\n  }\n};\n\nreturn sessionData;"
+      },
+      "id": "prepare-session-data",
+      "name": "Prepare Session Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        450,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "schema": "public",
+        "table": "profiles",
+        "filterType": "manual",
+        "matchValue": "={{ $json.user_id }}",
+        "columns": "onboarding_status,onboarding_started_at,updated_at",
+        "additionalFields": {}
+      },
+      "id": "update-profile-status",
+      "name": "Update Profile Status",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        850,
+        200
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "supabase-main",
+          "name": "Supabase B2C Platform"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Prepare profile update data\nconst userData = $input.first().json;\n\nconst profileUpdate = {\n  user_id: userData.user_id,\n  onboarding_status: 'in_progress',\n  onboarding_started_at: new Date().toISOString(),\n  updated_at: new Date().toISOString()\n};\n\nreturn profileUpdate;"
+      },
+      "id": "prepare-profile-update",
+      "name": "Prepare Profile Update",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        650,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "schema": "public",
+        "table": "usage_metrics",
+        "columns": "user_id,credits_total,credits_used,credits_remaining,tier,created_at",
+        "additionalFields": {}
+      },
+      "id": "initialize-credits",
+      "name": "Initialize User Credits",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1050,
+        200
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "supabase-main",
+          "name": "Supabase B2C Platform"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Initialize free tier credits\nconst userData = $input.first().json;\n\nconst creditsData = {\n  user_id: userData.user_id,\n  credits_total: 100,\n  credits_used: 0,\n  credits_remaining: 100,\n  tier: 'free',\n  created_at: new Date().toISOString()\n};\n\nreturn creditsData;"
+      },
+      "id": "prepare-credits-data",
+      "name": "Prepare Credits Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        850,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Generate personalized welcome email content\nconst userData = $input.first().json;\nconst displayName = userData.full_name || userData.email.split('@')[0];\n\nconst emailContent = {\n  to: userData.email,\n  subject: `Welcome to B2C Automation Platform, ${displayName}!`,\n  html: `\n    <!DOCTYPE html>\n    <html>\n    <head>\n      <meta charset=\"utf-8\">\n      <title>Welcome to B2C Automation Platform</title>\n      <style>\n        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }\n        .container { max-width: 600px; margin: 0 auto; padding: 20px; }\n        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }\n        .content { background: #f9f9f9; padding: 30px; }\n        .feature { background: white; margin: 15px 0; padding: 20px; border-left: 4px solid #667eea; border-radius: 5px; }\n        .cta { background: #667eea; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; display: inline-block; margin: 20px 0; }\n        .footer { background: #333; color: white; padding: 20px; text-align: center; border-radius: 0 0 10px 10px; }\n      </style>\n    </head>\n    <body>\n      <div class=\"container\">\n        <div class=\"header\">\n          <h1>🚀 Welcome to B2C Automation Platform!</h1>\n          <p>Your automation journey starts here, ${displayName}</p>\n        </div>\n        \n        <div class=\"content\">\n          <h2>🎉 Account Successfully Created!</h2>\n          <p>Thank you for joining our B2C Automation Platform. We're excited to help you streamline your business processes with powerful automation tools.</p>\n          \n          <div class=\"feature\">\n            <h3>📄 Document Analytics</h3>\n            <p>Extract insights, analyze content, and process documents automatically with AI-powered analytics.</p>\n          </div>\n          \n          <div class=\"feature\">\n            <h3>🤖 Task Automation</h3>\n            <p>Automate repetitive tasks, integrate with your favorite tools, and boost productivity.</p>\n          </div>\n          \n          <div class=\"feature\">\n            <h3>💎 Free Tier Benefits</h3>\n            <p>You've been granted <strong>100 free credits</strong> to explore our platform. Each credit represents one API call or automation execution.</p>\n          </div>\n          \n          <a href=\"https://platform.b2cautomation.com/dashboard\" class=\"cta\">Get Started Now →</a>\n          \n          <h3>🔑 API Access</h3>\n          <p>Your API key will be provided after completing the onboarding process. Use it to integrate our services into your applications.</p>\n          \n          <h3>📚 Resources</h3>\n          <ul>\n            <li><a href=\"https://docs.b2cautomation.com/getting-started\">Getting Started Guide</a></li>\n            <li><a href=\"https://docs.b2cautomation.com/api\">API Documentation</a></li>\n            <li><a href=\"https://support.b2cautomation.com\">Support Center</a></li>\n          </ul>\n          \n          <h3>🆘 Need Help?</h3>\n          <p>Our support team is here to help you succeed:</p>\n          <ul>\n            <li>📧 Email: <a href=\"mailto:support@b2cautomation.com\">support@b2cautomation.com</a></li>\n            <li>💬 Live Chat: Available in your dashboard</li>\n            <li>📖 Documentation: <a href=\"https://docs.b2cautomation.com\">docs.b2cautomation.com</a></li>\n          </ul>\n        </div>\n        \n        <div class=\"footer\">\n          <p>© 2025 B2C Automation Platform. All rights reserved.</p>\n          <p>Generated on ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}</p>\n        </div>\n      </div>\n    </body>\n    </html>\n  `,\n  text: `Welcome to B2C Automation Platform, ${displayName}!\\n\\nYour account has been successfully created. You've been granted 100 free credits to explore our Document Analytics and Task Automation services.\\n\\nGet started: https://platform.b2cautomation.com/dashboard\\n\\nNeed help? Contact us at support@b2cautomation.com\\n\\n© 2025 B2C Automation Platform`,\n  timestamp: new Date().toISOString()\n};\n\nreturn emailContent;"
+      },
+      "id": "generate-welcome-email",
+      "name": "Generate Welcome Email",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1250,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "fromEmail": "noreply@b2cautomation.com",
+        "toEmail": "={{ $json.to }}",
+        "subject": "={{ $json.subject }}",
+        "message": "={{ $json.html }}",
+        "options": {
+          "bodyFormat": "html"
+        }
+      },
+      "id": "send-welcome-email",
+      "name": "Send Welcome Email",
+      "type": "n8n-nodes-base.sendEmail",
+      "typeVersion": 2,
+      "position": [
+        1450,
+        300
+      ],
+      "credentials": {
+        "smtp": {
+          "id": "smtp-main",
+          "name": "B2C Platform SMTP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "schema": "public",
+        "table": "analytics_events",
+        "columns": "user_id,event_type,event_data,created_at",
+        "additionalFields": {}
+      },
+      "id": "log-registration",
+      "name": "Log User Registration",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1250,
+        500
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "supabase-main",
+          "name": "Supabase B2C Platform"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Prepare analytics event data\nconst userData = $input.first().json;\n\nconst analyticsEvent = {\n  user_id: userData.user_id,\n  event_type: 'user_registration',\n  event_data: {\n    source: 'webhook',\n    email: userData.email,\n    has_full_name: !!userData.full_name,\n    has_avatar: !!userData.avatar_url,\n    registration_timestamp: userData.created_at,\n    onboarding_started: userData.validation_timestamp,\n    metadata: userData.metadata\n  },\n  created_at: new Date().toISOString()\n};\n\nreturn analyticsEvent;"
+      },
+      "id": "prepare-analytics-data",
+      "name": "Prepare Analytics Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1050,
+        500
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Generate secure API key for the user\nconst userData = $input.first().json;\nconst crypto = require('crypto');\n\n// Generate API key with prefix\nconst prefix = 'b2c_';\nconst keyLength = 32;\nconst randomBytes = crypto.randomBytes(keyLength);\nconst apiKey = prefix + randomBytes.toString('hex');\n\n// Generate API key hash for storage\nconst apiKeyHash = crypto.createHash('sha256').update(apiKey).digest('hex');\n\nconst apiKeyData = {\n  user_id: userData.user_id,\n  api_key: apiKey,           // Return to user\n  api_key_hash: apiKeyHash,  // Store in database\n  created_at: new Date().toISOString(),\n  is_active: true\n};\n\nreturn apiKeyData;"
+      },
+      "id": "generate-api-key",
+      "name": "Generate API Key",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1650,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "schema": "public",
+        "table": "api_keys",
+        "columns": "user_id,api_key_hash,is_active,created_at",
+        "additionalFields": {}
+      },
+      "id": "store-api-key",
+      "name": "Store API Key",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1850,
+        300
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "supabase-main",
+          "name": "Supabase B2C Platform"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Prepare API key storage data (without exposing actual key)\nconst apiKeyData = $input.first().json;\n\nconst storageData = {\n  user_id: apiKeyData.user_id,\n  api_key_hash: apiKeyData.api_key_hash,\n  is_active: apiKeyData.is_active,\n  created_at: apiKeyData.created_at\n};\n\nreturn storageData;"
+      },
+      "id": "prepare-api-key-storage",
+      "name": "Prepare API Key Storage",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1650,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Prepare final success response\nconst userData = $input.first().json;\nconst apiKeyData = $input.all()[1]?.json || {}; // Get API key from second input\n\nconst response = {\n  success: true,\n  user_id: userData.user_id,\n  api_key: apiKeyData.api_key || 'Key generation pending',\n  credits_remaining: 100,\n  onboarding_completed: false,\n  next_steps: [\n    'complete_profile',\n    'try_document_analytics',\n    'explore_task_automation',\n    'read_getting_started_guide'\n  ],\n  dashboard_url: 'https://platform.b2cautomation.com/dashboard',\n  api_docs_url: 'https://docs.b2cautomation.com/api',\n  support_email: 'support@b2cautomation.com',\n  created_at: new Date().toISOString()\n};\n\nreturn response;"
+      },
+      "id": "prepare-success-response",
+      "name": "Prepare Success Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2050,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",\n        "responseBody": "={{ $json }}",\n        "options": {}\n      },\n      "id": "success-response",\n      "name": "Success Response",\n      "type": "n8n-nodes-base.respondToWebhook",\n      "typeVersion": 1,\n      "position": [\n        2250,\n        300\n      ]\n    },\n    {\n      "parameters": {\n        "conditions": {\n          "options": {\n            "caseSensitive": true,\n            "leftValue": "",\n            "typeValidation": "strict"\n          },\n          "conditions": [\n            {\n              "id": "validation-check",\n              "leftValue": "={{ $json.error }}",\n              "rightValue": "",\n              "operator": {\n                "type": "string",\n                "operation": "notEqual"\n              }\n            }\n          ],\n          "combinator": "or"\n        },\n        "options": {}\n      },\n      "id": "check-validation-errors",\n      "name": "Check Validation Errors",\n      "type": "n8n-nodes-base.if",\n      "typeVersion": 2,\n      "position": [\n        450,\n        500\n      ]\n    },\n    {\n      "parameters": {\n        "mode": "runOnceForEachItem",\n        "jsCode": "// Handle validation errors\nconst error = $input.first().json;\n\nconst errorResponse = {\n  success: false,\n  error: {\n    type: 'validation_error',\n    message: error.message || 'Invalid user data provided',\n    code: 'INVALID_USER_DATA',\n    timestamp: new Date().toISOString()\n  },\n  retry: true,\n  help_url: 'https://docs.b2cautomation.com/errors/validation'\n};\n\nreturn errorResponse;"\n      },\n      "id": "handle-validation-error",\n      "name": "Handle Validation Error",\n      "type": "n8n-nodes-base.code",\n      "typeVersion": 2,\n      "position": [\n        650,\n        600\n      ]\n    },\n    {\n      "parameters": {\n        "respondWith": "json",\n        "responseBody": "={{ $json }}",\n        "responseCode": 400,\n        "options": {}\n      },\n      "id": "error-response",\n      "name": "Error Response",\n      "type": "n8n-nodes-base.respondToWebhook",\n      "typeVersion": 1,\n      "position": [\n        850,\n        600\n      ]\n    }\n  ],\n  "connections": {\n    "Webhook: User Signup": {\n      "main": [\n        [\n          {\n            "node": "Validate User Data",\n            "type": "main",\n            "index": 0\n          }\n        ]\n      ]\n    },\n    "Validate User Data": {\n      "main": [\n        [\n          {\n            "node": "Prepare Session Data",\n            "type": "main",\n            "index": 0\n          },\n          {\n            "node": "Prepare Profile Update",\n            "type": "main",\n            "index": 0\n          },\n          {\n            "node": "Prepare Credits Data",\n            "type": "main",\n            "index": 0\n          },\n          {\n            "node": "Prepare Analytics Data",\n            "type": "main",\n            "index": 0\n          }\n        ]\n      ]\n    },\n    "Prepare Session Data": {\n      "main": [\n        [\n          {\n            "node": "Create User Session",\n            "type": "main",\n            "index": 0\n          }\n        ]\n      ]\n    },\n    "Create User Session": {\n      "main": [\n        [\n          {\n            "node": "Update Profile Status",\n            "type": "main",\n            "index": 0\n          }\n        ]\n      ]\n    },\n    "Prepare Profile Update": {\n      "main": [\n        [\n          {\n            "node": "Update Profile Status",\n            "type": "main",\n            "index": 0\n          }\n        ]\n      ]\n    },\n    "Update Profile Status": {\n      "main": [\n        [\n          {\n            "node": "Initialize User Credits",\n            "type": "main",\n            "index": 0\n          }\n        ]\n      ]\n    },\n    "Prepare Credits Data": {\n      "main": [\n        [\n          {\n            "node": "Initialize User Credits",\n            "type": "main",\n            "index": 0\n          }\n        ]\n      ]\n    },\n    "Initialize User Credits": {\n      "main": [\n        [\n          {\n            "node": "Generate Welcome Email",\n            "type": "main",\n            "index": 0\n          }\n        ]\n      ]\n    },\n    "Generate Welcome Email": {\n      "main": [\n        [\n          {\n            "node": "Send Welcome Email",\n            "type": "main",\n            "index": 0\n          }\n        ]\n      ]\n    },\n    "Send Welcome Email": {\n      "main": [\n        [\n          {\n            "node": "Generate API Key",\n            "type": "main",\n            "index": 0\n          }\n        ]\n      ]\n    },\n    "Prepare Analytics Data": {\n      "main": [\n        [\n          {\n            "node": "Log User Registration",\n            "type": "main",\n            "index": 0\n          }\n        ]\n      ]\n    },\n    "Generate API Key": {\n      "main": [\n        [\n          {\n            "node": "Prepare API Key Storage",\n            "type": "main",\n            "index": 0\n          },\n          {\n            "node": "Prepare Success Response",\n            "type": "main",\n            "index": 1\n          }\n        ]\n      ]\n    },\n    "Prepare API Key Storage": {\n      "main": [\n        [\n          {\n            "node": "Store API Key",\n            "type": "main",\n            "index": 0\n          }\n        ]\n      ]\n    },\n    "Store API Key": {\n      "main": [\n        [\n          {\n            "node": "Prepare Success Response",\n            "type": "main",\n            "index": 0\n          }\n        ]\n      ]\n    },\n    "Prepare Success Response": {\n      "main": [\n        [\n          {\n            "node": "Success Response",\n            "type": "main",\n            "index": 0\n          }\n        ]\n      ]\n    },\n    "Check Validation Errors": {\n      "main": [\n        [\n          {\n            "node": "Handle Validation Error",\n            "type": "main",\n            "index": 0\n          }\n        ],\n        []\n      ]\n    },\n    "Handle Validation Error": {\n      "main": [\n        [\n          {\n            "node": "Error Response",\n            "type": "main",\n            "index": 0\n          }\n        ]\n      ]\n    }\n  },\n  "settings": {\n    "executionOrder": "v1",\n    "saveDataErrorExecution": "all",\n    "saveDataSuccessExecution": "all",\n    "callerPolicy": "workflowsFromSameOwner",\n    "executionTimeout": 300,\n    "maxExecutionTime": 600\n  },\n  "staticData": null,\n  "tags": [\n    "user-onboarding",\n    "supabase",\n    "webhook",\n    "b2c-platform",\n    "automation"\n  ],\n  "triggerCount": 0,\n  "updatedAt": "2025-08-22T00:00:00.000Z",\n  "versionId": null\n}

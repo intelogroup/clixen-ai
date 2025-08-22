@@ -1,0 +1,57 @@
+{
+  "name": "n8n-core-workflows-testing",
+  "version": "1.0.0",
+  "description": "Battle-tested n8n core workflows with agent nodes",
+  "scripts": {
+    "test": "node scripts/test-workflows.js",
+    "validate": "node scripts/validate-workflows.js",
+    "deploy": "node scripts/deploy-workflows.js",
+    "import": "node scripts/import-workflow.js",
+    "export": "node scripts/export-workflow.js",
+    "benchmark": "node scripts/benchmark.js",
+    "orchestrate": "node scripts/n8n-workflow-orchestrator.js",
+    "validate-intent": "node scripts/n8n-workflow-orchestrator.js validate-intent",
+    "create-workflow": "node scripts/n8n-workflow-orchestrator.js create",
+    "setup-mcp": "node scripts/setup-n8n-mcp.js",
+    "prisma-orchestrate": "node scripts/n8n-prisma-orchestrator.js create",
+    "prisma-validate-intent": "node scripts/n8n-prisma-orchestrator.js validate-intent",
+    "search-nodes": "node scripts/n8n-prisma-orchestrator.js search-nodes",
+    "prisma-generate": "prisma generate",
+    "mcp-create": "node scripts/n8n-mcp-complete-orchestrator.js create",
+    "mcp-clean": "node scripts/n8n-mcp-complete-orchestrator.js clean",
+    "clean-instance": "node scripts/clean-n8n-instance.js",
+    "enhanced-create": "node scripts/n8n-mcp-firecrawl-orchestrator.js create",
+    "create-telegram-agent": "node scripts/create-telegram-agent-workflow.js"
+  },
+  "keywords": [
+    "n8n",
+    "workflows",
+    "automation",
+    "agent-nodes",
+    "testing"
+  ],
+  "author": "Terragon Labs",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "dotenv": "^16.3.1"
+  },
+  "dependencies": {
+    "@mendable/firecrawl-js": "^3.0.3",
+    "@prisma/client": "^6.14.0",
+    "ajv": "^8.17.1",
+    "apify-client": "^2.15.0",
+    "axios": "^1.6.5",
+    "better-sqlite3": "^12.2.0",
+    "chalk": "^4.1.2",
+    "commander": "^11.1.0",
+    "got": "^14.4.7",
+    "joi": "^18.0.0",
+    "n8n-mcp": "^2.10.4",
+    "natural": "^8.1.0",
+    "prisma": "^6.14.0",
+    "puppeteer": "^24.16.2",
+    "yup": "^1.7.0",
+    "zod": "^3.25.76"
+  }
+}

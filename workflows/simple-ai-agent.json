@@ -1,0 +1,276 @@
+{
+  "name": "Simple AI Agent with Chat & Tools",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "simple-ai-chat",
+        "responseMode": "responseNode"
+      },
+      "id": "webhook",
+      "name": "Chat Interface",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        250,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Parse incoming message and determine intent\nconst message = ($input.first().json.message || $input.first().json.query || '').toLowerCase();\nconst sessionId = $input.first().json.sessionId || 'session-' + Date.now();\n\n// Determine what the user wants\nlet intent = 'general';\nlet needsWeather = false;\nlet needsNews = false;\nlet needsCalculation = false;\nlet needsHelp = false;\n\nif (message.includes('weather') || message.includes('temperature')) {\n    intent = 'weather';\n    needsWeather = true;\n}\nif (message.includes('news') || message.includes('headline')) {\n    intent = 'news';\n    needsNews = true;\n}\nif (message.includes('calculate') || message.includes('math') || /\\d+[\\+\\-\\*\\/]\\d+/.test(message)) {\n    intent = 'calculation';\n    needsCalculation = true;\n}\nif (message.includes('help') || message.includes('what can you do')) {\n    intent = 'help';\n    needsHelp = true;\n}\n\nreturn {\n    originalMessage: message,\n    sessionId: sessionId,\n    intent: intent,\n    needsWeather,\n    needsNews,\n    needsCalculation,\n    needsHelp,\n    timestamp: new Date().toISOString()\n};"
+      },
+      "id": "parse-message",
+      "name": "Parse Message",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        450,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.intent }}",
+              "rightValue": "weather",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "id": "router-weather",
+      "name": "Is Weather?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        650,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Weather Service\nconst locations = ['Everett, MA', 'Boston', 'New York', 'Los Angeles'];\nconst location = locations.find(loc => $json.originalMessage.includes(loc.toLowerCase())) || 'Everett, MA';\n\nconst weatherData = {\n    location: location,\n    temperature: Math.floor(Math.random() * 30) + 60,\n    condition: ['Sunny', 'Partly Cloudy', 'Cloudy', 'Light Rain'][Math.floor(Math.random() * 4)],\n    humidity: Math.floor(Math.random() * 40) + 40,\n    windSpeed: Math.floor(Math.random() * 15) + 5\n};\n\nreturn {\n    ...($input.first().json),\n    weatherResponse: `🌤️ Weather in ${weatherData.location}:\\n• Temperature: ${weatherData.temperature}°F\\n• Condition: ${weatherData.condition}\\n• Humidity: ${weatherData.humidity}%\\n• Wind: ${weatherData.windSpeed} mph`,\n    toolUsed: 'weather'\n};"
+      },
+      "id": "weather-service",
+      "name": "Weather Service",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        850,
+        250
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.intent }}",
+              "rightValue": "news",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ]
+        }
+      },
+      "id": "router-news",
+      "name": "Is News?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        650,
+        500
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// News Service\nconst newsTopics = {\n    tech: ['AI breakthrough in language models', 'New smartphone features announced', 'Cybersecurity alert issued'],\n    local: ['Community center opens new programs', 'Local park renovation complete', 'City council meeting highlights'],\n    world: ['Climate summit reaches agreement', 'Global economy shows signs of recovery', 'Scientific discovery announced']\n};\n\nconst topic = $json.originalMessage.includes('tech') ? 'tech' : \n             $json.originalMessage.includes('local') ? 'local' : 'world';\n\nconst headlines = newsTopics[topic];\n\nreturn {\n    ...($input.first().json),\n    newsResponse: `📰 Latest ${topic} news:\\n${headlines.map((h, i) => `${i+1}. ${h}`).join('\\n')}`,\n    toolUsed: 'news'\n};"
+      },
+      "id": "news-service",
+      "name": "News Service",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        850,
+        450
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// AI Response Generator\nconst message = $json.originalMessage;\nconst intent = $json.intent;\n\n// Check if we have tool responses\nconst weatherResponse = $json.weatherResponse || '';\nconst newsResponse = $json.newsResponse || '';\n\n// Generate appropriate response\nlet response = '';\n\nif (weatherResponse) {\n    response = weatherResponse;\n} else if (newsResponse) {\n    response = newsResponse;\n} else if (intent === 'help' || message.includes('help')) {\n    response = `🤖 I'm your AI Assistant! I can help you with:\\n\\n• 🌤️ Weather information\\n• 📰 Latest news\\n• 🧮 Calculations\\n• 💬 General conversation\\n\\nJust ask me anything!`;\n} else if (message.includes('hello') || message.includes('hi')) {\n    response = 'Hello! How can I help you today? I can provide weather updates, news, or just chat!';\n} else if (intent === 'calculation') {\n    try {\n        const match = message.match(/\\d+[\\+\\-\\*\\/]\\d+/);\n        if (match) {\n            const result = eval(match[0]);\n            response = `🧮 ${match[0]} = ${result}`;\n        } else {\n            response = '🧮 Please provide a calculation like \"2+2\" or \"10*5\"';\n        }\n    } catch {\n        response = '🧮 I can help with calculations! Try asking \"What is 2+2?\"';\n    }\n} else {\n    response = `I understand you're asking about \"${message}\". I can help with weather, news, calculations, or general questions. What would you like to know?`;\n}\n\nreturn {\n    sessionId: $json.sessionId,\n    response: response,\n    intent: intent,\n    toolsUsed: $json.toolUsed ? [$json.toolUsed] : [],\n    timestamp: new Date().toISOString()\n};"
+      },
+      "id": "ai-response",
+      "name": "AI Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1050,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Format final response\nreturn {\n    success: true,\n    sessionId: $json.sessionId,\n    response: $json.response,\n    metadata: {\n        intent: $json.intent,\n        toolsUsed: $json.toolsUsed,\n        timestamp: $json.timestamp,\n        processingTime: Date.now() - new Date($node[\"parse-message\"].json.timestamp).getTime() + 'ms'\n    }\n};"
+      },
+      "id": "format-response",
+      "name": "Format Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1250,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}"
+      },
+      "id": "send-response",
+      "name": "Send Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        1450,
+        400
+      ]
+    }
+  ],
+  "connections": {
+    "webhook": {
+      "main": [
+        [
+          {
+            "node": "parse-message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "parse-message": {
+      "main": [
+        [
+          {
+            "node": "router-weather",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "router-news",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "router-weather": {
+      "main": [
+        [
+          {
+            "node": "weather-service",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "ai-response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "weather-service": {
+      "main": [
+        [
+          {
+            "node": "ai-response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "router-news": {
+      "main": [
+        [
+          {
+            "node": "news-service",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "ai-response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "news-service": {
+      "main": [
+        [
+          {
+            "node": "ai-response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ai-response": {
+      "main": [
+        [
+          {
+            "node": "format-response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "format-response": {
+      "main": [
+        [
+          {
+            "node": "send-response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

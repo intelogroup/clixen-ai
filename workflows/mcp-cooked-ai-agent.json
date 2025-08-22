@@ -1,0 +1,466 @@
+{
+  "name": "MCP Enhanced: AI Agent with Chat Interface & Multiple Tools",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "mcp-ai-chat",
+        "responseMode": "responseNode",
+        "responseData": "allEntries",
+        "options": {}
+      },
+      "id": "chat-interface",
+      "name": "Chat Interface",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        250,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// MCP: Session Management\nconst sessionId = $input.first().json.session_id || 'session-' + Date.now();\nconst userId = $input.first().json.user_id || 'anonymous';\nconst message = $input.first().json.message || $input.first().json.query;\n\n// Store session context\nconst sessionData = {\n    sessionId,\n    userId,\n    message,\n    timestamp: new Date().toISOString(),\n    context: {\n        location: 'Everett, MA',\n        preferences: {},\n        history: []\n    }\n};\n\nreturn sessionData;"
+      },
+      "id": "session-manager",
+      "name": "Session Manager",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        450,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// MCP: AI Agent Controller with Tool Selection\nconst message = $input.first().json.message?.toLowerCase() || '';\nconst sessionId = $input.first().json.sessionId;\n\n// Determine which tools to use\nconst toolsNeeded = [];\nlet primaryIntent = 'general';\n\nif (message.includes('weather') || message.includes('temperature')) {\n    toolsNeeded.push('weather');\n    primaryIntent = 'weather';\n}\nif (message.includes('news') || message.includes('headline')) {\n    toolsNeeded.push('news');\n    primaryIntent = 'news';\n}\nif (message.includes('event') || message.includes('happening')) {\n    toolsNeeded.push('events');\n    primaryIntent = 'events';\n}\nif (message.includes('remember') || message.includes('save')) {\n    toolsNeeded.push('memory');\n    primaryIntent = 'memory';\n}\nif (message.includes('email') || message.includes('send')) {\n    toolsNeeded.push('email');\n    primaryIntent = 'email';\n}\n\n// If no specific tools, provide general help\nif (toolsNeeded.length === 0) {\n    toolsNeeded.push('help');\n    primaryIntent = 'help';\n}\n\nreturn {\n    sessionId,\n    message: $input.first().json.message,\n    intent: primaryIntent,\n    toolsNeeded,\n    timestamp: new Date().toISOString(),\n    requiresTools: toolsNeeded.length > 0\n};"
+      },
+      "id": "ai-controller",
+      "name": "AI Agent Controller",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        650,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "expression",
+        "value1": "={{ $json.intent }}",
+        "rules": {
+          "rules": [
+            {
+              "value2": "weather",
+              "output": 0
+            },
+            {
+              "value2": "news",
+              "output": 1
+            },
+            {
+              "value2": "events",
+              "output": 2
+            },
+            {
+              "value2": "memory",
+              "output": 3
+            },
+            {
+              "value2": "email",
+              "output": 4
+            }
+          ]
+        },
+        "fallbackOutput": 5
+      },
+      "id": "tool-router",
+      "name": "Tool Router",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        850,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// MCP: Weather Tool\nconst location = 'Everett, MA';\n\n// Simulated weather data (would connect to real API)\nconst weatherData = {\n    location,\n    current: {\n        temperature: 72,\n        condition: 'Partly Cloudy',\n        humidity: 65,\n        windSpeed: 8\n    },\n    forecast: {\n        high: 76,\n        low: 64,\n        precipitation: '10%'\n    },\n    timestamp: new Date().toISOString()\n};\n\nreturn {\n    tool: 'weather',\n    data: weatherData,\n    response: `🌤️ Weather in ${location}: Currently ${weatherData.current.temperature}°F and ${weatherData.current.condition}. High: ${weatherData.forecast.high}°F, Low: ${weatherData.forecast.low}°F. Chance of rain: ${weatherData.forecast.precipitation}`\n};"
+      },
+      "id": "weather-tool",
+      "name": "Weather Tool",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1050,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// MCP: News Tool\nconst location = 'Everett, MA';\n\n// Simulated news data (would connect to real API)\nconst newsData = {\n                    articles: [\n        {\n            title: 'Community Center Announces New Programs',\n            summary: 'Tech workshops and art classes starting next month'\n        },\n        {\n            title: 'Local Park Renovation Complete',\n            summary: 'New playground and walking trails now open'\n        },\n        {\n            title: 'City Council Meeting Highlights',\n            summary: 'Discussion on traffic improvements and budget'\n        }\n    ],\n    timestamp: new Date().toISOString()\n};\n\nconst headlines = newsData.articles.map(a => `• ${a.title}: ${a.summary}`).join('\\n');\n\nreturn {\n    tool: 'news',\n    data: newsData,\n    response: `📰 Latest news for ${location}:\\n${headlines}`\n};"
+      },
+      "id": "news-tool",
+      "name": "News Tool",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1050,
+        350
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// MCP: Events Tool\nconst location = 'Everett, MA';\nconst today = new Date().toLocaleDateString();\n\n// Simulated events data (would connect to real API)\nconst eventsData = {\n    events: [\n        {\n            name: 'Farmers Market',\n            time: '9:00 AM',\n            location: 'Town Square'\n        },\n        {\n            name: 'Library Book Club',\n            time: '2:00 PM',\n            location: 'Public Library'\n        },\n        {\n            name: 'Youth Soccer Practice',\n            time: '4:00 PM',\n            location: 'Central Park'\n        },\n        {\n            name: 'Evening Concert',\n            time: '7:00 PM',\n            location: 'Amphitheater'\n        }\n    ],\n    date: today\n};\n\nconst eventList = eventsData.events.map(e => `• ${e.time}: ${e.name} at ${e.location}`).join('\\n');\n\nreturn {\n    tool: 'events',\n    data: eventsData,\n    response: `🎉 Events in ${location} today (${today}):\\n${eventList}`\n};"
+      },
+      "id": "events-tool",
+      "name": "Events Tool",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1050,
+        500
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// MCP: Memory Tool\nconst sessionId = $input.first().json.sessionId;\nconst message = $input.first().json.message;\n\n// Simulated memory storage (would connect to database)\nconst memory = {\n    sessionId,\n    savedData: {\n        message,\n        timestamp: new Date().toISOString(),\n        context: 'User request saved to memory'\n    }\n};\n\nreturn {\n    tool: 'memory',\n    data: memory,\n    response: '💾 I\\'ve saved that information to my memory for future reference.'\n};"
+      },
+      "id": "memory-tool",
+      "name": "Memory Tool",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1050,
+        650
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// MCP: Email Tool\nconst recipient = 'jimkalinov@gmail.com';\nconst subject = 'AI Assistant Update - ' + new Date().toLocaleDateString();\n\n// Prepare email content\nconst emailData = {\n    to: recipient,\n    subject,\n    body: `\nHello!\n\nThis is your AI Assistant with today's update from Everett, MA.\n\nWeather: Currently 72°F and partly cloudy\nNews: Community events and local updates available\nEvents: Multiple activities scheduled today\n\nBest regards,\nYour AI Assistant\n    `,\n    timestamp: new Date().toISOString()\n};\n\nreturn {\n    tool: 'email',\n    data: emailData,\n    response: `📧 Email prepared for ${recipient}. Subject: \"${subject}\"`\n};"
+      },
+      "id": "email-tool",
+      "name": "Email Tool",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1050,
+        800
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// MCP: Help Tool\nconst capabilities = [\n    '🌤️ Weather - Ask about current weather or forecast',\n    '📰 News - Get latest news and headlines',\n    '🎉 Events - Find out what\\'s happening today',\n    '💾 Memory - Save information for later',\n    '📧 Email - Send updates via email'\n];\n\nreturn {\n    tool: 'help',\n    response: `Hello! I'm your AI Assistant. I can help you with:\\n\\n${capabilities.join('\\n')}\\n\\nJust ask me about any of these topics!`\n};"
+      },
+      "id": "help-tool",
+      "name": "Help Tool",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1050,
+        950
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// MCP: Response Aggregator\nconst toolResponses = $input.all().map(item => item.json);\n\n// Combine all tool responses\nconst aggregatedResponse = toolResponses\n    .map(r => r.response)\n    .filter(r => r)\n    .join('\\n\\n');\n\nreturn {\n    success: true,\n    sessionId: toolResponses[0]?.sessionId || 'unknown',\n    response: aggregatedResponse || 'I processed your request successfully!',\n    timestamp: new Date().toISOString(),\n    toolsUsed: toolResponses.map(r => r.tool).filter(t => t)\n};"
+      },
+      "id": "response-aggregator",
+      "name": "Response Aggregator",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1250,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}"
+      },
+      "id": "chat-response",
+      "name": "Send Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        1450,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message",
+          "edited_message"
+        ]
+      },
+      "id": "telegram-trigger",
+      "name": "Telegram Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        250,
+        600
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "sendMessage",
+        "chatId": "={{ $node[\"session-manager\"].json.context?.chatId || $json.message?.chat?.id }}",
+        "text": "={{ $node[\"response-aggregator\"].json.response }}",
+        "additionalFields": {}
+      },
+      "id": "telegram-response",
+      "name": "Telegram Reply",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.1,
+      "position": [
+        1450,
+        600
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 24,
+              "triggerAtHour": 8,
+              "triggerAtMinute": 0
+            }
+          ]
+        }
+      },
+      "id": "daily-schedule",
+      "name": "Daily 8AM Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        250,
+        800
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// MCP: Daily Report Generator\nconst report = {\n    message: 'generate daily report',\n    sessionId: 'daily-report-' + Date.now(),\n    intent: 'all',\n    toolsNeeded: ['weather', 'news', 'events'],\n    isDailyReport: true\n};\n\nreturn report;"
+      },
+      "id": "daily-report-gen",
+      "name": "Daily Report Generator",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        450,
+        800
+      ]
+    }
+  ],
+  "connections": {
+    "chat-interface": {
+      "main": [
+        [
+          {
+            "node": "session-manager",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "session-manager": {
+      "main": [
+        [
+          {
+            "node": "ai-controller",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ai-controller": {
+      "main": [
+        [
+          {
+            "node": "tool-router",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "tool-router": {
+      "main": [
+        [
+          {
+            "node": "weather-tool",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "news-tool",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "events-tool",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "memory-tool",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "email-tool",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "help-tool",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "weather-tool": {
+      "main": [
+        [
+          {
+            "node": "response-aggregator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "news-tool": {
+      "main": [
+        [
+          {
+            "node": "response-aggregator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "events-tool": {
+      "main": [
+        [
+          {
+            "node": "response-aggregator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "memory-tool": {
+      "main": [
+        [
+          {
+            "node": "response-aggregator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "email-tool": {
+      "main": [
+        [
+          {
+            "node": "response-aggregator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "help-tool": {
+      "main": [
+        [
+          {
+            "node": "response-aggregator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "response-aggregator": {
+      "main": [
+        [
+          {
+            "node": "chat-response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "telegram-trigger": {
+      "main": [
+        [
+          {
+            "node": "session-manager",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "daily-schedule": {
+      "main": [
+        [
+          {
+            "node": "daily-report-gen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "daily-report-gen": {
+      "main": [
+        [
+          {
+            "node": "ai-controller",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataSuccessExecution": "all",
+    "saveManualExecutions": true
+  }
+}
