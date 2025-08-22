@@ -5,6 +5,7 @@ import { Inter } from 'next/font/google'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
+  metadataBase: new URL('http://localhost:3000'),
   title: 'B2C Automation Platform - AI-Powered Workflow Automation',
   description: 'Automate your business tasks with AI. Document analysis, scheduling, API integrations, and more. Start free with 100 monthly executions.',
   keywords: 'automation, AI, workflow, document analysis, scheduling, API integration, business automation',
@@ -29,8 +30,12 @@ export const metadata: Metadata = {
     description: 'Automate your business tasks with AI. Start free today.',
     images: ['/og-image.png'],
   },
-  viewport: 'width=device-width, initial-scale=1',
   robots: 'index, follow',
+}
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
 }
 
 export default function RootLayout({
