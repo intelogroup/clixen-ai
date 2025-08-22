@@ -1,12 +1,13 @@
 'use client'
 
-import { useState } from 'react'
 import { ArrowRight, Bot, Zap, FileText, Calendar } from 'lucide-react'
-import AuthModal from './AuthModal'
 
-export default function Hero() {
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
+interface HeroProps {
+  onGetStarted: () => void
+  onSignIn: () => void
+}
 
+export default function Hero({ onGetStarted, onSignIn }: HeroProps) {
   return (
     <section className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 via-white to-purple-50 overflow-hidden">
       {/* Background decorations */}
@@ -55,7 +56,7 @@ export default function Hero() {
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center animate-slide-up" style={{ animationDelay: '0.4s' }}>
             <button
-              onClick={() => setIsAuthModalOpen(true)}
+              onClick={onGetStarted}
               className="btn-primary flex items-center text-lg px-8 py-4 group"
             >
               Start Free Today
@@ -86,11 +87,6 @@ export default function Hero() {
         </div>
       </div>
 
-      {/* Auth Modal */}
-      <AuthModal 
-        isOpen={isAuthModalOpen} 
-        onClose={() => setIsAuthModalOpen(false)} 
-      />
     </section>
   )
 }

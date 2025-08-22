@@ -2,27 +2,29 @@
 
 import { useState, useEffect } from 'react'
 import { X, Mail, ArrowRight, CheckCircle } from 'lucide-react'
-import { createBrowserClient } from '../lib/supabase'
+import { supabase } from '../lib/supabase'
 import type { AuthError } from '@supabase/supabase-js'
 
 interface AuthModalProps {
   isOpen: boolean
   onClose: () => void
+  mode: 'signin' | 'signup'
+  onModeChange: (mode: 'signin' | 'signup') => void
 }
 
-export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
+export default function AuthModal({ isOpen, onClose, mode, onModeChange }: AuthModalProps) {
   const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [authMethod, setAuthMethod] = useState<'password' | 'magic'>('password')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
-  const [mode, setMode] = useState<'signin' | 'signup'>('signup')
-  
-  const supabase = createBrowserClient()
 
   useEffect(() => {
     if (!isOpen) {
       // Reset state when modal closes
       setEmail('')
+      setPassword('')
       setError(null)
       setSuccess(false)
       setIsLoading(false)
@@ -34,24 +36,49 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
     setIsLoading(true)
     setError(null)
 
+    console.log('🔐 Starting authentication:', { mode, authMethod, email })
+
     try {
-      const { data, error } = await supabase.auth.signInWithOtp({
-        email,
-        options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
-          data: {
-            signup_type: mode,
-          }
+      if (authMethod === 'password') {
+        if (mode === 'signup') {
+          const { data, error } = await supabase.auth.signUp({
+            email,
+            password,
+            options: {
+              emailRedirectTo: `${window.location.origin}/auth/callback`,
+            }
+          })
+          if (error) throw error
+          console.log('✅ Sign up successful:', data)
+          setSuccess(true)
+        } else {
+          const { data, error } = await supabase.auth.signInWithPassword({
+            email,
+            password,
+          })
+          if (error) throw error
+          console.log('✅ Sign in successful:', data)
+          
+          // Successful login - redirect to dashboard
+          console.log('🔄 Redirecting to dashboard...')
+          window.location.href = '/dashboard'
         }
-      })
-
-      if (error) {
-        throw error
+      } else {
+        const { data, error } = await supabase.auth.signInWithOtp({
+          email,
+          options: {
+            emailRedirectTo: `${window.location.origin}/auth/callback`,
+            data: {
+              signup_type: mode,
+            }
+          }
+        })
+        if (error) throw error
+        setSuccess(true)
       }
-
-      setSuccess(true)
     } catch (error) {
       const authError = error as AuthError
+      console.error('❌ Authentication error:', authError)
       setError(authError.message || 'An error occurred. Please try again.')
     } finally {
       setIsLoading(false)
@@ -128,6 +155,32 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
             </div>
           ) : (
             <>
+              {/* Auth Method Toggle */}
+              <div className="flex rounded-lg bg-gray-100 p-1 mb-6">
+                <button
+                  type="button"
+                  onClick={() => setAuthMethod('password')}
+                  className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors ${
+                    authMethod === 'password'
+                      ? 'bg-white text-gray-900 shadow-sm'
+                      : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  Password
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAuthMethod('magic')}
+                  className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors ${
+                    authMethod === 'magic'
+                      ? 'bg-white text-gray-900 shadow-sm'
+                      : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  Magic Link
+                </button>
+              </div>
+
               <form onSubmit={handleAuth} className="space-y-4">
                 <div>
                   <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
@@ -140,9 +193,26 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                     onChange={(e) => setEmail(e.target.value)}
                     required
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
-                    placeholder="you@company.com"
+                    placeholder="testuser1@email.com"
                   />
                 </div>
+
+                {authMethod === 'password' && (
+                  <div>
+                    <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+                      Password
+                    </label>
+                    <input
+                      id="password"
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required={authMethod === 'password'}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
+                      placeholder="Demo123"
+                    />
+                  </div>
+                )}
 
                 {error && (
                   <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm">
@@ -152,7 +222,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
                 <button
                   type="submit"
-                  disabled={isLoading || !email}
+                  disabled={isLoading || !email || (authMethod === 'password' && !password)}
                   className="w-full btn-primary flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isLoading ? (
@@ -160,7 +230,10 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                   ) : (
                     <Mail className="w-5 h-5 mr-2" />
                   )}
-                  {mode === 'signup' ? 'Send Magic Link' : 'Send Login Link'}
+                  {authMethod === 'password' 
+                    ? (mode === 'signup' ? 'Create Account' : 'Sign In')
+                    : (mode === 'signup' ? 'Send Magic Link' : 'Send Login Link')
+                  }
                 </button>
               </form>
 
@@ -192,7 +265,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                   {mode === 'signup' ? 'Already have an account?' : "Don't have an account?"}{' '}
                   <button
                     type="button"
-                    onClick={() => setMode(mode === 'signup' ? 'signin' : 'signup')}
+                    onClick={() => onModeChange(mode === 'signup' ? 'signin' : 'signup')}
                     className="text-primary-600 hover:text-primary-700 font-medium"
                   >
                     {mode === 'signup' ? 'Sign in' : 'Sign up'}
