@@ -14,6 +14,8 @@ interface AuthModalProps {
 
 export default function AuthModal({ isOpen, onClose, mode, onModeChange }: AuthModalProps) {
   const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [authMethod, setAuthMethod] = useState<'password' | 'magic'>('password')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
@@ -22,6 +24,7 @@ export default function AuthModal({ isOpen, onClose, mode, onModeChange }: AuthM
     if (!isOpen) {
       // Reset state when modal closes
       setEmail('')
+      setPassword('')
       setError(null)
       setSuccess(false)
       setIsLoading(false)
@@ -34,21 +37,40 @@ export default function AuthModal({ isOpen, onClose, mode, onModeChange }: AuthM
     setError(null)
 
     try {
-      const { data, error } = await supabase.auth.signInWithOtp({
-        email,
-        options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
-          data: {
-            signup_type: mode,
-          }
+      if (authMethod === 'password') {
+        if (mode === 'signup') {
+          const { data, error } = await supabase.auth.signUp({
+            email,
+            password,
+            options: {
+              emailRedirectTo: `${window.location.origin}/auth/callback`,
+            }
+          })
+          if (error) throw error
+          setSuccess(true)
+        } else {
+          const { data, error } = await supabase.auth.signInWithPassword({
+            email,
+            password,
+          })
+          if (error) throw error
+          
+          // Successful login - redirect to dashboard
+          window.location.href = '/dashboard'
         }
-      })
-
-      if (error) {
-        throw error
+      } else {
+        const { data, error } = await supabase.auth.signInWithOtp({
+          email,
+          options: {
+            emailRedirectTo: `${window.location.origin}/auth/callback`,
+            data: {
+              signup_type: mode,
+            }
+          }
+        })
+        if (error) throw error
+        setSuccess(true)
       }
-
-      setSuccess(true)
     } catch (error) {
       const authError = error as AuthError
       setError(authError.message || 'An error occurred. Please try again.')
@@ -127,6 +149,32 @@ export default function AuthModal({ isOpen, onClose, mode, onModeChange }: AuthM
             </div>
           ) : (
             <>
+              {/* Auth Method Toggle */}
+              <div className="flex rounded-lg bg-gray-100 p-1 mb-6">
+                <button
+                  type="button"
+                  onClick={() => setAuthMethod('password')}
+                  className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors ${
+                    authMethod === 'password'
+                      ? 'bg-white text-gray-900 shadow-sm'
+                      : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  Password
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAuthMethod('magic')}
+                  className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors ${
+                    authMethod === 'magic'
+                      ? 'bg-white text-gray-900 shadow-sm'
+                      : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  Magic Link
+                </button>
+              </div>
+
               <form onSubmit={handleAuth} className="space-y-4">
                 <div>
                   <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
@@ -139,9 +187,26 @@ export default function AuthModal({ isOpen, onClose, mode, onModeChange }: AuthM
                     onChange={(e) => setEmail(e.target.value)}
                     required
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
-                    placeholder="you@company.com"
+                    placeholder="testuser1@email.com"
                   />
                 </div>
+
+                {authMethod === 'password' && (
+                  <div>
+                    <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+                      Password
+                    </label>
+                    <input
+                      id="password"
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required={authMethod === 'password'}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
+                      placeholder="Demo123"
+                    />
+                  </div>
+                )}
 
                 {error && (
                   <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm">
@@ -151,7 +216,7 @@ export default function AuthModal({ isOpen, onClose, mode, onModeChange }: AuthM
 
                 <button
                   type="submit"
-                  disabled={isLoading || !email}
+                  disabled={isLoading || !email || (authMethod === 'password' && !password)}
                   className="w-full btn-primary flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isLoading ? (
@@ -159,7 +224,10 @@ export default function AuthModal({ isOpen, onClose, mode, onModeChange }: AuthM
                   ) : (
                     <Mail className="w-5 h-5 mr-2" />
                   )}
-                  {mode === 'signup' ? 'Send Magic Link' : 'Send Login Link'}
+                  {authMethod === 'password' 
+                    ? (mode === 'signup' ? 'Create Account' : 'Sign In')
+                    : (mode === 'signup' ? 'Send Magic Link' : 'Send Login Link')
+                  }
                 </button>
               </form>
 
