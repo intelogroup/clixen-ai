@@ -1,0 +1,174 @@
+{
+  "name": "Front LLM Intent Router",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "/chat",
+        "method": "POST",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-chat",
+      "name": "Chat Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [
+        250,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse user intent\nconst parser = class IntentParser {\n    constructor() {\n        this.minConfidence = 0.7;\n        this.conversationContext = new Map();\n    }\n    \n    /**\n     * Parse user message and extract intent\n     */\n    parseIntent(message, userId) {\n        const lowerMessage = message.toLowerCase();\n        const words = lowerMessage.split(/\\s+/);\n        \n        // Check for non-actionable messages\n        if (this.isNonActionable(message)) {\n            return {\n                intent: 'conversation',\n                confidence: 1.0,\n                response: this.getConversationalResponse(message),\n                actionable: false\n            };\n        }\n        \n        // Score each service based on keyword matches\n        const scores = {};\n        let maxScore = 0;\n        let bestMatch = null;\n        \n        for (const [service, config] of Object.entries(SERVICE_CATALOG)) {\n            let score = 0;\n            \n            // Check keyword matches\n            for (const keyword of config.keywords) {\n                if (lowerMessage.includes(keyword)) {\n                    score += 1;\n                }\n            }\n            \n            // Check for example similarity\n            for (const example of config.examples) {\n                const similarity = this.calculateSimilarity(lowerMessage, example.toLowerCase());\n                score += similarity;\n            }\n            \n            scores[service] = score;\n            if (score > maxScore) {\n                maxScore = score;\n                bestMatch = service;\n            }\n        }\n        \n        // Calculate confidence\n        const totalScore = Object.values(scores).reduce((a, b) => a + b, 0);\n        const confidence = totalScore > 0 ? maxScore / totalScore : 0;\n        \n        // If confidence is too low, ask for clarification\n        if (confidence < this.minConfidence || !bestMatch) {\n            return {\n                intent: 'clarification_needed',\n                confidence: confidence,\n                response: this.getClarificationResponse(),\n                suggestions: this.getSuggestions(scores),\n                actionable: false\n            };\n        }\n        \n        // Extract entities from message\n        const entities = this.extractEntities(message, SERVICE_CATALOG[bestMatch]);\n        \n        // Check if all requirements are met\n        const missingRequirements = this.checkRequirements(\n            entities,\n            SERVICE_CATALOG[bestMatch].requirements\n        );\n        \n        if (missingRequirements.length > 0) {\n            return {\n                intent: bestMatch,\n                confidence: confidence,\n                response: this.getMissingRequirementsResponse(bestMatch, missingRequirements),\n                missing: missingRequirements,\n                actionable: false\n            };\n        }\n        \n        // Update conversation context\n        this.updateContext(userId, bestMatch, entities);\n        \n        return {\n            intent: bestMatch,\n            confidence: confidence,\n            workflow: SERVICE_CATALOG[bestMatch].workflow,\n            entities: entities,\n            response: SERVICE_CATALOG[bestMatch].response,\n            actionable: true\n        };\n    }\n    \n    /**\n     * Check if message is non-actionable\n     */\n    isNonActionable(message) {\n        const nonActionable = [\n            /^(hi|hello|hey|greetings?)$/i,\n            /^(thanks|thank you|thx)$/i,\n            /^(bye|goodbye|see you)$/i,\n            /^(ok|okay|sure|yes|no)$/i,\n            /^(help|what can you do)$/i\n        ];\n        \n        return nonActionable.some(pattern => pattern.test(message.trim()));\n    }\n    \n    /**\n     * Calculate similarity between two strings\n     */\n    calculateSimilarity(str1, str2) {\n        const words1 = new Set(str1.split(/\\s+/));\n        const words2 = new Set(str2.split(/\\s+/));\n        const intersection = new Set([...words1].filter(x => words2.has(x)));\n        const union = new Set([...words1, ...words2]);\n        return intersection.size / union.size;\n    }\n    \n    /**\n     * Extract entities from message\n     */\n    extractEntities(message, serviceConfig) {\n        const entities = {};\n        \n        // Extract URLs\n        const urlMatch = message.match(/https?:\\/\\/[^\\s]+/gi);\n        if (urlMatch) {\n            entities.file_url = urlMatch[0];\n        }\n        \n        // Extract file types\n        const fileTypeMatch = message.match(/\\.(pdf|csv|xlsx?|docx?|txt)/gi);\n        if (fileTypeMatch) {\n            entities.file_type = fileTypeMatch[0].substring(1);\n        }\n        \n        // Extract dates/times\n        const timeMatch = message.match(/(\\d{1,2}:\\d{2})|tomorrow|next\\s+\\w+|every\\s+\\w+/gi);\n        if (timeMatch) {\n            entities.schedule_time = timeMatch[0];\n        }\n        \n        // Extract email addresses\n        const emailMatch = message.match(/[^\\s]+@[^\\s]+\\.[^\\s]+/gi);\n        if (emailMatch) {\n            entities.email = emailMatch[0];\n        }\n        \n        return entities;\n    }\n    \n    /**\n     * Check missing requirements\n     */\n    checkRequirements(entities, requirements) {\n        return requirements.filter(req => !entities[req]);\n    }\n    \n    /**\n     * Update conversation context\n     */\n    updateContext(userId, intent, entities) {\n        if (!this.conversationContext.has(userId)) {\n            this.conversationContext.set(userId, {\n                history: [],\n                lastIntent: null,\n                entities: {}\n            });\n        }\n        \n        const context = this.conversationContext.get(userId);\n        context.history.push({\n            intent: intent,\n            timestamp: new Date(),\n            entities: entities\n        });\n        context.lastIntent = intent;\n        context.entities = { ...context.entities, ...entities };\n        \n        // Keep only last 10 interactions\n        if (context.history.length > 10) {\n            context.history.shift();\n        }\n    }\n    \n    /**\n     * Get conversational response\n     */\n    getConversationalResponse(message) {\n        const responses = {\n            'hi': \"Hello! I can help you with document analysis, task scheduling, API automation, and more. What would you like to do today?\",\n            'hello': \"Hi there! I'm your automation assistant. I can analyze documents, schedule tasks, or set up integrations. How can I help?\",\n            'help': this.getHelpMessage(),\n            'thanks': \"You're welcome! Is there anything else I can help you with?\",\n            'bye': \"Goodbye! Feel free to come back anytime you need automation help.\"\n        };\n        \n        const key = message.toLowerCase().trim();\n        return responses[key] || responses['help'];\n    }\n    \n    /**\n     * Get help message\n     */\n    getHelpMessage() {\n        const services = Object.entries(SERVICE_CATALOG)\n            .map(([key, config]) => `• ${key.replace(/_/g, ' ').toUpperCase()}: ${config.examples[0]}`)\n            .join('\\n');\n        \n        return `I can help you with:\\n\\n${services}\\n\\nJust tell me what you'd like to do!`;\n    }\n    \n    /**\n     * Get clarification response\n     */\n    getClarificationResponse() {\n        return \"I'm not sure what you'd like to do. Could you provide more details? \" +\n               \"For example, you could say 'Analyze my PDF document' or 'Schedule a reminder for tomorrow'.\";\n    }\n    \n    /**\n     * Get suggestions based on scores\n     */\n    getSuggestions(scores) {\n        return Object.entries(scores)\n            .filter(([_, score]) => score > 0)\n            .sort((a, b) => b[1] - a[1])\n            .slice(0, 3)\n            .map(([service]) => ({\n                service: service,\n                example: SERVICE_CATALOG[service].examples[0]\n            }));\n    }\n    \n    /**\n     * Get missing requirements response\n     */\n    getMissingRequirementsResponse(intent, missing) {\n        const service = intent.replace(/_/g, ' ');\n        const missingList = missing.map(m => m.replace(/_/g, ' ')).join(', ');\n        \n        return `I understand you want to use ${service}, but I need more information. ` +\n               `Please provide: ${missingList}`;\n    }\n};\nconst intentParser = new parser();\n\nconst message = $input.first().json.message;\nconst userId = $input.first().json.user_id || 'anonymous';\n\nconst result = intentParser.parseIntent(message, userId);\n\nreturn {\n    ...result,\n    user_id: userId,\n    message: message,\n    timestamp: new Date().toISOString()\n};"
+      },
+      "id": "parse-intent",
+      "name": "Parse Intent",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        450,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.actionable }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "check-actionable",
+      "name": "Is Actionable?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        650,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ 'http://localhost:5678/webhook/' + $json.workflow }}",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "user_id",
+              "value": "={{ $json.user_id }}"
+            },
+            {
+              "name": "intent",
+              "value": "={{ $json.intent }}"
+            },
+            {
+              "name": "entities",
+              "value": "={{ $json.entities }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "execute-workflow",
+      "name": "Execute Workflow",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        850,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": {
+          "json": {
+            "success": "={{ $json.actionable }}",
+            "response": "={{ $json.response }}",
+            "intent": "={{ $json.intent }}",
+            "confidence": "={{ $json.confidence }}",
+            "suggestions": "={{ $json.suggestions }}",
+            "workflow_triggered": "={{ $json.actionable ? $json.workflow : null }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "respond",
+      "name": "Respond to User",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        1050,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Chat Webhook": {
+      "main": [
+        [
+          {
+            "node": "Parse Intent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Intent": {
+      "main": [
+        [
+          {
+            "node": "Is Actionable?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Actionable?": {
+      "main": [
+        [
+          {
+            "node": "Execute Workflow",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond to User",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Workflow": {
+      "main": [
+        [
+          {
+            "node": "Respond to User",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

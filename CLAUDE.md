@@ -1,5 +1,9 @@
 # N8N Workflow Orchestration Pipeline - Complete Guide
 
+## CRITICAL RULE: Workflow JSON Creation
+**NEVER create workflow JSON manually. ALWAYS use czlonkowski n8n MCP for ALL workflow creation tasks.**
+**The MCP has deep knowledge of n8n node structures, parameters, and connections that manual creation cannot match.**
+
 ## Core Pipeline Philosophy
 **NEVER rush to create JSON. Take as many steps as needed until 90% confident about the workflow structure.**
 
