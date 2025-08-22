@@ -1,0 +1,413 @@
+{
+  "name": "Profile Update Handler - B2C Platform",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "/webhook/api/user/profile",
+        "responseMode": "onReceived",
+        "options": {
+          "rawBody": true,
+          "allowedOrigins": "*"
+        }
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook: Profile Update",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        250,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Validate incoming profile update data\nconst incomingData = $input.first().json;\n\n// Required fields validation\nif (!incomingData.user_id) {\n  throw new Error('Missing required field: user_id');\n}\n\n// UUID validation for user_id\nconst uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;\nif (!uuidRegex.test(incomingData.user_id)) {\n  throw new Error('Invalid user_id format');\n}\n\n// Validate update fields\nconst allowedFields = ['full_name', 'avatar_url', 'phone', 'company', 'timezone', 'preferences'];\nconst updates = {};\n\nfor (const [key, value] of Object.entries(incomingData)) {\n  if (key === 'user_id') continue; // Skip user_id as it's not updatable\n  \n  if (allowedFields.includes(key)) {\n    // Sanitize string values\n    if (typeof value === 'string') {\n      updates[key] = value.trim();\n    } else {\n      updates[key] = value;\n    }\n  }\n}\n\n// Email validation if provided\nif (updates.email) {\n  const emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;\n  if (!emailRegex.test(updates.email)) {\n    throw new Error('Invalid email format');\n  }\n  updates.email = updates.email.toLowerCase();\n}\n\n// Phone validation if provided\nif (updates.phone) {\n  const phoneRegex = /^[+]?[1-9]\\d{1,14}$/;\n  if (!phoneRegex.test(updates.phone.replace(/[\\s-()]/g, ''))) {\n    throw new Error('Invalid phone format');\n  }\n}\n\nif (Object.keys(updates).length === 0) {\n  throw new Error('No valid fields to update');\n}\n\nconst validatedUpdate = {\n  user_id: incomingData.user_id,\n  updates: updates,\n  updated_at: new Date().toISOString(),\n  validation_timestamp: new Date().toISOString()\n};\n\nreturn validatedUpdate;"
+      },
+      "id": "validate-profile-data",
+      "name": "Validate Profile Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        450,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": "public",
+        "table": "profiles",
+        "filterType": "manual",
+        "matchValue": "={{ $json.user_id }}",
+        "options": {}
+      },
+      "id": "check-user-exists",
+      "name": "Check User Exists",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        650,
+        300
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "supabase-main",
+          "name": "Supabase B2C Platform"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "user-exists-check",
+              "leftValue": "={{ $json.length }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "verify-user-exists",
+      "name": "Verify User Exists",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        850,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Prepare update data for Supabase\nconst updateData = $input.first().json;\nconst existingProfile = $input.all()[1]?.json?.[0] || {};\n\n// Build dynamic update columns and values\nconst columns = [];\nconst values = {};\n\nfor (const [key, value] of Object.entries(updateData.updates)) {\n  columns.push(key);\n  values[key] = value;\n}\n\n// Always update the updated_at timestamp\ncolumns.push('updated_at');\nvalues['updated_at'] = updateData.updated_at;\n\n// Track profile completion percentage\nconst profileFields = ['full_name', 'avatar_url', 'phone', 'company', 'timezone'];\nconst completedFields = profileFields.filter(field => \n  (existingProfile[field] && existingProfile[field] !== '') || \n  (values[field] && values[field] !== '')\n).length;\n\nconst completionPercentage = Math.round((completedFields / profileFields.length) * 100);\ncolumns.push('profile_completion_percentage');\nvalues['profile_completion_percentage'] = completionPercentage;\n\nconst supabaseUpdate = {\n  user_id: updateData.user_id,\n  columns: columns.join(','),\n  values: values,\n  completion_percentage: completionPercentage\n};\n\nreturn supabaseUpdate;"
+      },
+      "id": "prepare-update-data",
+      "name": "Prepare Update Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1050,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "schema": "public",
+        "table": "profiles",
+        "filterType": "manual",
+        "matchValue": "={{ $json.user_id }}",
+        "columns": "={{ $json.columns }}",
+        "additionalFields": {}
+      },
+      "id": "update-profile",
+      "name": "Update Profile",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1250,
+        200
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "supabase-main",
+          "name": "Supabase B2C Platform"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "schema": "public",
+        "table": "analytics_events",
+        "columns": "user_id,event_type,event_data,created_at",
+        "additionalFields": {}
+      },
+      "id": "log-profile-update",
+      "name": "Log Profile Update",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1250,
+        400
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "supabase-main",
+          "name": "Supabase B2C Platform"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Prepare analytics event for profile update\nconst updateData = $input.first().json;\n\nconst analyticsEvent = {\n  user_id: updateData.user_id,\n  event_type: 'profile_updated',\n  event_data: {\n    fields_updated: Object.keys(updateData.updates),\n    completion_percentage: updateData.completion_percentage,\n    update_source: 'api',\n    timestamp: updateData.updated_at\n  },\n  created_at: new Date().toISOString()\n};\n\nreturn analyticsEvent;"
+      },
+      "id": "prepare-analytics-event",
+      "name": "Prepare Analytics Event",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1050,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Prepare success response\nconst updateData = $input.first().json;\nconst updateResult = $input.all()[1]?.json || {};\n\nconst response = {\n  success: true,\n  user_id: updateData.user_id,\n  fields_updated: Object.keys(updateData.updates),\n  profile_completion_percentage: updateData.completion_percentage,\n  updated_at: updateData.updated_at,\n  message: 'Profile updated successfully',\n  next_steps: updateData.completion_percentage < 100 ? [\n    'complete_remaining_profile_fields',\n    'upload_profile_picture',\n    'verify_contact_information'\n  ] : [\n    'explore_platform_features',\n    'set_up_integrations'\n  ]\n};\n\nreturn response;"
+      },
+      "id": "prepare-success-response",
+      "name": "Prepare Success Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1450,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "success-response",
+      "name": "Success Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        1650,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Handle user not found error\nconst errorResponse = {\n  success: false,\n  error: {\n    type: 'user_not_found',\n    message: 'User not found or does not exist',\n    code: 'USER_NOT_FOUND',\n    timestamp: new Date().toISOString()\n  },\n  help_url: 'https://docs.b2cautomation.com/errors/user-not-found'\n};\n\nreturn errorResponse;"
+      },
+      "id": "handle-user-not-found",
+      "name": "Handle User Not Found",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1050,
+        600
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "responseCode": 404,
+        "options": {}
+      },
+      "id": "user-not-found-response",
+      "name": "User Not Found Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        1250,
+        600
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Handle validation errors\nconst error = $input.first().json;\n\nconst errorResponse = {\n  success: false,\n  error: {\n    type: 'validation_error',\n    message: error.message || 'Invalid profile data provided',\n    code: 'INVALID_PROFILE_DATA',\n    timestamp: new Date().toISOString()\n  },\n  help_url: 'https://docs.b2cautomation.com/errors/validation'\n};\n\nreturn errorResponse;"
+      },
+      "id": "handle-validation-error",
+      "name": "Handle Validation Error",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        450,
+        600
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "responseCode": 400,
+        "options": {}
+      },
+      "id": "validation-error-response",
+      "name": "Validation Error Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        650,
+        600
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook: Profile Update": {
+      "main": [
+        [
+          {
+            "node": "Validate Profile Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Profile Data": {
+      "main": [
+        [
+          {
+            "node": "Check User Exists",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check User Exists": {
+      "main": [
+        [
+          {
+            "node": "Verify User Exists",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verify User Exists": {
+      "main": [
+        [
+          {
+            "node": "Prepare Update Data",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Prepare Analytics Event",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Handle User Not Found",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Update Data": {
+      "main": [
+        [
+          {
+            "node": "Update Profile",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Profile": {
+      "main": [
+        [
+          {
+            "node": "Prepare Success Response",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Prepare Analytics Event": {
+      "main": [
+        [
+          {
+            "node": "Log Profile Update",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Profile Update": {
+      "main": [
+        [
+          {
+            "node": "Prepare Success Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Success Response": {
+      "main": [
+        [
+          {
+            "node": "Success Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Handle User Not Found": {
+      "main": [
+        [
+          {
+            "node": "User Not Found Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Handle Validation Error": {
+      "main": [
+        [
+          {
+            "node": "Validation Error Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionTimeout": 300,
+    "maxExecutionTime": 600
+  },
+  "staticData": null,
+  "tags": [
+    "profile-update",
+    "supabase",
+    "webhook",
+    "b2c-platform",
+    "user-management"
+  ],
+  "triggerCount": 0,
+  "updatedAt": "2025-08-22T00:00:00.000Z",
+  "versionId": null
+}
