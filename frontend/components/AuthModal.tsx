@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { X, Mail, CheckCircle, Loader2, Bot, Sparkles, Shield, Zap, Users, ArrowRight } from 'lucide-react'
-import { supabase } from '../lib/supabase'
+import { supabase, handleSupabaseError, isSupabaseConfigured } from '../lib/supabase'
 import type { AuthError } from '@supabase/supabase-js'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
@@ -53,9 +53,23 @@ export default function AuthModal({ isOpen, onClose, mode, onModeChange }: AuthM
     setIsLoading(true)
     setError(null)
 
+    // Check if Supabase is properly configured
+    if (!isSupabaseConfigured()) {
+      setError('Authentication service is not properly configured. Please try again later.')
+      setIsLoading(false)
+      return
+    }
+
     try {
       if (authMethod === 'password') {
         if (mode === 'signup') {
+          // Validate password length
+          if (password.length < 6) {
+            setError('Password must be at least 6 characters long.')
+            setIsLoading(false)
+            return
+          }
+
           const { data, error } = await supabase.auth.signUp({
             email,
             password,
@@ -91,7 +105,7 @@ export default function AuthModal({ isOpen, onClose, mode, onModeChange }: AuthM
     } catch (error) {
       const authError = error as AuthError
       console.error('Authentication error:', authError)
-      setError(authError.message || 'An error occurred. Please try again.')
+      setError(handleSupabaseError(authError))
     } finally {
       setIsLoading(false)
     }

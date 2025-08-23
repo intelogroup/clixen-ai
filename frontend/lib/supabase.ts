@@ -1,21 +1,27 @@
 import { createClient } from '@supabase/supabase-js'
 
-console.log('🔧 Supabase configuration loading...')
+// Get environment variables with fallbacks for development
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://efashzkgbougijqcbead.supabase.co'
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVmYXNoenZrZ2JvdWdpanFjYmVhZCIsInNvdXJjZSI6InN1cGVyYmFzZSIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzM0NzI5NjAwLCJleHAiOjIwNTAzMDU2MDB9.example_key_here'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-
-console.log('🔧 Supabase URL:', supabaseUrl ? `${supabaseUrl.substring(0, 30)}...` : 'NOT SET')
-console.log('🔧 Supabase Key:', supabaseAnonKey ? `${supabaseAnonKey.substring(0, 20)}...` : 'NOT SET')
+// Validate environment variables
+if (!supabaseUrl || !supabaseAnonKey) {
+  console.warn('⚠️ Missing Supabase environment variables. Using fallback values for development.')
+}
 
 // Client-side Supabase client
 export const createBrowserClient = () => {
-  console.log('🔧 Creating Supabase browser client...')
   return createClient(supabaseUrl, supabaseAnonKey, {
     auth: {
       autoRefreshToken: true,
       persistSession: true,
-    }
+      detectSessionInUrl: true,
+    },
+    realtime: {
+      params: {
+        eventsPerSecond: 10,
+      },
+    },
   })
 }
 
@@ -79,6 +85,30 @@ export interface DocumentAnalytics {
 }
 
 // Default client instance for client components
-console.log('🔧 Creating default Supabase client instance...')
 export const supabase = createBrowserClient()
-console.log('✅ Supabase client created successfully')
+
+// Helper function to check if Supabase is properly configured
+export const isSupabaseConfigured = () => {
+  return supabaseUrl && supabaseAnonKey && supabaseAnonKey !== 'example_key_here'
+}
+
+// Helper function for better error handling
+export const handleSupabaseError = (error: any) => {
+  if (error?.message) {
+    // Handle specific Supabase errors
+    if (error.message.includes('Invalid login credentials')) {
+      return 'Invalid email or password. Please try again.'
+    }
+    if (error.message.includes('Email not confirmed')) {
+      return 'Please check your email and click the confirmation link.'
+    }
+    if (error.message.includes('User already registered')) {
+      return 'An account with this email already exists. Please sign in instead.'
+    }
+    if (error.message.includes('Password should be at least 6 characters')) {
+      return 'Password must be at least 6 characters long.'
+    }
+    return error.message
+  }
+  return 'An unexpected error occurred. Please try again.'
+}

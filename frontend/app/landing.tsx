@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import ModernHero from '../components/ModernHero'
 import FeatureShowcase from '../components/FeatureShowcase'
 import HowItWorks from '../components/HowItWorks'
@@ -9,8 +9,6 @@ import AuthModal from '../components/AuthModal'
 import { Sparkles, ArrowRight, CheckCircle, Users, TrendingUp, Shield, Globe, MessageCircle, Zap, Bot, ArrowUp, Menu, X } from 'lucide-react'
 
 export default function LandingPage() {
-  console.log('📄 Landing page component initializing...')
-  
   const [showAuthModal, setShowAuthModal] = useState(false)
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signup')
   const [mounted, setMounted] = useState(false)
@@ -18,36 +16,62 @@ export default function LandingPage() {
   const [showScrollTop, setShowScrollTop] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
-  useEffect(() => {
-    console.log('📄 Landing page useEffect triggered')
-    setMounted(true)
-    
-    // Add smooth scrolling for anchor links
-    const handleAnchorClick = (e: Event) => {
-      const target = e.target as HTMLAnchorElement
-      if (target.hash) {
-        e.preventDefault()
-        const element = document.querySelector(target.hash)
-        if (element) {
-          element.scrollIntoView({ behavior: 'smooth' })
-        }
+  // Memoize event handlers to prevent unnecessary re-renders
+  const handleGetStarted = useCallback(() => {
+    setAuthMode('signup')
+    setShowAuthModal(true)
+  }, [])
+
+  const handleSignIn = useCallback(() => {
+    setAuthMode('signin')
+    setShowAuthModal(true)
+  }, [])
+
+  const handleCloseAuthModal = useCallback(() => {
+    setShowAuthModal(false)
+  }, [])
+
+  const handleAuthModeChange = useCallback((mode: 'signin' | 'signup') => {
+    setAuthMode(mode)
+  }, [])
+
+  const scrollToTop = useCallback(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [])
+
+  const toggleMobileMenu = useCallback(() => {
+    setMobileMenuOpen(prev => !prev)
+  }, [])
+
+  // Memoize scroll handler to prevent recreation on every render
+  const handleScroll = useCallback(() => {
+    setShowScrollTop(window.scrollY > 500)
+  }, [])
+
+  // Memoize anchor click handler
+  const handleAnchorClick = useCallback((e: Event) => {
+    const target = e.target as HTMLAnchorElement
+    if (target.hash) {
+      e.preventDefault()
+      const element = document.querySelector(target.hash)
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' })
       }
     }
+  }, [])
 
-    // Intersection observer for final CTA section
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true)
-        }
-      },
-      { threshold: 0.1 }
-    )
-
-    // Scroll to top button visibility
-    const handleScroll = () => {
-      setShowScrollTop(window.scrollY > 500)
+  // Memoize intersection observer callback
+  const handleIntersection = useCallback(([entry]: IntersectionObserverEntry[]) => {
+    if (entry.isIntersecting) {
+      setIsVisible(true)
     }
+  }, [])
+
+  useEffect(() => {
+    setMounted(true)
+    
+    // Intersection observer for final CTA section
+    const observer = new IntersectionObserver(handleIntersection, { threshold: 0.1 })
 
     const ctaElement = document.getElementById('final-cta')
     if (ctaElement) {
@@ -56,26 +80,13 @@ export default function LandingPage() {
 
     window.addEventListener('scroll', handleScroll)
     document.addEventListener('click', handleAnchorClick)
+    
     return () => {
       document.removeEventListener('click', handleAnchorClick)
       window.removeEventListener('scroll', handleScroll)
       observer.disconnect()
     }
-  }, [])
-
-  const handleGetStarted = () => {
-    setAuthMode('signup')
-    setShowAuthModal(true)
-  }
-
-  const handleSignIn = () => {
-    setAuthMode('signin')
-    setShowAuthModal(true)
-  }
-
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
+  }, [handleScroll, handleAnchorClick, handleIntersection])
 
   if (!mounted) {
     return null // Prevent hydration issues
@@ -125,7 +136,7 @@ export default function LandingPage() {
 
             {/* Mobile menu button */}
             <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              onClick={toggleMobileMenu}
               className="md:hidden p-3 rounded-xl hover:bg-gray-100 transition-all duration-300 hover:scale-105 transform"
             >
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -408,9 +419,9 @@ export default function LandingPage() {
       {/* Auth Modal */}
       <AuthModal
         isOpen={showAuthModal}
-        onClose={() => setShowAuthModal(false)}
+        onClose={handleCloseAuthModal}
         mode={authMode}
-        onModeChange={setAuthMode}
+        onModeChange={handleAuthModeChange}
       />
     </main>
   )
