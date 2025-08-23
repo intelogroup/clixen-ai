@@ -1,0 +1,54 @@
+{
+  "name": "telegram-n8n-orchestration-service",
+  "version": "1.0.0",
+  "description": "Orchestration service for Telegram bot to n8n workflow integration",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "lint": "eslint src/",
+    "docker:build": "docker build -t telegram-orchestrator .",
+    "docker:run": "docker run -p 3000:3000 --env-file .env telegram-orchestrator"
+  },
+  "keywords": [
+    "telegram",
+    "bot",
+    "n8n",
+    "automation",
+    "orchestration",
+    "multi-tenant"
+  ],
+  "author": "Terragon Labs",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "telegraf": "^4.15.2",
+    "axios": "^1.6.5",
+    "jsonwebtoken": "^9.0.2",
+    "bcrypt": "^5.1.1",
+    "@supabase/supabase-js": "^2.56.0",
+    "stripe": "^15.0.0",
+    "cors": "^2.8.5",
+    "helmet": "^7.1.0",
+    "express-rate-limit": "^7.1.5",
+    "winston": "^3.11.0",
+    "dotenv": "^16.3.1",
+    "crypto": "^1.0.1",
+    "natural": "^8.1.0",
+    "uuid": "^9.0.1",
+    "joi": "^17.11.0",
+    "express-validator": "^7.0.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2",
+    "jest": "^29.7.0",
+    "supertest": "^6.3.3",
+    "eslint": "^8.56.0",
+    "@types/node": "^20.11.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
