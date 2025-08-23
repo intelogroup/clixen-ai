@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run:*)",
+      "Bash(mkdir:*)",
+      "Bash(mv:*)",
+      "Bash(npm install:*)",
+      "Bash(npx tsc:*)",
+      "Bash(curl:*)",
+      "Bash(node:*)",
+      "Bash(npx next start:*)",
+      "Bash(taskkill:*)",
+      "Bash(PORT=3002 npm run start)",
+      "Bash(wmic process where processid=2368 delete:*)",
+      "Bash(set PORT=4000)",
+      "Bash(npx playwright install:*)",
+      "Bash(timeout:*)",
+      "Bash(ping:*)",
+      "Bash(wmic process where processid=7824 delete:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
