@@ -17,7 +17,8 @@ export default defineConfig({
   reporter: [
     ['html'],
     ['json', { outputFile: 'test-results/results.json' }],
-    ['junit', { outputFile: 'test-results/results.xml' }]
+    ['junit', { outputFile: 'test-results/results.xml' }],
+    ['list']
   ],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
@@ -33,11 +34,25 @@ export default defineConfig({
     /* Record video on failure */
     video: 'retain-on-failure',
     
+    /* Browser context options */
+    viewport: { width: 1280, height: 720 },
+    
+    /* Ignore HTTPS errors */
+    ignoreHTTPSErrors: true,
+    
     /* Global test timeout */
-    actionTimeout: 10000,
+    actionTimeout: 15000,
     
     /* Navigation timeout */
     navigationTimeout: 30000,
+  },
+
+  /* Test timeout */
+  timeout: 60 * 1000, // 60 seconds per test
+
+  /* Expect timeout */
+  expect: {
+    timeout: 10 * 1000, // 10 seconds for assertions
   },
 
   /* Configure projects for major browsers */

@@ -1,0 +1,144 @@
+# Page snapshot
+
+```yaml
+- generic:
+  - alert
+  - generic:
+    - navigation:
+      - generic:
+        - generic:
+          - generic:
+            - generic:
+              - img
+            - generic: Clixen AI
+          - generic:
+            - button: Sign In
+            - button: Get Started
+    - generic:
+      - generic:
+        - heading [level=1]: AI-Powered Workflow Automation
+        - paragraph: Automate your business tasks with AI. Document analysis, scheduling, API integrations via Telegram bot.
+        - generic:
+          - button: Start Building Today
+    - generic:
+      - generic:
+        - heading [level=2]: Features
+        - generic:
+          - generic:
+            - generic:
+              - img
+            - heading [level=3]: AI Automation
+            - paragraph: Smart workflow automation powered by artificial intelligence.
+          - generic:
+            - generic:
+              - img
+            - heading [level=3]: Easy Setup
+            - paragraph: Get started in minutes with our Telegram bot interface.
+          - generic:
+            - generic:
+              - img
+            - heading [level=3]: 24/7 Support
+            - paragraph: Continuous automation with reliable uptime and support.
+    - generic:
+      - generic:
+        - heading [level=2]: Simple Pricing
+        - generic:
+          - generic:
+            - heading [level=3]: Starter
+            - generic:
+              - text: $9
+              - generic: /mo
+            - list:
+              - listitem: • 1,000 executions/month
+              - listitem: • Basic workflows
+              - listitem: • Email support
+            - button: Get Started
+          - generic:
+            - heading [level=3]: Professional
+            - generic:
+              - text: $29
+              - generic: /mo
+            - list:
+              - listitem: • 10,000 executions/month
+              - listitem: • Advanced workflows
+              - listitem: • Priority support
+            - button: Get Started
+          - generic:
+            - heading [level=3]: Enterprise
+            - generic:
+              - text: $99
+              - generic: /mo
+            - list:
+              - listitem: • Unlimited executions
+              - listitem: • Custom workflows
+              - listitem: • Dedicated support
+            - button: Get Started
+    - contentinfo:
+      - generic:
+        - paragraph: © 2025 Clixen AI. All rights reserved.
+  - dialog "Welcome Back" [ref=e2]:
+    - generic [ref=e3]:
+      - heading "Welcome Back" [level=2] [ref=e4]
+      - paragraph [ref=e5]: Continue automating your business
+    - generic [ref=e6]:
+      - generic [ref=e7]:
+        - generic [ref=e8]:
+          - generic [ref=e9]:
+            - img [ref=e11]
+            - generic [ref=e18]:
+              - heading "Clixen AI" [level=1] [ref=e19]
+              - paragraph [ref=e20]: Automation Platform
+          - heading "Welcome Back" [level=2] [ref=e21]
+          - paragraph [ref=e22]: Continue automating your business
+        - generic [ref=e23]:
+          - button "Password" [active] [ref=e24] [cursor=pointer]
+          - button "Magic Link" [ref=e25] [cursor=pointer]
+        - generic [ref=e26]:
+          - generic [ref=e27]:
+            - generic [ref=e28]: Email Address
+            - textbox "Email Address" [ref=e29]
+          - generic [ref=e30]:
+            - generic [ref=e31]: Password
+            - textbox "Password" [ref=e32]
+          - button "Sign In" [disabled]:
+            - img
+            - text: Sign In
+        - generic [ref=e36]: Or continue with
+        - button "Continue with Google" [ref=e37] [cursor=pointer]:
+          - img
+          - text: Continue with Google
+        - paragraph [ref=e39]:
+          - text: Don't have an account?
+          - button "Sign up" [ref=e40] [cursor=pointer]
+      - generic [ref=e45]:
+        - generic [ref=e46]:
+          - img [ref=e48]
+          - heading "Welcome Back" [level=3] [ref=e54]
+          - paragraph [ref=e55]: Continue your automation journey
+        - generic [ref=e56]:
+          - generic [ref=e57]:
+            - img [ref=e59]
+            - generic [ref=e66]: AI-powered automation
+          - generic [ref=e67]:
+            - img [ref=e69]
+            - generic [ref=e71]: 100+ integrations
+          - generic [ref=e72]:
+            - img [ref=e74]
+            - generic [ref=e79]: 2,000+ active users
+          - generic [ref=e80]:
+            - img [ref=e82]
+            - generic [ref=e84]: Enterprise security
+        - generic [ref=e86]:
+          - generic [ref=e87]:
+            - generic [ref=e88]: 2,000+
+            - generic [ref=e89]: Active Users
+          - generic [ref=e90]:
+            - generic [ref=e91]: 50K+
+            - generic [ref=e92]: Tasks Automated
+        - button "Continue to Dashboard" [ref=e94] [cursor=pointer]:
+          - text: Continue to Dashboard
+          - img
+    - button "Close" [ref=e95] [cursor=pointer]:
+      - img [ref=e96] [cursor=pointer]
+      - generic [ref=e98] [cursor=pointer]: Close
+```

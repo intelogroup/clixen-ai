@@ -268,10 +268,18 @@ After EVERY workflow:
 
 ---
 
-# B2C Automation Platform - Complete Development Documentation
+# Clixen AI - Lead Generation Platform for Telegram Bot Automation
 
 ## Project Overview
-The B2C Automation Platform is a comprehensive full-stack application that enables users to automate business processes through AI-powered workflows. Built with Next.js 14, Supabase, and n8n integration.
+Clixen AI is a B2C lead generation platform that converts visitors into paying subscribers for AI-powered automation services. Users pay via Stripe to gain access to a Telegram bot that handles workflow creation through natural language processing. Built with Next.js 14, Supabase, Stripe, and n8n integration.
+
+## Business Model
+**Lead Generation → Payment → Telegram Bot Access**
+- Landing page attracts users with automation promises
+- Users choose subscription plans (Starter $9, Pro $29, Enterprise $99)  
+- After payment, users get access to @ClixenAIBot on Telegram
+- All workflow creation happens through the Telegram bot interface
+- Frontend serves as marketing/payment gateway only
 
 ## Major Components Implemented
 
@@ -503,4 +511,46 @@ Ready for Claude Desktop integration with all production credentials configured.
 - 🚀 Production deployment
 - 🚀 Scaling to multiple users
 
-**Platform is ready to onboard users and start processing automation workflows!**
+### 7. STRIPE PAYMENT INTEGRATION ✅
+**Implementation Date**: August 23, 2025
+
+#### Complete Payment Flow
+- **Stripe Checkout**: Seamless subscription purchase flow
+- **Multiple Plans**: Starter ($9), Professional ($29), Enterprise ($99)
+- **Automatic Provisioning**: Credits and bot access granted instantly
+- **Webhook Handling**: Secure payment confirmations and subscription updates
+
+#### Payment Features
+- **Secure Payments**: PCI-compliant Stripe integration
+- **Subscription Management**: Automatic renewals and plan changes
+- **Customer Portal**: Stripe-powered billing management
+- **Failed Payment Handling**: Grace periods and downgrade logic
+
+#### API Routes Implemented
+- `/api/stripe/checkout` - Create payment sessions
+- `/api/stripe/webhook` - Handle payment events
+- `/api/user` - User profile management
+
+#### Payment Pages
+- **Subscription Page** (`/subscription`): Plan selection and pricing
+- **Payment Success** (`/payment-success`): Confirmation and next steps
+- **Bot Access** (`/bot-access`): Telegram bot connection after payment
+
+### 8. TELEGRAM BOT INTEGRATION READY ✅
+**Bot Integration Points**: August 23, 2025
+
+#### Bot Access System
+- **Unique Access Codes**: Generated per user for bot authentication
+- **Secure Connection**: Users authenticate with Telegram bot using web app codes
+- **Credit System**: Integrated with Stripe billing for usage tracking
+- **Multi-tier Support**: Different feature access based on subscription
+
+#### Bot Information
+- **Bot Username**: @ClixenAIBot
+- **Authentication**: User ID-based access codes
+- **Commands Ready**: /start, /new, /templates, /list, /status, /help
+- **Integration**: Connected to n8n workflows via API
+
+### **🚀 PLATFORM IS PRODUCTION-READY FOR LEAD GENERATION!**
+
+**Current Status**: Fully functional lead generation platform with complete payment processing and bot access provisioning.

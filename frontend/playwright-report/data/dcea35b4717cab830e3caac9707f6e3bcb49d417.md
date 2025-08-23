@@ -1,0 +1,69 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - alert [ref=e2]
+  - generic [ref=e3]:
+    - navigation [ref=e4]:
+      - generic [ref=e6]:
+        - generic [ref=e7]:
+          - img [ref=e9]
+          - generic [ref=e12]: Clixen AI
+        - generic [ref=e13]:
+          - button "Sign In" [ref=e14] [cursor=pointer]
+          - button "Get Started" [ref=e15] [cursor=pointer]
+    - generic [ref=e17]:
+      - heading "AI-Powered Workflow Automation" [level=1] [ref=e18]
+      - paragraph [ref=e19]: Automate your business tasks with AI. Document analysis, scheduling, API integrations via Telegram bot.
+      - button "Start Building Today" [ref=e21] [cursor=pointer]
+    - generic [ref=e23]:
+      - heading "Features" [level=2] [ref=e24]
+      - generic [ref=e25]:
+        - generic [ref=e26]:
+          - img [ref=e28]
+          - heading "AI Automation" [level=3] [ref=e31]
+          - paragraph [ref=e32]: Smart workflow automation powered by artificial intelligence.
+        - generic [ref=e33]:
+          - img [ref=e35]
+          - heading "Easy Setup" [level=3] [ref=e37]
+          - paragraph [ref=e38]: Get started in minutes with our Telegram bot interface.
+        - generic [ref=e39]:
+          - img [ref=e41]
+          - heading "24/7 Support" [level=3] [ref=e44]
+          - paragraph [ref=e45]: Continuous automation with reliable uptime and support.
+    - generic [ref=e47]:
+      - heading "Simple Pricing" [level=2] [ref=e48]
+      - generic [ref=e49]:
+        - generic [ref=e50]:
+          - heading "Starter" [level=3] [ref=e51]
+          - generic [ref=e52]:
+            - text: $9
+            - generic [ref=e53]: /mo
+          - list [ref=e54]:
+            - listitem [ref=e55]: • 1,000 executions/month
+            - listitem [ref=e56]: • Basic workflows
+            - listitem [ref=e57]: • Email support
+          - button "Get Started" [ref=e58] [cursor=pointer]
+        - generic [ref=e59]:
+          - heading "Professional" [level=3] [ref=e60]
+          - generic [ref=e61]:
+            - text: $29
+            - generic [ref=e62]: /mo
+          - list [ref=e63]:
+            - listitem [ref=e64]: • 10,000 executions/month
+            - listitem [ref=e65]: • Advanced workflows
+            - listitem [ref=e66]: • Priority support
+          - button "Get Started" [ref=e67] [cursor=pointer]
+        - generic [ref=e68]:
+          - heading "Enterprise" [level=3] [ref=e69]
+          - generic [ref=e70]:
+            - text: $99
+            - generic [ref=e71]: /mo
+          - list [ref=e72]:
+            - listitem [ref=e73]: • Unlimited executions
+            - listitem [ref=e74]: • Custom workflows
+            - listitem [ref=e75]: • Dedicated support
+          - button "Get Started" [ref=e76] [cursor=pointer]
+    - contentinfo [ref=e77]:
+      - paragraph [ref=e79]: © 2025 Clixen AI. All rights reserved.
+```

@@ -16,7 +16,18 @@
       "Bash(npx playwright install:*)",
       "Bash(timeout:*)",
       "Bash(ping:*)",
-      "Bash(wmic process where processid=7824 delete:*)"
+      "Bash(wmic process where processid=7824 delete:*)",
+      "mcp__ide__getDiagnostics",
+      "Bash(/dev/null)",
+      "Bash(npx next lint:*)",
+      "Bash(npx playwright test:*)",
+      "Bash(npm start)",
+      "Bash(npx next build:*)",
+      "Bash(npx playwright screenshot:*)",
+      "WebFetch(domain:supabase.com)",
+      "WebFetch(domain:docs.stripe.com)",
+      "WebSearch",
+      "Bash(git add:*)"
     ],
     "deny": [],
     "ask": []

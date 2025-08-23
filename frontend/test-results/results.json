@@ -1,0 +1,1644 @@
+{
+  "config": {
+    "configFile": "C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\playwright.config.ts",
+    "rootDir": "C:/Users/jayve/projects/project/clixen-ai/frontend/tests",
+    "forbidOnly": false,
+    "fullyParallel": true,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 2
+    },
+    "preserveOutput": "always",
+    "reporter": [
+      [
+        "html",
+        null
+      ],
+      [
+        "json",
+        {
+          "outputFile": "test-results/results.json"
+        }
+      ],
+      [
+        "junit",
+        {
+          "outputFile": "test-results/results.xml"
+        }
+      ],
+      [
+        "list",
+        null
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "quiet": false,
+    "projects": [
+      {
+        "outputDir": "C:/Users/jayve/projects/project/clixen-ai/frontend/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 2
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "C:/Users/jayve/projects/project/clixen-ai/frontend/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      },
+      {
+        "outputDir": "C:/Users/jayve/projects/project/clixen-ai/frontend/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 2
+        },
+        "id": "firefox",
+        "name": "firefox",
+        "testDir": "C:/Users/jayve/projects/project/clixen-ai/frontend/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      },
+      {
+        "outputDir": "C:/Users/jayve/projects/project/clixen-ai/frontend/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 2
+        },
+        "id": "webkit",
+        "name": "webkit",
+        "testDir": "C:/Users/jayve/projects/project/clixen-ai/frontend/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      },
+      {
+        "outputDir": "C:/Users/jayve/projects/project/clixen-ai/frontend/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 2
+        },
+        "id": "Mobile Chrome",
+        "name": "Mobile Chrome",
+        "testDir": "C:/Users/jayve/projects/project/clixen-ai/frontend/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      },
+      {
+        "outputDir": "C:/Users/jayve/projects/project/clixen-ai/frontend/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 2
+        },
+        "id": "Mobile Safari",
+        "name": "Mobile Safari",
+        "testDir": "C:/Users/jayve/projects/project/clixen-ai/frontend/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      }
+    ],
+    "shard": null,
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.55.0",
+    "workers": 2,
+    "webServer": {
+      "command": "npm run dev",
+      "url": "http://localhost:3000",
+      "reuseExistingServer": true,
+      "timeout": 120000
+    }
+  },
+  "suites": [
+    {
+      "title": "complete-user-journey-new.spec.ts",
+      "file": "complete-user-journey-new.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Complete User Journey - Authentication & Payment Flow",
+          "file": "complete-user-journey-new.spec.ts",
+          "line": 3,
+          "column": 6,
+          "specs": [
+            {
+              "title": "New user complete journey: signup → payment → bot access",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 11342,
+                      "error": {
+                        "message": "TimeoutError: page.waitForSelector: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-testid=\"auth-modal\"]') to be visible\u001b[22m\n",
+                        "stack": "TimeoutError: page.waitForSelector: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-testid=\"auth-modal\"]') to be visible\u001b[22m\n\n    at C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\tests\\complete-user-journey-new.spec.ts:30:16",
+                        "location": {
+                          "file": "C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\tests\\complete-user-journey-new.spec.ts",
+                          "column": 16,
+                          "line": 30
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 28 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mclick(\u001b[32m'button:has-text(\"Get Started\")'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 29 |\u001b[39m     \u001b[90m// Wait for auth modal to appear\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 30 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForSelector(\u001b[32m'[data-testid=\"auth-modal\"]'\u001b[39m\u001b[33m,\u001b[39m { timeout\u001b[33m:\u001b[39m \u001b[35m5000\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 31 |\u001b[39m\n \u001b[90m 32 |\u001b[39m     \u001b[90m// Step 4: Sign up as new user\u001b[39m\n \u001b[90m 33 |\u001b[39m     console\u001b[33m.\u001b[39mlog(\u001b[32m'📍 Step 4: Sign up new user'\u001b[39m)\u001b[33m;\u001b[39m\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\tests\\complete-user-journey-new.spec.ts",
+                            "column": 16,
+                            "line": 30
+                          },
+                          "message": "TimeoutError: page.waitForSelector: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-testid=\"auth-modal\"]') to be visible\u001b[22m\n\n\n  28 |     await page.click('button:has-text(\"Get Started\")');\n  29 |     // Wait for auth modal to appear\n> 30 |     await page.waitForSelector('[data-testid=\"auth-modal\"]', { timeout: 5000 });\n     |                ^\n  31 |\n  32 |     // Step 4: Sign up as new user\n  33 |     console.log('📍 Step 4: Sign up new user');\n    at C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\tests\\complete-user-journey-new.spec.ts:30:16"
+                        }
+                      ],
+                      "stdout": [
+                        {
+                          "text": "🧪 Starting new user complete journey test...\n"
+                        },
+                        {
+                          "text": "📍 Step 1: Verify landing page loads\n"
+                        },
+                        {
+                          "text": "📍 Step 2: Verify dashboard redirect when not authenticated\n"
+                        },
+                        {
+                          "text": "📍 Step 3: Trigger authentication modal\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-08-23T16:45:08.664Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\test-results\\complete-user-journey-new--eec5a-gnup-→-payment-→-bot-access-chromium\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\test-results\\complete-user-journey-new--eec5a-gnup-→-payment-→-bot-access-chromium\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\test-results\\complete-user-journey-new--eec5a-gnup-→-payment-→-bot-access-chromium\\error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\tests\\complete-user-journey-new.spec.ts",
+                        "column": 16,
+                        "line": 30
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "28ca5a43e47bcc039269-346105ac67579c93af23",
+              "file": "complete-user-journey-new.spec.ts",
+              "line": 13,
+              "column": 7
+            },
+            {
+              "title": "Returning user with payment should access bot directly",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 1,
+                      "status": "failed",
+                      "duration": 10266,
+                      "error": {
+                        "message": "TimeoutError: page.waitForSelector: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-testid=\"auth-modal\"]') to be visible\u001b[22m\n",
+                        "stack": "TimeoutError: page.waitForSelector: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-testid=\"auth-modal\"]') to be visible\u001b[22m\n\n    at C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\tests\\complete-user-journey-new.spec.ts:105:16",
+                        "location": {
+                          "file": "C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\tests\\complete-user-journey-new.spec.ts",
+                          "column": 16,
+                          "line": 105
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 103 |\u001b[39m     console\u001b[33m.\u001b[39mlog(\u001b[32m'📍 Step 1: Sign in existing user'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 104 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mclick(\u001b[32m'button:has-text(\"Sign In\")'\u001b[39m)\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 105 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForSelector(\u001b[32m'[data-testid=\"auth-modal\"]'\u001b[39m\u001b[33m,\u001b[39m { timeout\u001b[33m:\u001b[39m \u001b[35m5000\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m                \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 106 |\u001b[39m     \n \u001b[90m 107 |\u001b[39m     \u001b[90m// Use existing test user\u001b[39m\n \u001b[90m 108 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mfill(\u001b[32m'input[type=\"email\"]'\u001b[39m\u001b[33m,\u001b[39m \u001b[32m'testuser1@email.com'\u001b[39m)\u001b[33m;\u001b[39m\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\tests\\complete-user-journey-new.spec.ts",
+                            "column": 16,
+                            "line": 105
+                          },
+                          "message": "TimeoutError: page.waitForSelector: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-testid=\"auth-modal\"]') to be visible\u001b[22m\n\n\n  103 |     console.log('📍 Step 1: Sign in existing user');\n  104 |     await page.click('button:has-text(\"Sign In\")');\n> 105 |     await page.waitForSelector('[data-testid=\"auth-modal\"]', { timeout: 5000 });\n      |                ^\n  106 |     \n  107 |     // Use existing test user\n  108 |     await page.fill('input[type=\"email\"]', 'testuser1@email.com');\n    at C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\tests\\complete-user-journey-new.spec.ts:105:16"
+                        }
+                      ],
+                      "stdout": [
+                        {
+                          "text": "🧪 Starting returning user test...\n"
+                        },
+                        {
+                          "text": "📍 Step 1: Sign in existing user\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-08-23T16:45:08.649Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\test-results\\complete-user-journey-new--4982b--should-access-bot-directly-chromium\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\test-results\\complete-user-journey-new--4982b--should-access-bot-directly-chromium\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\test-results\\complete-user-journey-new--4982b--should-access-bot-directly-chromium\\error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\tests\\complete-user-journey-new.spec.ts",
+                        "column": 16,
+                        "line": 105
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "28ca5a43e47bcc039269-078d71e97ff1ddc95986",
+              "file": "complete-user-journey-new.spec.ts",
+              "line": 99,
+              "column": 7
+            },
+            {
+              "title": "Protected routes security test",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 1,
+                      "status": "passed",
+                      "duration": 9104,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "🧪 Starting security test...\n"
+                        },
+                        {
+                          "text": "📍 Testing route: /dashboard\n"
+                        },
+                        {
+                          "text": "✅ Route /dashboard properly protected\n"
+                        },
+                        {
+                          "text": "📍 Testing route: /profile\n"
+                        },
+                        {
+                          "text": "✅ Route /profile properly protected\n"
+                        },
+                        {
+                          "text": "📍 Testing route: /bot-access\n"
+                        },
+                        {
+                          "text": "✅ Route /bot-access properly protected\n"
+                        },
+                        {
+                          "text": "📍 Testing route: /subscription\n"
+                        },
+                        {
+                          "text": "✅ Route /subscription properly protected\n"
+                        },
+                        {
+                          "text": "✅ Security test completed\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-08-23T16:45:20.787Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "28ca5a43e47bcc039269-a07dd247b8a2bf6eedc4",
+              "file": "complete-user-journey-new.spec.ts",
+              "line": 142,
+              "column": 7
+            },
+            {
+              "title": "Payment flow integration test",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 2734,
+                      "error": {
+                        "message": "Error: expect.toBeVisible: Error: strict mode violation: locator('text=$9') resolved to 2 elements:\n    1) <div class=\"text-3xl font-bold text-blue-600 mb-4\">…</div> aka getByText('$9/mo')\n    2) <div class=\"text-3xl font-bold text-blue-600 mb-4\">…</div> aka getByText('$99/mo')\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('text=$9')\u001b[22m\n",
+                        "stack": "Error: expect.toBeVisible: Error: strict mode violation: locator('text=$9') resolved to 2 elements:\n    1) <div class=\"text-3xl font-bold text-blue-600 mb-4\">…</div> aka getByText('$9/mo')\n    2) <div class=\"text-3xl font-bold text-blue-600 mb-4\">…</div> aka getByText('$99/mo')\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('text=$9')\u001b[22m\n\n    at C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\tests\\complete-user-journey-new.spec.ts:181:43",
+                        "location": {
+                          "file": "C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\tests\\complete-user-journey-new.spec.ts",
+                          "column": 43,
+                          "line": 181
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 179 |\u001b[39m     \u001b[90m// Step 2: Check plan features\u001b[39m\n \u001b[90m 180 |\u001b[39m     console\u001b[33m.\u001b[39mlog(\u001b[32m'📍 Step 2: Verify plan features'\u001b[39m)\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 181 |\u001b[39m     \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mlocator(\u001b[32m'text=$9'\u001b[39m))\u001b[33m.\u001b[39mtoBeVisible()\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m                                           \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 182 |\u001b[39m     \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mlocator(\u001b[32m'text=$29'\u001b[39m))\u001b[33m.\u001b[39mtoBeVisible()\u001b[33m;\u001b[39m\n \u001b[90m 183 |\u001b[39m     \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mlocator(\u001b[32m'text=$99'\u001b[39m))\u001b[33m.\u001b[39mtoBeVisible()\u001b[33m;\u001b[39m\n \u001b[90m 184 |\u001b[39m\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\tests\\complete-user-journey-new.spec.ts",
+                            "column": 43,
+                            "line": 181
+                          },
+                          "message": "Error: expect.toBeVisible: Error: strict mode violation: locator('text=$9') resolved to 2 elements:\n    1) <div class=\"text-3xl font-bold text-blue-600 mb-4\">…</div> aka getByText('$9/mo')\n    2) <div class=\"text-3xl font-bold text-blue-600 mb-4\">…</div> aka getByText('$99/mo')\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('text=$9')\u001b[22m\n\n\n  179 |     // Step 2: Check plan features\n  180 |     console.log('📍 Step 2: Verify plan features');\n> 181 |     await expect(page.locator('text=$9')).toBeVisible();\n      |                                           ^\n  182 |     await expect(page.locator('text=$29')).toBeVisible();\n  183 |     await expect(page.locator('text=$99')).toBeVisible();\n  184 |\n    at C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\tests\\complete-user-journey-new.spec.ts:181:43"
+                        }
+                      ],
+                      "stdout": [
+                        {
+                          "text": "🧪 Starting payment flow test...\n"
+                        },
+                        {
+                          "text": "📍 Step 1: Verify pricing plans\n"
+                        },
+                        {
+                          "text": "📍 Step 2: Verify plan features\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-08-23T16:45:22.360Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\test-results\\complete-user-journey-new--37d8e-yment-flow-integration-test-chromium\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\test-results\\complete-user-journey-new--37d8e-yment-flow-integration-test-chromium\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\test-results\\complete-user-journey-new--37d8e-yment-flow-integration-test-chromium\\error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\tests\\complete-user-journey-new.spec.ts",
+                        "column": 43,
+                        "line": 181
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "28ca5a43e47bcc039269-d5a6ccb1488e6becdda7",
+              "file": "complete-user-journey-new.spec.ts",
+              "line": 167,
+              "column": 7
+            },
+            {
+              "title": "New user complete journey: signup → payment → bot access",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "firefox",
+                  "projectName": "firefox",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 18833,
+                      "error": {
+                        "message": "TimeoutError: page.waitForSelector: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-testid=\"auth-modal\"]') to be visible\u001b[22m\n",
+                        "stack": "TimeoutError: page.waitForSelector: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-testid=\"auth-modal\"]') to be visible\u001b[22m\n\n    at C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\tests\\complete-user-journey-new.spec.ts:30:16",
+                        "location": {
+                          "file": "C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\tests\\complete-user-journey-new.spec.ts",
+                          "column": 16,
+                          "line": 30
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 28 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mclick(\u001b[32m'button:has-text(\"Get Started\")'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 29 |\u001b[39m     \u001b[90m// Wait for auth modal to appear\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 30 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForSelector(\u001b[32m'[data-testid=\"auth-modal\"]'\u001b[39m\u001b[33m,\u001b[39m { timeout\u001b[33m:\u001b[39m \u001b[35m5000\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 31 |\u001b[39m\n \u001b[90m 32 |\u001b[39m     \u001b[90m// Step 4: Sign up as new user\u001b[39m\n \u001b[90m 33 |\u001b[39m     console\u001b[33m.\u001b[39mlog(\u001b[32m'📍 Step 4: Sign up new user'\u001b[39m)\u001b[33m;\u001b[39m\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\tests\\complete-user-journey-new.spec.ts",
+                            "column": 16,
+                            "line": 30
+                          },
+                          "message": "TimeoutError: page.waitForSelector: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-testid=\"auth-modal\"]') to be visible\u001b[22m\n\n\n  28 |     await page.click('button:has-text(\"Get Started\")');\n  29 |     // Wait for auth modal to appear\n> 30 |     await page.waitForSelector('[data-testid=\"auth-modal\"]', { timeout: 5000 });\n     |                ^\n  31 |\n  32 |     // Step 4: Sign up as new user\n  33 |     console.log('📍 Step 4: Sign up new user');\n    at C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\tests\\complete-user-journey-new.spec.ts:30:16"
+                        }
+                      ],
+                      "stdout": [
+                        {
+                          "text": "🧪 Starting new user complete journey test...\n"
+                        },
+                        {
+                          "text": "📍 Step 1: Verify landing page loads\n"
+                        },
+                        {
+                          "text": "📍 Step 2: Verify dashboard redirect when not authenticated\n"
+                        },
+                        {
+                          "text": "📍 Step 3: Trigger authentication modal\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-08-23T16:45:26.784Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\test-results\\complete-user-journey-new--eec5a-gnup-→-payment-→-bot-access-firefox\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\test-results\\complete-user-journey-new--eec5a-gnup-→-payment-→-bot-access-firefox\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\test-results\\complete-user-journey-new--eec5a-gnup-→-payment-→-bot-access-firefox\\error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\tests\\complete-user-journey-new.spec.ts",
+                        "column": 16,
+                        "line": 30
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "28ca5a43e47bcc039269-3711cbd8ad6a48ee416e",
+              "file": "complete-user-journey-new.spec.ts",
+              "line": 13,
+              "column": 7
+            },
+            {
+              "title": "Returning user with payment should access bot directly",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "firefox",
+                  "projectName": "firefox",
+                  "results": [
+                    {
+                      "workerIndex": 5,
+                      "parallelIndex": 1,
+                      "status": "failed",
+                      "duration": 14764,
+                      "error": {
+                        "message": "TimeoutError: page.waitForSelector: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-testid=\"auth-modal\"]') to be visible\u001b[22m\n",
+                        "stack": "TimeoutError: page.waitForSelector: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-testid=\"auth-modal\"]') to be visible\u001b[22m\n\n    at C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\tests\\complete-user-journey-new.spec.ts:105:16",
+                        "location": {
+                          "file": "C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\tests\\complete-user-journey-new.spec.ts",
+                          "column": 16,
+                          "line": 105
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 103 |\u001b[39m     console\u001b[33m.\u001b[39mlog(\u001b[32m'📍 Step 1: Sign in existing user'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 104 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mclick(\u001b[32m'button:has-text(\"Sign In\")'\u001b[39m)\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 105 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForSelector(\u001b[32m'[data-testid=\"auth-modal\"]'\u001b[39m\u001b[33m,\u001b[39m { timeout\u001b[33m:\u001b[39m \u001b[35m5000\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m                \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 106 |\u001b[39m     \n \u001b[90m 107 |\u001b[39m     \u001b[90m// Use existing test user\u001b[39m\n \u001b[90m 108 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mfill(\u001b[32m'input[type=\"email\"]'\u001b[39m\u001b[33m,\u001b[39m \u001b[32m'testuser1@email.com'\u001b[39m)\u001b[33m;\u001b[39m\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\tests\\complete-user-journey-new.spec.ts",
+                            "column": 16,
+                            "line": 105
+                          },
+                          "message": "TimeoutError: page.waitForSelector: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-testid=\"auth-modal\"]') to be visible\u001b[22m\n\n\n  103 |     console.log('📍 Step 1: Sign in existing user');\n  104 |     await page.click('button:has-text(\"Sign In\")');\n> 105 |     await page.waitForSelector('[data-testid=\"auth-modal\"]', { timeout: 5000 });\n      |                ^\n  106 |     \n  107 |     // Use existing test user\n  108 |     await page.fill('input[type=\"email\"]', 'testuser1@email.com');\n    at C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\tests\\complete-user-journey-new.spec.ts:105:16"
+                        }
+                      ],
+                      "stdout": [
+                        {
+                          "text": "🧪 Starting returning user test...\n"
+                        },
+                        {
+                          "text": "📍 Step 1: Sign in existing user\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-08-23T16:45:32.610Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\test-results\\complete-user-journey-new--4982b--should-access-bot-directly-firefox\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\test-results\\complete-user-journey-new--4982b--should-access-bot-directly-firefox\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\test-results\\complete-user-journey-new--4982b--should-access-bot-directly-firefox\\error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\tests\\complete-user-journey-new.spec.ts",
+                        "column": 16,
+                        "line": 105
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "28ca5a43e47bcc039269-dbff15226257d18681bd",
+              "file": "complete-user-journey-new.spec.ts",
+              "line": 99,
+              "column": 7
+            },
+            {
+              "title": "Protected routes security test",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "firefox",
+                  "projectName": "firefox",
+                  "results": [
+                    {
+                      "workerIndex": 6,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 22252,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "🧪 Starting security test...\n"
+                        },
+                        {
+                          "text": "📍 Testing route: /dashboard\n"
+                        },
+                        {
+                          "text": "✅ Route /dashboard properly protected\n"
+                        },
+                        {
+                          "text": "📍 Testing route: /profile\n"
+                        },
+                        {
+                          "text": "✅ Route /profile properly protected\n"
+                        },
+                        {
+                          "text": "📍 Testing route: /bot-access\n"
+                        },
+                        {
+                          "text": "✅ Route /bot-access properly protected\n"
+                        },
+                        {
+                          "text": "📍 Testing route: /subscription\n"
+                        },
+                        {
+                          "text": "✅ Route /subscription properly protected\n"
+                        },
+                        {
+                          "text": "✅ Security test completed\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-08-23T16:45:52.272Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "28ca5a43e47bcc039269-c127a68b0ca631fb90fa",
+              "file": "complete-user-journey-new.spec.ts",
+              "line": 142,
+              "column": 7
+            },
+            {
+              "title": "Payment flow integration test",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "firefox",
+                  "projectName": "firefox",
+                  "results": [
+                    {
+                      "workerIndex": 7,
+                      "parallelIndex": 1,
+                      "status": "failed",
+                      "duration": 12036,
+                      "error": {
+                        "message": "Error: expect.toBeVisible: Error: strict mode violation: locator('text=$9') resolved to 2 elements:\n    1) <div class=\"text-3xl font-bold text-blue-600 mb-4\">…</div> aka getByText('$9/mo')\n    2) <div class=\"text-3xl font-bold text-blue-600 mb-4\">…</div> aka getByText('$99/mo')\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('text=$9')\u001b[22m\n",
+                        "stack": "Error: expect.toBeVisible: Error: strict mode violation: locator('text=$9') resolved to 2 elements:\n    1) <div class=\"text-3xl font-bold text-blue-600 mb-4\">…</div> aka getByText('$9/mo')\n    2) <div class=\"text-3xl font-bold text-blue-600 mb-4\">…</div> aka getByText('$99/mo')\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('text=$9')\u001b[22m\n\n    at C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\tests\\complete-user-journey-new.spec.ts:181:43",
+                        "location": {
+                          "file": "C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\tests\\complete-user-journey-new.spec.ts",
+                          "column": 43,
+                          "line": 181
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 179 |\u001b[39m     \u001b[90m// Step 2: Check plan features\u001b[39m\n \u001b[90m 180 |\u001b[39m     console\u001b[33m.\u001b[39mlog(\u001b[32m'📍 Step 2: Verify plan features'\u001b[39m)\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 181 |\u001b[39m     \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mlocator(\u001b[32m'text=$9'\u001b[39m))\u001b[33m.\u001b[39mtoBeVisible()\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m                                           \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 182 |\u001b[39m     \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mlocator(\u001b[32m'text=$29'\u001b[39m))\u001b[33m.\u001b[39mtoBeVisible()\u001b[33m;\u001b[39m\n \u001b[90m 183 |\u001b[39m     \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mlocator(\u001b[32m'text=$99'\u001b[39m))\u001b[33m.\u001b[39mtoBeVisible()\u001b[33m;\u001b[39m\n \u001b[90m 184 |\u001b[39m\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\tests\\complete-user-journey-new.spec.ts",
+                            "column": 43,
+                            "line": 181
+                          },
+                          "message": "Error: expect.toBeVisible: Error: strict mode violation: locator('text=$9') resolved to 2 elements:\n    1) <div class=\"text-3xl font-bold text-blue-600 mb-4\">…</div> aka getByText('$9/mo')\n    2) <div class=\"text-3xl font-bold text-blue-600 mb-4\">…</div> aka getByText('$99/mo')\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('text=$9')\u001b[22m\n\n\n  179 |     // Step 2: Check plan features\n  180 |     console.log('📍 Step 2: Verify plan features');\n> 181 |     await expect(page.locator('text=$9')).toBeVisible();\n      |                                           ^\n  182 |     await expect(page.locator('text=$29')).toBeVisible();\n  183 |     await expect(page.locator('text=$99')).toBeVisible();\n  184 |\n    at C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\tests\\complete-user-journey-new.spec.ts:181:43"
+                        }
+                      ],
+                      "stdout": [
+                        {
+                          "text": "🧪 Starting payment flow test...\n"
+                        },
+                        {
+                          "text": "📍 Step 1: Verify pricing plans\n"
+                        },
+                        {
+                          "text": "📍 Step 2: Verify plan features\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-08-23T16:45:53.455Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\test-results\\complete-user-journey-new--37d8e-yment-flow-integration-test-firefox\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\test-results\\complete-user-journey-new--37d8e-yment-flow-integration-test-firefox\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\test-results\\complete-user-journey-new--37d8e-yment-flow-integration-test-firefox\\error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\tests\\complete-user-journey-new.spec.ts",
+                        "column": 43,
+                        "line": 181
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "28ca5a43e47bcc039269-feeab6cb6ec1491b4e61",
+              "file": "complete-user-journey-new.spec.ts",
+              "line": 167,
+              "column": 7
+            },
+            {
+              "title": "New user complete journey: signup → payment → bot access",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "webkit",
+                  "projectName": "webkit",
+                  "results": [
+                    {
+                      "workerIndex": 8,
+                      "parallelIndex": 1,
+                      "status": "failed",
+                      "duration": 11098,
+                      "error": {
+                        "message": "TimeoutError: page.waitForSelector: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-testid=\"auth-modal\"]') to be visible\u001b[22m\n",
+                        "stack": "TimeoutError: page.waitForSelector: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-testid=\"auth-modal\"]') to be visible\u001b[22m\n\n    at C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\tests\\complete-user-journey-new.spec.ts:30:16",
+                        "location": {
+                          "file": "C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\tests\\complete-user-journey-new.spec.ts",
+                          "column": 16,
+                          "line": 30
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 28 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mclick(\u001b[32m'button:has-text(\"Get Started\")'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 29 |\u001b[39m     \u001b[90m// Wait for auth modal to appear\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 30 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForSelector(\u001b[32m'[data-testid=\"auth-modal\"]'\u001b[39m\u001b[33m,\u001b[39m { timeout\u001b[33m:\u001b[39m \u001b[35m5000\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 31 |\u001b[39m\n \u001b[90m 32 |\u001b[39m     \u001b[90m// Step 4: Sign up as new user\u001b[39m\n \u001b[90m 33 |\u001b[39m     console\u001b[33m.\u001b[39mlog(\u001b[32m'📍 Step 4: Sign up new user'\u001b[39m)\u001b[33m;\u001b[39m\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\tests\\complete-user-journey-new.spec.ts",
+                            "column": 16,
+                            "line": 30
+                          },
+                          "message": "TimeoutError: page.waitForSelector: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-testid=\"auth-modal\"]') to be visible\u001b[22m\n\n\n  28 |     await page.click('button:has-text(\"Get Started\")');\n  29 |     // Wait for auth modal to appear\n> 30 |     await page.waitForSelector('[data-testid=\"auth-modal\"]', { timeout: 5000 });\n     |                ^\n  31 |\n  32 |     // Step 4: Sign up as new user\n  33 |     console.log('📍 Step 4: Sign up new user');\n    at C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\tests\\complete-user-journey-new.spec.ts:30:16"
+                        }
+                      ],
+                      "stdout": [
+                        {
+                          "text": "🧪 Starting new user complete journey test...\n"
+                        },
+                        {
+                          "text": "📍 Step 1: Verify landing page loads\n"
+                        },
+                        {
+                          "text": "📍 Step 2: Verify dashboard redirect when not authenticated\n"
+                        },
+                        {
+                          "text": "📍 Step 3: Trigger authentication modal\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-08-23T16:46:19.359Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\test-results\\complete-user-journey-new--eec5a-gnup-→-payment-→-bot-access-webkit\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\test-results\\complete-user-journey-new--eec5a-gnup-→-payment-→-bot-access-webkit\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\test-results\\complete-user-journey-new--eec5a-gnup-→-payment-→-bot-access-webkit\\error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\tests\\complete-user-journey-new.spec.ts",
+                        "column": 16,
+                        "line": 30
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "28ca5a43e47bcc039269-5e7705fa1433c4000bee",
+              "file": "complete-user-journey-new.spec.ts",
+              "line": 13,
+              "column": 7
+            },
+            {
+              "title": "Returning user with payment should access bot directly",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "webkit",
+                  "projectName": "webkit",
+                  "results": [
+                    {
+                      "workerIndex": 9,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 9711,
+                      "error": {
+                        "message": "TimeoutError: page.waitForSelector: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-testid=\"auth-modal\"]') to be visible\u001b[22m\n",
+                        "stack": "TimeoutError: page.waitForSelector: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-testid=\"auth-modal\"]') to be visible\u001b[22m\n\n    at C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\tests\\complete-user-journey-new.spec.ts:105:16",
+                        "location": {
+                          "file": "C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\tests\\complete-user-journey-new.spec.ts",
+                          "column": 16,
+                          "line": 105
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 103 |\u001b[39m     console\u001b[33m.\u001b[39mlog(\u001b[32m'📍 Step 1: Sign in existing user'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 104 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mclick(\u001b[32m'button:has-text(\"Sign In\")'\u001b[39m)\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 105 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForSelector(\u001b[32m'[data-testid=\"auth-modal\"]'\u001b[39m\u001b[33m,\u001b[39m { timeout\u001b[33m:\u001b[39m \u001b[35m5000\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m                \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 106 |\u001b[39m     \n \u001b[90m 107 |\u001b[39m     \u001b[90m// Use existing test user\u001b[39m\n \u001b[90m 108 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mfill(\u001b[32m'input[type=\"email\"]'\u001b[39m\u001b[33m,\u001b[39m \u001b[32m'testuser1@email.com'\u001b[39m)\u001b[33m;\u001b[39m\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\tests\\complete-user-journey-new.spec.ts",
+                            "column": 16,
+                            "line": 105
+                          },
+                          "message": "TimeoutError: page.waitForSelector: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-testid=\"auth-modal\"]') to be visible\u001b[22m\n\n\n  103 |     console.log('📍 Step 1: Sign in existing user');\n  104 |     await page.click('button:has-text(\"Sign In\")');\n> 105 |     await page.waitForSelector('[data-testid=\"auth-modal\"]', { timeout: 5000 });\n      |                ^\n  106 |     \n  107 |     // Use existing test user\n  108 |     await page.fill('input[type=\"email\"]', 'testuser1@email.com');\n    at C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\tests\\complete-user-journey-new.spec.ts:105:16"
+                        }
+                      ],
+                      "stdout": [
+                        {
+                          "text": "🧪 Starting returning user test...\n"
+                        },
+                        {
+                          "text": "📍 Step 1: Sign in existing user\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-08-23T16:46:19.418Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\test-results\\complete-user-journey-new--4982b--should-access-bot-directly-webkit\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\test-results\\complete-user-journey-new--4982b--should-access-bot-directly-webkit\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\test-results\\complete-user-journey-new--4982b--should-access-bot-directly-webkit\\error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\tests\\complete-user-journey-new.spec.ts",
+                        "column": 16,
+                        "line": 105
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "28ca5a43e47bcc039269-246fe426b7c74e8b262f",
+              "file": "complete-user-journey-new.spec.ts",
+              "line": 99,
+              "column": 7
+            },
+            {
+              "title": "Protected routes security test",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "webkit",
+                  "projectName": "webkit",
+                  "results": [
+                    {
+                      "workerIndex": 10,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 12831,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "🧪 Starting security test...\n"
+                        },
+                        {
+                          "text": "📍 Testing route: /dashboard\n"
+                        },
+                        {
+                          "text": "✅ Route /dashboard properly protected\n"
+                        },
+                        {
+                          "text": "📍 Testing route: /profile\n"
+                        },
+                        {
+                          "text": "✅ Route /profile properly protected\n"
+                        },
+                        {
+                          "text": "📍 Testing route: /bot-access\n"
+                        },
+                        {
+                          "text": "✅ Route /bot-access properly protected\n"
+                        },
+                        {
+                          "text": "📍 Testing route: /subscription\n"
+                        },
+                        {
+                          "text": "✅ Route /subscription properly protected\n"
+                        },
+                        {
+                          "text": "✅ Security test completed\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-08-23T16:46:33.470Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "28ca5a43e47bcc039269-7ae851eaaaed26fa8a7c",
+              "file": "complete-user-journey-new.spec.ts",
+              "line": 142,
+              "column": 7
+            },
+            {
+              "title": "Payment flow integration test",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "webkit",
+                  "projectName": "webkit",
+                  "results": [
+                    {
+                      "workerIndex": 11,
+                      "parallelIndex": 1,
+                      "status": "failed",
+                      "duration": 5898,
+                      "error": {
+                        "message": "Error: expect.toBeVisible: Error: strict mode violation: locator('text=$9') resolved to 2 elements:\n    1) <div class=\"text-3xl font-bold text-blue-600 mb-4\">…</div> aka getByText('$9/mo')\n    2) <div class=\"text-3xl font-bold text-blue-600 mb-4\">…</div> aka getByText('$99/mo')\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('text=$9')\u001b[22m\n",
+                        "stack": "Error: expect.toBeVisible: Error: strict mode violation: locator('text=$9') resolved to 2 elements:\n    1) <div class=\"text-3xl font-bold text-blue-600 mb-4\">…</div> aka getByText('$9/mo')\n    2) <div class=\"text-3xl font-bold text-blue-600 mb-4\">…</div> aka getByText('$99/mo')\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('text=$9')\u001b[22m\n\n    at C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\tests\\complete-user-journey-new.spec.ts:181:43",
+                        "location": {
+                          "file": "C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\tests\\complete-user-journey-new.spec.ts",
+                          "column": 43,
+                          "line": 181
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 179 |\u001b[39m     \u001b[90m// Step 2: Check plan features\u001b[39m\n \u001b[90m 180 |\u001b[39m     console\u001b[33m.\u001b[39mlog(\u001b[32m'📍 Step 2: Verify plan features'\u001b[39m)\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 181 |\u001b[39m     \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mlocator(\u001b[32m'text=$9'\u001b[39m))\u001b[33m.\u001b[39mtoBeVisible()\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m                                           \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 182 |\u001b[39m     \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mlocator(\u001b[32m'text=$29'\u001b[39m))\u001b[33m.\u001b[39mtoBeVisible()\u001b[33m;\u001b[39m\n \u001b[90m 183 |\u001b[39m     \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mlocator(\u001b[32m'text=$99'\u001b[39m))\u001b[33m.\u001b[39mtoBeVisible()\u001b[33m;\u001b[39m\n \u001b[90m 184 |\u001b[39m\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\tests\\complete-user-journey-new.spec.ts",
+                            "column": 43,
+                            "line": 181
+                          },
+                          "message": "Error: expect.toBeVisible: Error: strict mode violation: locator('text=$9') resolved to 2 elements:\n    1) <div class=\"text-3xl font-bold text-blue-600 mb-4\">…</div> aka getByText('$9/mo')\n    2) <div class=\"text-3xl font-bold text-blue-600 mb-4\">…</div> aka getByText('$99/mo')\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('text=$9')\u001b[22m\n\n\n  179 |     // Step 2: Check plan features\n  180 |     console.log('📍 Step 2: Verify plan features');\n> 181 |     await expect(page.locator('text=$9')).toBeVisible();\n      |                                           ^\n  182 |     await expect(page.locator('text=$29')).toBeVisible();\n  183 |     await expect(page.locator('text=$99')).toBeVisible();\n  184 |\n    at C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\tests\\complete-user-journey-new.spec.ts:181:43"
+                        }
+                      ],
+                      "stdout": [
+                        {
+                          "text": "🧪 Starting payment flow test...\n"
+                        },
+                        {
+                          "text": "📍 Step 1: Verify pricing plans\n"
+                        },
+                        {
+                          "text": "📍 Step 2: Verify plan features\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-08-23T16:46:35.288Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\test-results\\complete-user-journey-new--37d8e-yment-flow-integration-test-webkit\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\test-results\\complete-user-journey-new--37d8e-yment-flow-integration-test-webkit\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\test-results\\complete-user-journey-new--37d8e-yment-flow-integration-test-webkit\\error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\tests\\complete-user-journey-new.spec.ts",
+                        "column": 43,
+                        "line": 181
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "28ca5a43e47bcc039269-90e191cb3f3206c96653",
+              "file": "complete-user-journey-new.spec.ts",
+              "line": 167,
+              "column": 7
+            },
+            {
+              "title": "New user complete journey: signup → payment → bot access",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Chrome",
+                  "projectName": "Mobile Chrome",
+                  "results": [
+                    {
+                      "workerIndex": 12,
+                      "parallelIndex": 1,
+                      "status": "failed",
+                      "duration": 9364,
+                      "error": {
+                        "message": "TimeoutError: page.waitForSelector: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-testid=\"auth-modal\"]') to be visible\u001b[22m\n",
+                        "stack": "TimeoutError: page.waitForSelector: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-testid=\"auth-modal\"]') to be visible\u001b[22m\n\n    at C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\tests\\complete-user-journey-new.spec.ts:30:16",
+                        "location": {
+                          "file": "C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\tests\\complete-user-journey-new.spec.ts",
+                          "column": 16,
+                          "line": 30
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 28 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mclick(\u001b[32m'button:has-text(\"Get Started\")'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 29 |\u001b[39m     \u001b[90m// Wait for auth modal to appear\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 30 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForSelector(\u001b[32m'[data-testid=\"auth-modal\"]'\u001b[39m\u001b[33m,\u001b[39m { timeout\u001b[33m:\u001b[39m \u001b[35m5000\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 31 |\u001b[39m\n \u001b[90m 32 |\u001b[39m     \u001b[90m// Step 4: Sign up as new user\u001b[39m\n \u001b[90m 33 |\u001b[39m     console\u001b[33m.\u001b[39mlog(\u001b[32m'📍 Step 4: Sign up new user'\u001b[39m)\u001b[33m;\u001b[39m\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\tests\\complete-user-journey-new.spec.ts",
+                            "column": 16,
+                            "line": 30
+                          },
+                          "message": "TimeoutError: page.waitForSelector: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-testid=\"auth-modal\"]') to be visible\u001b[22m\n\n\n  28 |     await page.click('button:has-text(\"Get Started\")');\n  29 |     // Wait for auth modal to appear\n> 30 |     await page.waitForSelector('[data-testid=\"auth-modal\"]', { timeout: 5000 });\n     |                ^\n  31 |\n  32 |     // Step 4: Sign up as new user\n  33 |     console.log('📍 Step 4: Sign up new user');\n    at C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\tests\\complete-user-journey-new.spec.ts:30:16"
+                        }
+                      ],
+                      "stdout": [
+                        {
+                          "text": "🧪 Starting new user complete journey test...\n"
+                        },
+                        {
+                          "text": "📍 Step 1: Verify landing page loads\n"
+                        },
+                        {
+                          "text": "📍 Step 2: Verify dashboard redirect when not authenticated\n"
+                        },
+                        {
+                          "text": "📍 Step 3: Trigger authentication modal\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-08-23T16:46:43.326Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\test-results\\complete-user-journey-new--eec5a-gnup-→-payment-→-bot-access-Mobile-Chrome\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\test-results\\complete-user-journey-new--eec5a-gnup-→-payment-→-bot-access-Mobile-Chrome\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\test-results\\complete-user-journey-new--eec5a-gnup-→-payment-→-bot-access-Mobile-Chrome\\error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\tests\\complete-user-journey-new.spec.ts",
+                        "column": 16,
+                        "line": 30
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "28ca5a43e47bcc039269-e0065000e3707f47e8d2",
+              "file": "complete-user-journey-new.spec.ts",
+              "line": 13,
+              "column": 7
+            },
+            {
+              "title": "Returning user with payment should access bot directly",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Chrome",
+                  "projectName": "Mobile Chrome",
+                  "results": [
+                    {
+                      "workerIndex": 13,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 7198,
+                      "error": {
+                        "message": "TimeoutError: page.waitForSelector: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-testid=\"auth-modal\"]') to be visible\u001b[22m\n",
+                        "stack": "TimeoutError: page.waitForSelector: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-testid=\"auth-modal\"]') to be visible\u001b[22m\n\n    at C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\tests\\complete-user-journey-new.spec.ts:105:16",
+                        "location": {
+                          "file": "C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\tests\\complete-user-journey-new.spec.ts",
+                          "column": 16,
+                          "line": 105
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 103 |\u001b[39m     console\u001b[33m.\u001b[39mlog(\u001b[32m'📍 Step 1: Sign in existing user'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 104 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mclick(\u001b[32m'button:has-text(\"Sign In\")'\u001b[39m)\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 105 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForSelector(\u001b[32m'[data-testid=\"auth-modal\"]'\u001b[39m\u001b[33m,\u001b[39m { timeout\u001b[33m:\u001b[39m \u001b[35m5000\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m                \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 106 |\u001b[39m     \n \u001b[90m 107 |\u001b[39m     \u001b[90m// Use existing test user\u001b[39m\n \u001b[90m 108 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mfill(\u001b[32m'input[type=\"email\"]'\u001b[39m\u001b[33m,\u001b[39m \u001b[32m'testuser1@email.com'\u001b[39m)\u001b[33m;\u001b[39m\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\tests\\complete-user-journey-new.spec.ts",
+                            "column": 16,
+                            "line": 105
+                          },
+                          "message": "TimeoutError: page.waitForSelector: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-testid=\"auth-modal\"]') to be visible\u001b[22m\n\n\n  103 |     console.log('📍 Step 1: Sign in existing user');\n  104 |     await page.click('button:has-text(\"Sign In\")');\n> 105 |     await page.waitForSelector('[data-testid=\"auth-modal\"]', { timeout: 5000 });\n      |                ^\n  106 |     \n  107 |     // Use existing test user\n  108 |     await page.fill('input[type=\"email\"]', 'testuser1@email.com');\n    at C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\tests\\complete-user-journey-new.spec.ts:105:16"
+                        }
+                      ],
+                      "stdout": [
+                        {
+                          "text": "🧪 Starting returning user test...\n"
+                        },
+                        {
+                          "text": "📍 Step 1: Sign in existing user\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-08-23T16:46:48.218Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\test-results\\complete-user-journey-new--4982b--should-access-bot-directly-Mobile-Chrome\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\test-results\\complete-user-journey-new--4982b--should-access-bot-directly-Mobile-Chrome\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\test-results\\complete-user-journey-new--4982b--should-access-bot-directly-Mobile-Chrome\\error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\tests\\complete-user-journey-new.spec.ts",
+                        "column": 16,
+                        "line": 105
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "28ca5a43e47bcc039269-788a7ca293cc2369f7a6",
+              "file": "complete-user-journey-new.spec.ts",
+              "line": 99,
+              "column": 7
+            },
+            {
+              "title": "Protected routes security test",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Chrome",
+                  "projectName": "Mobile Chrome",
+                  "results": [
+                    {
+                      "workerIndex": 14,
+                      "parallelIndex": 1,
+                      "status": "passed",
+                      "duration": 10117,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "🧪 Starting security test...\n"
+                        },
+                        {
+                          "text": "📍 Testing route: /dashboard\n"
+                        },
+                        {
+                          "text": "✅ Route /dashboard properly protected\n"
+                        },
+                        {
+                          "text": "📍 Testing route: /profile\n"
+                        },
+                        {
+                          "text": "✅ Route /profile properly protected\n"
+                        },
+                        {
+                          "text": "📍 Testing route: /bot-access\n"
+                        },
+                        {
+                          "text": "✅ Route /bot-access properly protected\n"
+                        },
+                        {
+                          "text": "📍 Testing route: /subscription\n"
+                        },
+                        {
+                          "text": "✅ Route /subscription properly protected\n"
+                        },
+                        {
+                          "text": "✅ Security test completed\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-08-23T16:46:54.326Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "28ca5a43e47bcc039269-6ce402c52fde4e03319d",
+              "file": "complete-user-journey-new.spec.ts",
+              "line": 142,
+              "column": 7
+            },
+            {
+              "title": "Payment flow integration test",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Chrome",
+                  "projectName": "Mobile Chrome",
+                  "results": [
+                    {
+                      "workerIndex": 15,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 3173,
+                      "error": {
+                        "message": "Error: expect.toBeVisible: Error: strict mode violation: locator('text=$9') resolved to 2 elements:\n    1) <div class=\"text-3xl font-bold text-blue-600 mb-4\">…</div> aka getByText('$9/mo')\n    2) <div class=\"text-3xl font-bold text-blue-600 mb-4\">…</div> aka getByText('$99/mo')\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('text=$9')\u001b[22m\n",
+                        "stack": "Error: expect.toBeVisible: Error: strict mode violation: locator('text=$9') resolved to 2 elements:\n    1) <div class=\"text-3xl font-bold text-blue-600 mb-4\">…</div> aka getByText('$9/mo')\n    2) <div class=\"text-3xl font-bold text-blue-600 mb-4\">…</div> aka getByText('$99/mo')\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('text=$9')\u001b[22m\n\n    at C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\tests\\complete-user-journey-new.spec.ts:181:43",
+                        "location": {
+                          "file": "C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\tests\\complete-user-journey-new.spec.ts",
+                          "column": 43,
+                          "line": 181
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 179 |\u001b[39m     \u001b[90m// Step 2: Check plan features\u001b[39m\n \u001b[90m 180 |\u001b[39m     console\u001b[33m.\u001b[39mlog(\u001b[32m'📍 Step 2: Verify plan features'\u001b[39m)\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 181 |\u001b[39m     \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mlocator(\u001b[32m'text=$9'\u001b[39m))\u001b[33m.\u001b[39mtoBeVisible()\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m                                           \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 182 |\u001b[39m     \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mlocator(\u001b[32m'text=$29'\u001b[39m))\u001b[33m.\u001b[39mtoBeVisible()\u001b[33m;\u001b[39m\n \u001b[90m 183 |\u001b[39m     \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mlocator(\u001b[32m'text=$99'\u001b[39m))\u001b[33m.\u001b[39mtoBeVisible()\u001b[33m;\u001b[39m\n \u001b[90m 184 |\u001b[39m\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\tests\\complete-user-journey-new.spec.ts",
+                            "column": 43,
+                            "line": 181
+                          },
+                          "message": "Error: expect.toBeVisible: Error: strict mode violation: locator('text=$9') resolved to 2 elements:\n    1) <div class=\"text-3xl font-bold text-blue-600 mb-4\">…</div> aka getByText('$9/mo')\n    2) <div class=\"text-3xl font-bold text-blue-600 mb-4\">…</div> aka getByText('$99/mo')\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('text=$9')\u001b[22m\n\n\n  179 |     // Step 2: Check plan features\n  180 |     console.log('📍 Step 2: Verify plan features');\n> 181 |     await expect(page.locator('text=$9')).toBeVisible();\n      |                                           ^\n  182 |     await expect(page.locator('text=$29')).toBeVisible();\n  183 |     await expect(page.locator('text=$99')).toBeVisible();\n  184 |\n    at C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\tests\\complete-user-journey-new.spec.ts:181:43"
+                        }
+                      ],
+                      "stdout": [
+                        {
+                          "text": "🧪 Starting payment flow test...\n"
+                        },
+                        {
+                          "text": "📍 Step 1: Verify pricing plans\n"
+                        },
+                        {
+                          "text": "📍 Step 2: Verify plan features\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-08-23T16:46:57.232Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\test-results\\complete-user-journey-new--37d8e-yment-flow-integration-test-Mobile-Chrome\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\test-results\\complete-user-journey-new--37d8e-yment-flow-integration-test-Mobile-Chrome\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\test-results\\complete-user-journey-new--37d8e-yment-flow-integration-test-Mobile-Chrome\\error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\tests\\complete-user-journey-new.spec.ts",
+                        "column": 43,
+                        "line": 181
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "28ca5a43e47bcc039269-0c371c6909ac068ab6c2",
+              "file": "complete-user-journey-new.spec.ts",
+              "line": 167,
+              "column": 7
+            },
+            {
+              "title": "New user complete journey: signup → payment → bot access",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Safari",
+                  "projectName": "Mobile Safari",
+                  "results": [
+                    {
+                      "workerIndex": 16,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 9616,
+                      "error": {
+                        "message": "TimeoutError: page.waitForSelector: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-testid=\"auth-modal\"]') to be visible\u001b[22m\n",
+                        "stack": "TimeoutError: page.waitForSelector: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-testid=\"auth-modal\"]') to be visible\u001b[22m\n\n    at C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\tests\\complete-user-journey-new.spec.ts:30:16",
+                        "location": {
+                          "file": "C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\tests\\complete-user-journey-new.spec.ts",
+                          "column": 16,
+                          "line": 30
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 28 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mclick(\u001b[32m'button:has-text(\"Get Started\")'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 29 |\u001b[39m     \u001b[90m// Wait for auth modal to appear\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 30 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForSelector(\u001b[32m'[data-testid=\"auth-modal\"]'\u001b[39m\u001b[33m,\u001b[39m { timeout\u001b[33m:\u001b[39m \u001b[35m5000\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 31 |\u001b[39m\n \u001b[90m 32 |\u001b[39m     \u001b[90m// Step 4: Sign up as new user\u001b[39m\n \u001b[90m 33 |\u001b[39m     console\u001b[33m.\u001b[39mlog(\u001b[32m'📍 Step 4: Sign up new user'\u001b[39m)\u001b[33m;\u001b[39m\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\tests\\complete-user-journey-new.spec.ts",
+                            "column": 16,
+                            "line": 30
+                          },
+                          "message": "TimeoutError: page.waitForSelector: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-testid=\"auth-modal\"]') to be visible\u001b[22m\n\n\n  28 |     await page.click('button:has-text(\"Get Started\")');\n  29 |     // Wait for auth modal to appear\n> 30 |     await page.waitForSelector('[data-testid=\"auth-modal\"]', { timeout: 5000 });\n     |                ^\n  31 |\n  32 |     // Step 4: Sign up as new user\n  33 |     console.log('📍 Step 4: Sign up new user');\n    at C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\tests\\complete-user-journey-new.spec.ts:30:16"
+                        }
+                      ],
+                      "stdout": [
+                        {
+                          "text": "🧪 Starting new user complete journey test...\n"
+                        },
+                        {
+                          "text": "📍 Step 1: Verify landing page loads\n"
+                        },
+                        {
+                          "text": "📍 Step 2: Verify dashboard redirect when not authenticated\n"
+                        },
+                        {
+                          "text": "📍 Step 3: Trigger authentication modal\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-08-23T16:47:02.026Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\test-results\\complete-user-journey-new--eec5a-gnup-→-payment-→-bot-access-Mobile-Safari\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\test-results\\complete-user-journey-new--eec5a-gnup-→-payment-→-bot-access-Mobile-Safari\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\test-results\\complete-user-journey-new--eec5a-gnup-→-payment-→-bot-access-Mobile-Safari\\error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\jayve\\projects\\project\\clixen-ai\\frontend\\tests\\complete-user-journey-new.spec.ts",
+                        "column": 16,
+                        "line": 30
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "28ca5a43e47bcc039269-caba814c924fa804ef5b",
+              "file": "complete-user-journey-new.spec.ts",
+              "line": 13,
+              "column": 7
+            },
+            {
+              "title": "Returning user with payment should access bot directly",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Safari",
+                  "projectName": "Mobile Safari",
+                  "results": [
+                    {
+                      "workerIndex": -1,
+                      "parallelIndex": -1,
+                      "status": "failed",
+                      "duration": 0,
+                      "error": {
+                        "message": "Error: worker process exited unexpectedly (code=3221225794, signal=null)"
+                      },
+                      "errors": [
+                        {
+                          "message": "Error: worker process exited unexpectedly (code=3221225794, signal=null)"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-08-23T16:47:05.041Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "28ca5a43e47bcc039269-936b65581e8c3b245771",
+              "file": "complete-user-journey-new.spec.ts",
+              "line": 99,
+              "column": 7
+            },
+            {
+              "title": "Protected routes security test",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Safari",
+                  "projectName": "Mobile Safari",
+                  "results": [
+                    {
+                      "workerIndex": -1,
+                      "parallelIndex": -1,
+                      "status": "failed",
+                      "duration": 0,
+                      "error": {
+                        "message": "Error: worker process exited unexpectedly (code=3221225794, signal=null)"
+                      },
+                      "errors": [
+                        {
+                          "message": "Error: worker process exited unexpectedly (code=3221225794, signal=null)"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-08-23T16:47:05.050Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "28ca5a43e47bcc039269-a9ee4f18a1788fe88d6b",
+              "file": "complete-user-journey-new.spec.ts",
+              "line": 142,
+              "column": 7
+            },
+            {
+              "title": "Payment flow integration test",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Safari",
+                  "projectName": "Mobile Safari",
+                  "results": [
+                    {
+                      "workerIndex": -1,
+                      "parallelIndex": -1,
+                      "status": "failed",
+                      "duration": 0,
+                      "error": {
+                        "message": "Error: worker process exited unexpectedly (code=3221225794, signal=null)"
+                      },
+                      "errors": [
+                        {
+                          "message": "Error: worker process exited unexpectedly (code=3221225794, signal=null)"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-08-23T16:47:05.067Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "28ca5a43e47bcc039269-2f8f6feee356155a317f",
+              "file": "complete-user-journey-new.spec.ts",
+              "line": 167,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2025-08-23T16:45:06.444Z",
+    "duration": 125587.489,
+    "expected": 4,
+    "skipped": 0,
+    "unexpected": 16,
+    "flaky": 0
+  }
+}

@@ -10,31 +10,63 @@ export default function AuthCallback() {
   useEffect(() => {
     const handleAuthCallback = async () => {
       try {
+        console.log('🔐 Auth callback - processing URL parameters...')
+        
+        // Handle the auth callback from URL parameters
         const { data, error } = await supabase.auth.getSession()
         
         if (error) {
+          console.error('🔐 Session error:', error)
           throw error
         }
 
+        console.log('🔐 Session data:', data)
+
         if (data?.session) {
+          console.log('✅ Valid session found, user authenticated')
           setStatus('success')
           setMessage('Authentication successful! Redirecting to dashboard...')
           
           // Redirect to dashboard after a brief delay
           setTimeout(() => {
             window.location.href = '/dashboard'
-          }, 2000)
+          }, 1500)
         } else {
-          throw new Error('No session found')
+          // Check for auth code in URL and exchange it
+          const urlParams = new URLSearchParams(window.location.search)
+          const code = urlParams.get('code')
+          
+          if (code) {
+            console.log('🔐 Found auth code, exchanging for session...')
+            const { data: sessionData, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
+            
+            if (exchangeError) {
+              throw exchangeError
+            }
+            
+            if (sessionData?.session) {
+              console.log('✅ Session exchange successful')
+              setStatus('success')
+              setMessage('Authentication successful! Redirecting to dashboard...')
+              
+              setTimeout(() => {
+                window.location.href = '/dashboard'
+              }, 1500)
+            } else {
+              throw new Error('Failed to create session from code')
+            }
+          } else {
+            throw new Error('No session or auth code found')
+          }
         }
       } catch (error: any) {
+        console.error('🔐 Auth callback error:', error)
         setStatus('error')
         setMessage(error.message || 'Authentication failed')
-        console.error('Auth callback error:', error)
         
         // Redirect to home page after error
         setTimeout(() => {
-          window.location.href = '/'
+          window.location.href = '/?auth=true'
         }, 3000)
       }
     }

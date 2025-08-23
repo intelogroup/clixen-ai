@@ -1,107 +1,306 @@
-# N8N Core Workflows - Battle Testing Repository
+# 🚀 Clixen AI - Telegram Bot Automation Platform
 
-## Overview
-Production-ready n8n workflows with AI agent nodes for automated testing and deployment.
+[![Next.js](https://img.shields.io/badge/Next.js-14.0-black)](https://nextjs.org/)
+[![Supabase](https://img.shields.io/badge/Supabase-Database-green)](https://supabase.com/)
+[![Stripe](https://img.shields.io/badge/Stripe-Payments-blue)](https://stripe.com/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)](https://www.typescriptlang.org/)
 
-## Core Workflows
+**Lead generation platform that converts visitors into paying subscribers for AI-powered automation services via Telegram bot.**
 
-### 1. Customer Support Agent
-- **Endpoint**: `/webhook/customer-support`
-- **Features**: Multi-model AI support, context-aware responses, ticket integration
-- **Models**: GPT-4, Claude-3
+## 🎯 Business Model
 
-### 2. Data Analysis Agent  
-- **Schedule**: Daily at 9 AM
-- **Features**: Automated data fetching, trend analysis, report generation
-- **Models**: Claude-3-Opus for analysis
+**Landing Page → Payment → Telegram Bot Access**
 
-### 3. Content Generation Agent
-- **Endpoint**: `/webhook/generate-content`
-- **Features**: Research + content creation + quality check pipeline
-- **Models**: GPT-4-Turbo, Claude-3-Opus
+1. **Lead Generation**: Marketing landing page with automation promises
+2. **Subscription Plans**: Tiered pricing (Starter $9, Pro $29, Enterprise $99)
+3. **Payment Processing**: Stripe checkout with instant provisioning
+4. **Bot Access**: Users get @ClixenAIBot access after payment
+5. **Automation**: All workflow creation through Telegram chat interface
 
-## Quick Start
+## ✨ Features
 
-1. **Setup Environment**
-   ```bash
-   cp .env.example .env
-   # Edit .env with your credentials
-   npm install
-   ```
+### 🎨 Frontend (Lead Generation)
+- **Modern Landing Page**: Hero, features, pricing, testimonials
+- **Authentication System**: Email/password + magic links
+- **Subscription Management**: Plan selection and Stripe checkout
+- **Payment Flow**: Success pages and bot access instructions
+- **Responsive Design**: Mobile-optimized with Tailwind CSS
 
-2. **Import Workflows to N8N**
-   ```bash
-   npm run import
-   ```
+### 💳 Payment Integration
+- **Stripe Checkout**: Secure subscription payments
+- **Webhook Handling**: Automatic user provisioning
+- **Multiple Plans**: Credits-based tiering system
+- **Billing Management**: Upgrades, downgrades, cancellations
 
-3. **Run Tests**
-   ```bash
-   npm test
-   ```
+### 🤖 Telegram Bot Integration
+- **Secure Access**: User-specific authentication codes
+- **Credit Tracking**: Usage monitoring and billing integration
+- **Command Interface**: Natural language workflow creation
+- **Template System**: Pre-built automation templates
 
-4. **Run Benchmarks**
-   ```bash
-   npm run benchmark
-   ```
+### 🗄️ Database & Backend
+- **Supabase**: PostgreSQL with real-time capabilities
+- **Authentication**: Row-level security and JWT tokens
+- **User Profiles**: Credits, subscriptions, and preferences
+- **Usage Analytics**: Tracking and billing data
 
-## Project Structure
-```
-├── workflows/
-│   ├── core/          # Production workflows
-│   ├── templates/     # Reusable templates
-│   └── tests/         # Test workflows
-├── data/
-│   ├── input/         # Test input data
-│   ├── output/        # Test results
-│   └── mocks/         # Mock data for testing
-├── scripts/           # Automation scripts
-├── docs/              # Documentation
-└── config/            # Configuration files
-```
+## 🛠️ Tech Stack
 
-## Testing
+### Frontend
+- **Next.js 14**: React framework with App Router
+- **TypeScript**: Type-safe development
+- **Tailwind CSS**: Utility-first styling
+- **shadcn/ui**: High-quality components
+- **Framer Motion**: Animations and transitions
 
-### Unit Tests
-Test individual workflow nodes:
+### Backend & Services  
+- **Supabase**: Database, auth, and real-time features
+- **Stripe**: Payment processing and subscription management
+- **n8n**: Workflow automation engine
+- **Vercel**: Deployment and hosting
+
+### Development Tools
+- **ESLint + Prettier**: Code formatting and linting
+- **Playwright**: End-to-end testing
+- **Claude Code & Gemini**: AI-assisted development
+
+## 📦 Installation
+
+### Prerequisites
+- Node.js 18+
+- npm or yarn
+- Supabase account
+- Stripe account (test keys for development)
+
+### 1. Clone Repository
 ```bash
-node scripts/test-workflows.js
+git clone https://github.com/your-org/clixen-ai.git
+cd clixen-ai/frontend
 ```
 
-### Load Testing
-Stress test workflows:
+### 2. Install Dependencies
 ```bash
-node scripts/benchmark.js
+npm install
 ```
 
-### Test Scenarios
-- Light Load: 5 concurrent, 50 iterations
-- Medium Load: 20 concurrent, 100 iterations  
-- Heavy Load: 50 concurrent, 200 iterations
+### 3. Environment Setup
+Create `.env.local` file:
+```env
+# Supabase Configuration
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
 
-## Metrics Tracked
-- Response Latency (p50, p95, p99)
-- Throughput (requests/second)
-- Error Rate
-- Resource Usage
+# Stripe Configuration
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
+STRIPE_SECRET_KEY=sk_test_...
 
-## Environment Variables
-- `N8N_API_KEY`: Your n8n cloud API key
-- `N8N_BASE_URL`: Your n8n instance URL
-- `OPENAI_API_KEY`: OpenAI API key for GPT models
-- `ANTHROPIC_API_KEY`: Anthropic API key for Claude models
+# Stripe Price IDs (create in Stripe Dashboard)
+STRIPE_PRICE_STARTER_MONTHLY=price_...
+STRIPE_PRICE_PRO_MONTHLY=price_...
+STRIPE_PRICE_ENTERPRISE_MONTHLY=price_...
 
-## Best Practices
-1. Always test workflows in staging before production
-2. Monitor agent token usage and costs
-3. Implement proper error handling
-4. Use appropriate timeout values
-5. Enable workflow execution logs
+# Site Configuration
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
+```
 
-## Contributing
-1. Create feature branch
-2. Add tests for new workflows
-3. Run benchmark suite
-4. Submit PR with test results
+### 4. Database Setup
+Run the Supabase migrations (see `CLAUDE.md` for details):
+```bash
+# Database schema is in CLAUDE.md
+# Run using postgres client or Supabase dashboard
+```
 
-## License
-MIT - Terragon Labs
+### 5. Start Development Server
+```bash
+npm run dev
+```
+
+Visit `http://localhost:3000`
+
+## 🏗️ Project Structure
+
+```
+frontend/
+├── app/                    # Next.js App Router
+│   ├── api/               # API routes
+│   │   ├── stripe/        # Payment handling
+│   │   └── user/          # User management
+│   ├── subscription/      # Pricing page
+│   ├── bot-access/        # Post-payment bot access
+│   ├── payment-success/   # Payment confirmation
+│   ├── dashboard/         # User dashboard
+│   └── profile/           # Account settings
+├── components/            # Reusable UI components
+│   ├── ui/               # shadcn/ui components
+│   ├── AuthModal.tsx     # Authentication modal
+│   ├── ModernHero.tsx    # Landing page hero
+│   └── PricingSection.tsx # Pricing display
+├── lib/                  # Utility functions
+│   ├── stripe.ts         # Stripe configuration
+│   ├── supabase.ts       # Database client
+│   └── utils.ts          # Common utilities
+└── middleware.ts         # Route protection
+```
+
+## 🔄 User Flow
+
+### New User Journey
+1. **Landing Page**: User discovers automation platform
+2. **Sign Up**: Creates account with email/password
+3. **Plan Selection**: Chooses subscription tier
+4. **Payment**: Stripe checkout process
+5. **Bot Access**: Gets Telegram bot credentials
+6. **Automation**: Creates workflows through bot chat
+
+### Returning User
+1. **Login**: Authenticates through landing page
+2. **Dashboard**: Views usage and bot access
+3. **Bot Interaction**: Continues automation work
+4. **Billing**: Manages subscription as needed
+
+## 💰 Pricing Plans
+
+| Plan | Price | Credits | Features |
+|------|-------|---------|----------|
+| **Starter** | $9/mo | 100 | Basic templates, Email support |
+| **Professional** | $29/mo | 500 | All templates, Priority support, Webhooks |
+| **Enterprise** | $99/mo | 2000 | Custom workflows, Dedicated support, API |
+
+## 🎯 Key Pages
+
+### 🏠 Landing Page (`/`)
+- Hero section with value proposition
+- Feature showcase and social proof
+- Pricing table with CTAs
+- Authentication modal
+
+### 💳 Subscription Page (`/subscription`)
+- Detailed plan comparison
+- Stripe checkout integration
+- FAQ and trust indicators
+
+### 🤖 Bot Access Page (`/bot-access`)
+- Telegram bot connection instructions
+- Unique user access codes
+- Getting started guide
+
+### ✅ Payment Success (`/payment-success`)
+- Payment confirmation
+- Next steps instructions
+- Auto-redirect to bot access
+
+## 🧪 Testing
+
+### Run Tests
+```bash
+# TypeScript compilation
+npm run type-check
+
+# Linting
+npm run lint
+
+# E2E tests (Playwright)
+npm run test:e2e
+```
+
+### Test User Account
+```
+Email: testuser1@email.com
+Password: Demo123
+```
+
+## 🚀 Deployment
+
+### Vercel Deployment
+```bash
+# Install Vercel CLI
+npm i -g vercel
+
+# Deploy
+vercel
+
+# Add environment variables in Vercel dashboard
+```
+
+### Environment Variables for Production
+- Update all test keys to live keys
+- Set production URLs
+- Configure webhook endpoints
+- Enable Stripe live mode
+
+## 🔌 Integrations
+
+### Stripe Webhooks
+Configure webhook endpoint: `https://yourdomain.com/api/stripe/webhook`
+
+Events to monitor:
+- `checkout.session.completed`
+- `customer.subscription.updated`
+- `invoice.payment_succeeded`
+- `invoice.payment_failed`
+
+### Telegram Bot Setup
+1. Create bot with @BotFather
+2. Get bot token
+3. Configure webhook for n8n integration
+4. Set up authentication flow
+
+## 📊 Database Schema
+
+### Key Tables
+- **profiles**: User accounts, subscriptions, credits
+- **usage_metrics**: Credit consumption tracking
+- **workflow_executions**: Automation run history
+
+See `CLAUDE.md` for complete schema details.
+
+## 🛡️ Security
+
+- **Row Level Security**: Database access control
+- **JWT Authentication**: Secure session management
+- **Environment Variables**: Sensitive data protection
+- **Webhook Verification**: Stripe signature validation
+- **Rate Limiting**: API protection (planned)
+
+## 📈 Analytics & Monitoring
+
+- **User Registration**: Track conversion rates
+- **Payment Success**: Monitor checkout completion
+- **Bot Engagement**: Track automation usage
+- **Churn Analysis**: Monitor subscription cancellations
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create feature branch (`git checkout -b feature/name`)
+3. Commit changes (`git commit -m 'Add feature'`)
+4. Push to branch (`git push origin feature/name`)
+5. Open Pull Request
+
+## 📄 License
+
+Private commercial project. All rights reserved.
+
+## 🆘 Support
+
+- **Documentation**: Check `CLAUDE.md` for detailed implementation
+- **Issues**: Create GitHub issues for bugs
+- **Questions**: Contact development team
+
+---
+
+## 🎉 Current Status
+
+**✅ Production Ready for Lead Generation**
+- Complete payment processing
+- Telegram bot access provisioning  
+- User management system
+- Responsive design
+- Security implementation
+
+**🔄 Ready for Launch**: Platform can immediately start converting visitors to paying bot users.
+
+---
+
+*Built with ❤️ using Next.js, Supabase, and Stripe*

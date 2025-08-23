@@ -202,11 +202,11 @@ test.describe('Landing Page', () => {
   test('should handle animations and transitions', async ({ page }) => {
     // Check for animation classes
     const animatedElements = page.locator('[class*="animate-"]');
-    await expect(animatedElements).toHaveCount.greaterThan(0);
+    await expect(animatedElements.first()).toBeVisible();
     
     // Check for transition classes
     const transitionElements = page.locator('[class*="transition-"]');
-    await expect(transitionElements).toHaveCount.greaterThan(0);
+    await expect(transitionElements.first()).toBeVisible();
     
     // Test hover animations on feature cards
     const firstFeatureCard = page.locator('[data-testid="feature-card"]').first();
@@ -220,7 +220,7 @@ test.describe('Landing Page', () => {
   test('should handle accessibility features', async ({ page }) => {
     // Check for proper heading hierarchy
     const headings = page.locator('h1, h2, h3, h4, h5, h6');
-    await expect(headings).toHaveCount.greaterThan(0);
+    await expect(headings.first()).toBeVisible();
     
     // Check for alt text on images
     const images = page.locator('img');

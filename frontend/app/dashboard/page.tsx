@@ -1,9 +1,10 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { supabase } from '../../lib/supabase'
+import { createClient } from '../../lib/supabase-browser'
 import { User } from '@supabase/supabase-js'
 import { Profile } from '../../lib/supabase'
+import { useRouter } from 'next/navigation'
 import { LogOut, User as UserIcon, Settings, Activity, FileText, CreditCard } from 'lucide-react'
 
 interface DashboardStats {
@@ -20,6 +21,8 @@ export default function Dashboard() {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [stats, setStats] = useState<DashboardStats | null>(null)
   const [loading, setLoading] = useState(true)
+  const router = useRouter()
+  const supabase = createClient()
 
   useEffect(() => {
     console.log('📊 Dashboard useEffect triggered - fetching user data...')
@@ -30,28 +33,9 @@ export default function Dashboard() {
       const { data: { user } } = await supabase.auth.getUser()
       
       if (!user) {
-        console.log('📊 No user found, but showing dashboard anyway for demo...')
-        // Temporarily disabled for demo: window.location.href = '/'
-        // Set mock user data for demo
-        setUser({ id: 'demo', email: 'demo@example.com' } as any)
-        setProfile({
-          id: 'demo',
-          email: 'demo@example.com',
-          full_name: 'Demo User',
-          credits_remaining: 98,
-          credits_used: 2,
-          tier: 'free',
-          onboarding_completed: true,
-          api_key: 'demo_api_key_123',
-          created_at: new Date().toISOString()
-        } as any)
-        setStats({
-          total_executions: 12,
-          successful_executions: 11,
-          documents_analyzed: 5,
-          total_credits_spent: 2
-        })
-        setLoading(false)
+        console.log('📊 No authenticated user found, redirecting to home page...')
+        // Use Next.js router for better navigation
+        router.push('/?auth=true')
         return
       }
 

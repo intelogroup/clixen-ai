@@ -1,8 +1,9 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { supabase } from '../../lib/supabase'
+import { createClient } from '../../lib/supabase-browser'
 import { User } from '@supabase/supabase-js'
+import { useRouter } from 'next/navigation'
 import { ArrowLeft, Save, Eye, EyeOff, Copy, RefreshCw } from 'lucide-react'
 
 interface UserProfile {
@@ -25,34 +26,16 @@ export default function Profile() {
     full_name: '',
     email: ''
   })
+  const router = useRouter()
+  const supabase = createClient()
 
   useEffect(() => {
     const getUser = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       
       if (!user) {
-        console.log('👤 No user found, but showing profile anyway for demo...')
-        // Temporarily disabled for demo: window.location.href = '/'
-        // Set mock user data for demo
-        const mockUser = { id: 'demo', email: 'demo@example.com', created_at: new Date().toISOString() } as any
-        setUser(mockUser)
-        
-        const mockProfile: UserProfile = {
-          id: 'demo',
-          email: 'demo@example.com',
-          full_name: 'Demo User',
-          credits_remaining: 98,
-          tier: 'free',
-          api_key: 'ap_demo_' + Math.random().toString(36).substr(2, 32),
-          created_at: new Date().toISOString()
-        }
-        
-        setProfile(mockProfile)
-        setFormData({
-          full_name: mockProfile.full_name || '',
-          email: mockProfile.email
-        })
-        setLoading(false)
+        console.log('👤 No authenticated user found, redirecting to home page...')
+        router.push('/?auth=true')
         return
       }
 
