@@ -21,7 +21,20 @@
     "mcp-clean": "node scripts/n8n-mcp-complete-orchestrator.js clean",
     "clean-instance": "node scripts/clean-n8n-instance.js",
     "enhanced-create": "node scripts/n8n-mcp-firecrawl-orchestrator.js create",
-    "create-telegram-agent": "node scripts/create-telegram-agent-workflow.js"
+    "create-telegram-agent": "node scripts/create-telegram-agent-workflow.js",
+    "test:playwright": "cd frontend && npm run test",
+    "test:playwright:ui": "cd frontend && npm run test:ui",
+    "test:playwright:headed": "cd frontend && npm run test:headed",
+    "test:puppeteer": "jest tests/puppeteer-comprehensive.spec.js",
+    "test:puppeteer:watch": "jest tests/puppeteer-comprehensive.spec.js --watch",
+    "test:puppeteer:coverage": "jest tests/puppeteer-comprehensive.spec.js --coverage",
+    "test:all": "npm run test:playwright && npm run test:puppeteer",
+    "test:install": "cd frontend && npm run test:install",
+    "test:report": "cd frontend && npm run test:report",
+    "test:visual": "npm run test:puppeteer -- --testNamePattern='Visual Regression'",
+    "test:performance": "npm run test:puppeteer -- --testNamePattern='Performance'",
+    "test:accessibility": "npm run test:puppeteer -- --testNamePattern='Accessibility'",
+    "test:security": "npm run test:puppeteer -- --testNamePattern='Security'"
   },
   "keywords": [
     "n8n",
@@ -34,7 +47,8 @@
   "license": "MIT",
   "devDependencies": {
     "@types/node": "^20.11.0",
-    "dotenv": "^16.3.1"
+    "dotenv": "^16.3.1",
+    "jest": "^30.0.5"
   },
   "dependencies": {
     "@henkey/postgres-mcp-server": "^1.0.5",
