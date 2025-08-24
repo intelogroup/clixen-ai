@@ -33,7 +33,7 @@ export async function GET() {
           url: supabaseUrl ? 'Found' : 'Missing',
           serviceKey: supabaseServiceKey ? 'Found' : 'Missing'
         }
-      }, { status: 500 })
+      }, { status: 500, headers: corsHeaders })
     }
     
     const supabase = createClient(supabaseUrl, supabaseServiceKey, {
