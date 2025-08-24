@@ -143,6 +143,33 @@ export default function SubscriptionPage() {
     setStripeLoaded(true)
   }
 
+  const handleStartTrial = async () => {
+    try {
+      console.log('🚀 [SUBSCRIPTION] Starting free trial...')
+
+      const response = await fetch('/api/user/start-trial', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+
+      const data = await response.json()
+
+      if (response.ok && data.success) {
+        console.log('✅ [SUBSCRIPTION] Trial started successfully')
+        // Redirect to bot access page
+        router.push('/bot-access')
+      } else {
+        console.error('❌ [SUBSCRIPTION] Trial start failed:', data.error)
+        alert('Failed to start trial. Please try again.')
+      }
+    } catch (error) {
+      console.error('🚨 [SUBSCRIPTION] Error starting trial:', error)
+      alert('An error occurred. Please try again.')
+    }
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
