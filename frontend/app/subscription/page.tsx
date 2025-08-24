@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '../../components/AuthProvider'
+import { createClient } from '../../lib/supabase-browser'
 import { User } from '@supabase/supabase-js'
 import { Check, X, Zap, Rocket, Crown, Shield, Clock, Users, Sparkles } from 'lucide-react'
 import Script from 'next/script'
