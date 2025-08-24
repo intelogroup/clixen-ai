@@ -70,16 +70,18 @@ export function AuthProvider({ children }: AuthProviderProps) {
         setUser(session?.user ?? null)
         setLoading(false)
 
-        // Handle auth events
+        // Handle auth events - let middleware handle redirects
         switch (event) {
           case 'SIGNED_IN':
-            console.log('✅ [AUTH] User signed in, redirecting to dashboard')
-            // Small delay to ensure state is properly set
-            setTimeout(() => router.push('/dashboard'), 100)
+            console.log('✅ [AUTH] User signed in - middleware will handle redirect')
+            // Remove automatic redirect - let middleware handle this
             break
           case 'SIGNED_OUT':
-            console.log('👋 [AUTH] User signed out, redirecting to home')
-            router.push('/')
+            console.log('👋 [AUTH] User signed out')
+            // Only redirect on explicit sign out, not on session expiry
+            if (user) {
+              router.push('/')
+            }
             break
           case 'TOKEN_REFRESHED':
             console.log('🔄 [AUTH] Token refreshed')
@@ -201,8 +203,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
         }
       }
 
-      // Let middleware handle the redirect after authentication state changes
-      console.log('✅ [AUTH] Sign in completed, waiting for auth state change')
+      // Force a page refresh to trigger middleware redirect
+      console.log('✅ [AUTH] Sign in completed, refreshing page for middleware redirect')
+
+      // Small delay to ensure auth state is set, then refresh
+      setTimeout(() => {
+        window.location.href = '/dashboard'
+      }, 100)
 
       return { user: data.user, error: null }
     } finally {
