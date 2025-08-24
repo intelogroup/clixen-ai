@@ -263,9 +263,17 @@ export default function SubscriptionPage() {
                     ))}
                   </div>
 
-                  {/* Stripe Buy Button */}
+                  {/* Plan Action */}
                   <div className="text-center">
-                    {stripeLoaded ? (
+                    {plan.id === 'starter' && !profile?.trial_active && !profile?.tier ? (
+                      // Free trial for new users
+                      <button
+                        onClick={() => router.push('/bot-access')}
+                        className="w-full py-3 px-4 rounded-xl font-semibold transition-all bg-green-600 hover:bg-green-700 text-white shadow-lg hover:shadow-xl"
+                      >
+                        Start 7-Day Free Trial
+                      </button>
+                    ) : stripeLoaded ? (
                       <stripe-buy-button
                         buy-button-id={plan.buyButtonId}
                         publishable-key="pk_test_51Qpb3I010OCMBFJxSyiNrUtC88p5ikKlyRZWoPJN4o8CAMWBdBBO3EzwNQm20uv1KR6Z47Eotb29r3VCg61mZ2f200KQ8LK6FF"
