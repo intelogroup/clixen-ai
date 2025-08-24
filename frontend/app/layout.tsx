@@ -55,9 +55,7 @@ export default function RootLayout({
       </head>
       <body className={inter.className}>
         <div id="modal-root"></div>
-        <AuthProvider>
-          {children}
-        </AuthProvider>
+        {children}
       </body>
     </html>
   )
