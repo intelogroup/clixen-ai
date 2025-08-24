@@ -51,7 +51,13 @@ export async function GET(request: NextRequest) {
             })
           
           if (insertError) {
-            console.error('❌ [AUTH CALLBACK] Error creating profile:', insertError)
+            console.error('❌ [AUTH CALLBACK] Error creating profile:', {
+              message: insertError.message,
+              details: insertError.details,
+              hint: insertError.hint,
+              code: insertError.code,
+              fullError: JSON.stringify(insertError, null, 2)
+            })
           } else {
             console.log('✅ [AUTH CALLBACK] User profile created successfully')
           }
@@ -59,7 +65,11 @@ export async function GET(request: NextRequest) {
           console.log('✅ [AUTH CALLBACK] User profile already exists')
         }
       } catch (profileError) {
-        console.error('❌ [AUTH CALLBACK] Profile handling error:', profileError)
+        console.error('❌ [AUTH CALLBACK] Profile handling error:', {
+          message: profileError instanceof Error ? profileError.message : 'Unknown error',
+          stack: profileError instanceof Error ? profileError.stack : undefined,
+          fullError: JSON.stringify(profileError, null, 2)
+        })
         // Continue with redirect even if profile creation fails
       }
       
