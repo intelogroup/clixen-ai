@@ -39,6 +39,9 @@ export default function LandingPage() {
               <span className="text-xl font-bold text-gray-900">Clixen AI</span>
             </div>
             <div className="flex items-center space-x-4">
+              <Button variant="ghost" onClick={() => window.location.href = "/test-auth"}>
+                🧪 Test Auth
+              </Button>
               <Button variant="ghost" onClick={handleSignIn}>
                 Sign In
               </Button>
@@ -67,6 +70,17 @@ export default function LandingPage() {
             </Button>
             <Button size="lg" variant="outline" onClick={handleSignIn}>
               Sign In
+            </Button>
+          </div>
+          
+          {/* Test Authentication Button */}
+          <div className="mt-8">
+            <Button 
+              variant="outline" 
+              onClick={() => window.location.href = "/test-auth"}
+              className="bg-yellow-50 border-yellow-200 text-yellow-800 hover:bg-yellow-100"
+            >
+              🧪 Test Authentication System
             </Button>
           </div>
         </div>
@@ -108,29 +122,45 @@ export default function LandingPage() {
       <section className="py-16 px-4 sm:px-6 lg:px-8 bg-blue-50">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl font-bold text-gray-900 mb-4">
-            ✅ Full Auth System Ready
+            ✅ Authentication System Verified
           </h2>
           <p className="text-xl text-gray-600 mb-8">
-            Stack Auth + Neon Database integration is now fully operational!
+            Stack Auth + Neon Database integration is operational with live user data!
           </p>
-          <div className="grid md:grid-cols-2 gap-6 text-left">
+          <div className="grid md:grid-cols-3 gap-6 text-left">
             <div className="bg-white p-6 rounded-lg">
               <h3 className="font-semibold mb-2">🔐 Auth Features:</h3>
               <ul className="space-y-1 text-sm text-gray-600">
-                <li>• User registration & login</li>
-                <li>• Protected routes</li>
-                <li>• Session management</li>
-                <li>• Database user sync</li>
+                <li>• User registration & login ✅</li>
+                <li>• Protected routes ✅</li>
+                <li>• Session management ✅</li>
+                <li>• Database user sync ✅</li>
               </ul>
             </div>
             <div className="bg-white p-6 rounded-lg">
-              <h3 className="font-semibold mb-2">🚀 Ready for:</h3>
+              <h3 className="font-semibold mb-2">💾 Database Status:</h3>
               <ul className="space-y-1 text-sm text-gray-600">
-                <li>• User onboarding</li>
-                <li>• Dashboard access</li>
-                <li>• Profile management</li>
-                <li>• Bot integration</li>
+                <li>• Neon DB connected ✅</li>
+                <li>• User table populated ✅</li>
+                <li>• Real-time sync active ✅</li>
+                <li>• Test data available ✅</li>
               </ul>
+            </div>
+            <div className="bg-white p-6 rounded-lg">
+              <h3 className="font-semibold mb-2">🧪 Test Available:</h3>
+              <ul className="space-y-1 text-sm text-gray-600">
+                <li>• Sign up new accounts</li>
+                <li>• Login existing users</li>
+                <li>• View database records</li>
+                <li>• Test protected routes</li>
+              </ul>
+              <Button 
+                size="sm" 
+                className="mt-2 w-full" 
+                onClick={() => window.location.href = "/test-auth"}
+              >
+                Start Testing
+              </Button>
             </div>
           </div>
         </div>
