@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import AuthModalSimple from '../components/AuthModalSimple'
 import GlobalErrorHandler from '../components/GlobalErrorHandler'
 import {
   Bot,
