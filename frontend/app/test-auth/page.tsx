@@ -12,7 +12,8 @@ export default function TestAuthPage() {
   const [userData, setUserData] = useState<any>(null);
   const [allUsers, setAllUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [authMode, setAuthMode] = useState<"signin" | "signup">("signin");
+  const [verification, setVerification] = useState<any>(null);
+  const [verifying, setVerifying] = useState(false);
 
   useEffect(() => {
     async function loadData() {
@@ -34,12 +35,79 @@ export default function TestAuthPage() {
     loadData();
   }, [user]);
 
+  const runVerification = async () => {
+    setVerifying(true);
+    try {
+      const response = await fetch('/api/verify-auth');
+      const data = await response.json();
+      setVerification(data);
+    } catch (error) {
+      console.error('Verification failed:', error);
+      setVerification({ error: 'Failed to run verification' });
+    } finally {
+      setVerifying(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">
-          🧪 Authentication Test Page
-        </h1>
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">
+            🧪 Authentication Test Center
+          </h1>
+          <Button variant="outline" onClick={() => window.location.href = "/"}>
+            ← Back to Landing
+          </Button>
+        </div>
+
+        {/* System Verification */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle>System Verification</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <Button 
+                onClick={runVerification} 
+                disabled={verifying}
+                className="w-full"
+              >
+                {verifying ? "🔄 Running Verification..." : "🔍 Run System Verification"}
+              </Button>
+              
+              {verification && (
+                <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+                  <h4 className="font-medium mb-2">
+                    {verification.overall?.status || "Verification Results"}
+                  </h4>
+                  {verification.overall && (
+                    <p className="text-sm text-gray-600 mb-3">
+                      {verification.overall.passedTests}/{verification.overall.totalTests} tests passed
+                    </p>
+                  )}
+                  
+                  {verification.tests && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                      {Object.entries(verification.tests).map(([key, test]: [string, any]) => (
+                        <div key={key} className="flex justify-between">
+                          <span className="capitalize">{key}:</span>
+                          <span className={test.success ? "text-green-600" : "text-red-600"}>
+                            {test.status}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  
+                  {verification.error && (
+                    <p className="text-red-600 text-sm">{verification.error}</p>
+                  )}
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Authentication Status */}
         <Card className="mb-8">
@@ -166,29 +234,24 @@ export default function TestAuthPage() {
             <CardTitle>Test Actions</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {user && (
-                <div className="flex space-x-4">
-                  <Button onClick={() => user.signOut()}>
+                <>
+                  <Button onClick={() => user.signOut()} variant="destructive">
                     Sign Out
                   </Button>
                   <Button variant="outline" onClick={() => window.location.href = "/dashboard"}>
-                    Go to Dashboard
+                    Dashboard
                   </Button>
                   <Button variant="outline" onClick={() => window.location.href = "/profile"}>
-                    Go to Profile
+                    Profile
                   </Button>
-                </div>
+                </>
               )}
               
-              <div className="flex space-x-4">
-                <Button variant="outline" onClick={() => window.location.href = "/"}>
-                  Back to Landing
-                </Button>
-                <Button variant="outline" onClick={() => window.location.reload()}>
-                  Refresh Page
-                </Button>
-              </div>
+              <Button variant="outline" onClick={() => window.location.reload()}>
+                Refresh
+              </Button>
             </div>
           </CardContent>
         </Card>
