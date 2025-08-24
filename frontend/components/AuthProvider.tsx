@@ -39,8 +39,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
     // Get initial session
     const getInitialSession = async () => {
       console.log('🔐 [AUTH] Getting initial session...')
-      
+
       try {
+        const supabase = createClient()
         const { data: { session: initialSession }, error } = await supabase.auth.getSession()
         
         if (error) {
