@@ -417,7 +417,7 @@ export default function LandingPage() {
                 The simplest way to automate your daily tasks through Telegram. No complex interfaces, just natural conversation.
               </p>
               <div className="flex items-center space-x-4">
-                <a href="https://t.me/clixen_bot" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 transition-colors">
+                <a {...getBotButtonProps('NAVIGATION')} className="text-blue-400 hover:text-blue-300 transition-colors">
                   @clixen_bot
                 </a>
               </div>
