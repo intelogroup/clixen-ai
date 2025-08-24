@@ -62,8 +62,7 @@ const nextConfig = {
     ]
   },
 
-  // Improve build performance
-  swcMinify: true,
+  // SWC minification is enabled by default in Next.js 15+
   
   // Better error handling
   onDemandEntries: {
