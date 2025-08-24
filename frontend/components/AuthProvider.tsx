@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import { User, Session, AuthError } from '@supabase/supabase-js'
 import { useRouter } from 'next/navigation'
-import { supabase } from '../lib/supabase-client'
+import { createClient } from '../lib/supabase-browser'
 
 interface AuthContextType {
   user: User | null
