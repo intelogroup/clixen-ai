@@ -28,6 +28,7 @@ import {
   Shield
 } from 'lucide-react'
 import GlobalNavigation from '../../components/GlobalNavigation'
+import { getBotButtonProps, trackBotAccess, BotAccessPresets } from '../../lib/telegram-utils'
 
 interface DashboardStats {
   total_executions: number
