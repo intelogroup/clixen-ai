@@ -1,0 +1,22 @@
+{
+  "name": "clixen-monitoring-mcp",
+  "version": "1.0.0",
+  "description": "MCP Server for Clixen AI n8n monitoring and logging",
+  "main": "n8n-mcp-server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node n8n-mcp-server.js",
+    "dev": "node --watch n8n-mcp-server.js",
+    "test": "node test-mcp-server.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^0.6.0",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0"
+  },
+  "keywords": ["mcp", "n8n", "monitoring", "logging"],
+  "author": "Clixen AI",
+  "license": "MIT"
+}

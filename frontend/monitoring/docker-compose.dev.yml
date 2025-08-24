@@ -1,0 +1,125 @@
+# Clixen AI - Development Monitoring Stack
+# Optimized for $9 SlipLane server with minimal resource usage
+# Maximum logging detail for development debugging
+
+version: '3.8'
+
+services:
+  # Loki - Log aggregation (lightweight config)
+  loki:
+    image: grafana/loki:3.4.1
+    container_name: clixen-loki
+    ports:
+      - "3100:3100"
+    volumes:
+      - loki-data:/loki
+      - ./config/loki-dev.yaml:/etc/loki/local-config.yaml
+    command: -config.file=/etc/loki/local-config.yaml
+    restart: unless-stopped
+    user: "10001:10001"
+    # Resource limits for $9 server
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.5'
+        reservations:
+          memory: 128M
+          cpus: '0.2'
+    environment:
+      - LOKI_LOG_LEVEL=debug
+    networks:
+      - monitoring
+
+  # Promtail - Log collection agent (maximum verbosity)
+  promtail:
+    image: grafana/promtail:3.4.1
+    container_name: clixen-promtail
+    volumes:
+      - ./config/promtail-dev.yaml:/etc/promtail/config.yml
+      - /var/log:/var/log:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - promtail-positions:/tmp/positions
+    command: -config.file=/etc/promtail/config.yml
+    restart: unless-stopped
+    depends_on:
+      - loki
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.3'
+        reservations:
+          memory: 64M
+          cpus: '0.1'
+    environment:
+      - PROMTAIL_LOG_LEVEL=debug
+    networks:
+      - monitoring
+
+  # Grafana - Minimal setup for development dashboards  
+  grafana:
+    image: grafana/grafana:11.4.0
+    container_name: clixen-grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./config/grafana-datasources.yaml:/etc/grafana/provisioning/datasources/datasources.yaml
+      - ./config/grafana-dev-dashboards.yaml:/etc/grafana/provisioning/dashboards/dashboards.yaml
+      - ./dashboards:/var/lib/grafana/dashboards
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=clixen_dev_2025
+      - GF_LOG_LEVEL=debug
+      - GF_EXPLORE_ENABLED=true
+      - GF_INSTALL_PLUGINS=grafana-loki-datasource
+      # Development optimizations
+      - GF_ANALYTICS_REPORTING_ENABLED=false
+      - GF_ANALYTICS_CHECK_FOR_UPDATES=false
+      - GF_USERS_ALLOW_SIGN_UP=false
+    restart: unless-stopped
+    depends_on:
+      - loki
+    # Resource limits for $9 server
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.5'
+        reservations:
+          memory: 128M
+          cpus: '0.2'
+    networks:
+      - monitoring
+
+  # N8N MCP Server - For debugging n8n via MCP
+  n8n-mcp:
+    build:
+      context: .
+      dockerfile: Dockerfile.mcp
+    container_name: clixen-n8n-mcp
+    environment:
+      - N8N_BASE_URL=https://n8nio-n8n-7xzf6n.sliplane.app
+      - N8N_API_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJiN2ZmZWU5My04YTBlLTQwYTItYmMyYi0xOGE1NDliODAwZDYiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzU1MTAzNzc1fQ.mXnHtIvlmj-93EjwXZqBwzmUx9uUIddS4fO3TGMRCZ0
+      - NODE_ENV=development
+    volumes:
+      - ./logs:/app/logs
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.3'
+    networks:
+      - monitoring
+
+networks:
+  monitoring:
+    driver: bridge
+
+volumes:
+  loki-data:
+  grafana-data:
+  promtail-positions:

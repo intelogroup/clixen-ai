@@ -1,0 +1,242 @@
+# SlipLane Enhanced Configuration for Clixen AI Monitoring Stack
+# Based on official SlipLane documentation capabilities
+
+apiVersion: v1
+kind: SlipLaneService
+metadata:
+  name: clixen-monitoring-stack
+  organization: org_v8jir501u7mp
+
+spec:
+  # Service Configuration
+  service:
+    name: "clixen-monitoring"
+    description: "Clixen AI Development Monitoring Stack - Grafana, Loki, Promtail, n8n MCP"
+    
+  # Docker Image Configuration
+  image:
+    # Use GitHub Container Registry for better integration
+    source: "github"
+    repository: "clixen-ai/monitoring-stack"
+    dockerfile: "Dockerfile.sliplane"
+    
+    # Alternative: Private registry
+    # registry: "ghcr.io"
+    # image: "ghcr.io/clixen-ai/monitoring-stack:latest"
+    # credentials: "ghcr-credentials"  # Set in team settings
+
+  # Environment Variables (SlipLane encrypted storage)
+  environment:
+    # n8n Integration
+    - name: "N8N_API_KEY"
+      value: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJiN2ZmZWU5My04YTBlLTQwYTItYmMyYi0xOGE1NDliODAwZDYiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzU1MTAzNzc1fQ.mXnHtIvlmj-93EjwXZqBwzmUx9uUIddS4fO3TGMRCZ0"
+      encrypted: true
+    - name: "N8N_BASE_URL"
+      value: "https://n8nio-n8n-7xzf6n.sliplane.app"
+    - name: "N8N_WEBHOOK_BASE_URL"
+      value: "https://n8nio-n8n-7xzf6n.sliplane.app/webhook"
+      
+    # OpenAI Integration  
+    - name: "OPENAI_API_KEY"
+      value: "your_openai_api_key_here"
+      encrypted: true
+      
+    # Monitoring Configuration
+    - name: "LOG_LEVEL"
+      value: "debug"
+    - name: "RETENTION_DAYS"
+      value: "30"
+    - name: "MAX_LOG_SIZE_MB"
+      value: "1024"
+    - name: "NODE_ENV"
+      value: "development"
+      
+    # Grafana Configuration
+    - name: "GF_SECURITY_ADMIN_PASSWORD"
+      value: "clixen_dev_2025_secure"
+      encrypted: true
+    - name: "GF_LOG_LEVEL"
+      value: "debug"
+    - name: "GF_EXPLORE_ENABLED"
+      value: "true"
+      
+    # SlipLane specific variables
+    - name: "SLIPLANE_SERVICE_NAME"
+      value: "clixen-monitoring"
+    - name: "SLIPLANE_DOMAIN"
+      value: "clixen-monitoring.sliplane.app"
+
+  # Networking Configuration
+  networking:
+    # Public ports
+    ports:
+      - name: "grafana"
+        internal: 3000
+        external: 3000
+        protocol: "HTTP"
+        public: true
+        subdomain: "monitoring"  # monitoring.sliplane.app
+        
+      - name: "loki"
+        internal: 3100
+        external: 3100
+        protocol: "HTTP"
+        public: false  # Internal only
+        
+      - name: "promtail-metrics"
+        internal: 9080
+        external: 9080
+        protocol: "HTTP"
+        public: false  # Internal only
+
+    # Health check configuration
+    healthCheck:
+      path: "/api/health"
+      port: 3000
+      interval: 30
+      timeout: 10
+      retries: 3
+
+  # Resource Configuration (optimized for $9 server)
+  resources:
+    # SlipLane instance type
+    instanceType: "basic"  # $9/month tier
+    
+    # Resource limits
+    limits:
+      memory: "1Gi"
+      cpu: "0.5"
+      ephemeral-storage: "2Gi"
+    
+    # Requests
+    requests:
+      memory: "512Mi"
+      cpu: "0.25"
+      ephemeral-storage: "1Gi"
+
+  # Persistent Storage Configuration
+  volumes:
+    - name: "loki-data"
+      size: "3Gi"
+      mountPath: "/var/lib/loki"
+      type: "persistent"
+      
+    - name: "grafana-data"  
+      size: "1Gi"
+      mountPath: "/var/lib/grafana"
+      type: "persistent"
+      
+    - name: "promtail-positions"
+      size: "100Mi"
+      mountPath: "/tmp/positions"
+      type: "persistent"
+
+  # SSH Access Configuration
+  ssh:
+    enabled: true
+    keyPairs:
+      - name: "monitoring-admin"
+        publicKey: "ssh-rsa AAAAB3NzaC1yc2E... monitoring-admin@clixen.ai"
+        
+    # SSH tunneling for secure access
+    tunnels:
+      - name: "loki-tunnel"
+        localPort: 3100
+        remotePort: 3100
+        description: "Loki API access via SSH tunnel"
+        
+      - name: "promtail-tunnel"
+        localPort: 9080
+        remotePort: 9080
+        description: "Promtail metrics via SSH tunnel"
+
+  # Build Configuration
+  build:
+    # Build arguments
+    args:
+      - name: "BUILD_ENV"
+        value: "production"
+      - name: "LOG_LEVEL"
+        value: "debug"
+        
+    # Build hooks
+    hooks:
+      preBuild:
+        - "echo 'Starting monitoring stack build...'"
+        - "npm ci --only=production"
+        
+      postBuild:
+        - "echo 'Build complete, running health checks...'"
+        - "node health-check.js"
+
+  # Deployment Strategy
+  deployment:
+    strategy: "rolling"
+    maxUnavailable: "0"
+    maxSurge: "1"
+    
+    # Automatic deployment triggers
+    triggers:
+      - type: "github"
+        branch: "main"
+        path: "frontend/monitoring/*"
+
+  # Monitoring Integration (SlipLane native)
+  monitoring:
+    # Use SlipLane's built-in logging (7 days retention)
+    logging:
+      enabled: true
+      level: "debug"
+      retention: "7d"
+      maxLines: 15000
+      
+    # Metrics collection
+    metrics:
+      enabled: true
+      endpoint: "/metrics"
+      port: 9090
+
+  # Scaling Configuration
+  scaling:
+    # Auto-scaling rules
+    enabled: false  # Manual scaling for $9 server
+    
+    # Manual scaling options
+    manual:
+      minInstances: 1
+      maxInstances: 1
+      
+    # Upgrade path when needed
+    upgradePolicy:
+      instanceType: "standard"  # Next tier up
+      autoUpgrade: false
+      
+# Registry Credentials (if using private registry)
+registryCredentials:
+  - name: "ghcr-credentials"
+    registry: "ghcr.io"
+    username: "clixen-ai"
+    password: "${GITHUB_PAT}"  # Set in SlipLane team settings
+    
+  - name: "dockerhub-credentials"
+    registry: "docker.io"
+    username: "clixenai"
+    password: "${DOCKER_HUB_TOKEN}"  # Set in SlipLane team settings
+
+# Team Settings Reference
+teamSettings:
+  organization: "org_v8jir501u7mp"
+  apiToken: "api_ro_yp6yg7m0vtricaevlwy11xs4"
+  
+  # SSH Keys (managed via dashboard)
+  sshKeys:
+    - name: "monitoring-admin"
+      description: "Admin access to monitoring stack"
+      
+  # Environment Variable Templates
+  environmentTemplates:
+    - name: "monitoring-secrets"
+      variables:
+        - "N8N_API_KEY"
+        - "OPENAI_API_KEY" 
+        - "GF_SECURITY_ADMIN_PASSWORD"

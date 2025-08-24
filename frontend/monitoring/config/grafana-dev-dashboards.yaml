@@ -1,0 +1,12 @@
+# Grafana Dashboards Configuration for Development
+apiVersion: 1
+
+providers:
+  # Dashboard provider for development dashboards
+  - name: 'development'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 10
+    allowUiUpdates: true
+    options:
+      path: /var/lib/grafana/dashboards

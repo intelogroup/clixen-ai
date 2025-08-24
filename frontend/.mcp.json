@@ -1,0 +1,22 @@
+{
+  "mcpServers": {
+    "ref-tools": {
+      "command": "npx",
+      "args": ["ref-tools-mcp@latest"],
+      "env": {
+        "REF_API_KEY": "PLACEHOLDER_API_KEY"
+      }
+    },
+    "supabase": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@supabase/mcp-server-supabase@latest",
+        "--read-only"
+      ],
+      "env": {
+        "SUPABASE_ACCESS_TOKEN": "PLACEHOLDER_SUPABASE_TOKEN"
+      }
+    }
+  }
+}

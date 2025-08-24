@@ -1,0 +1,40 @@
+{
+  "name": "clixen-ai-backend",
+  "version": "1.0.0",
+  "description": "Dedicated AI Backend Server for Clixen AI - Telegram Bot + n8n Orchestration",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "deploy": "node deploy.js",
+    "test": "node test-backend.js"
+  },
+  "dependencies": {
+    "@supabase/mcp-server-supabase": "^0.4.5",
+    "@supabase/supabase-js": "^2.38.5",
+    "axios": "^1.6.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "express-rate-limit": "^7.1.5",
+    "helmet": "^7.1.0",
+    "openai": "^4.24.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "telegram",
+    "ai",
+    "n8n",
+    "automation",
+    "backend",
+    "webhook"
+  ],
+  "author": "Clixen AI Team",
+  "license": "MIT"
+}

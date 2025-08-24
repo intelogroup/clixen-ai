@@ -40,6 +40,8 @@ export const viewport = {
   initialScale: 1,
 }
 
+import { AuthProvider } from '../components/AuthProvider'
+
 export default function RootLayout({
   children,
 }: {
@@ -55,7 +57,9 @@ export default function RootLayout({
       </head>
       <body className={inter.className}>
         <div id="modal-root"></div>
-        {children}
+        <AuthProvider>
+          {children}
+        </AuthProvider>
       </body>
     </html>
   )

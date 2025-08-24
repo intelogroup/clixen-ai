@@ -164,7 +164,7 @@ async function analyzeDashboardContent(page: Page, user: any, testName: string) 
   // Analyze payment-related elements
   const paymentElements = {
     paymentPrompts: await page.locator('button:has-text("Upgrade"), button:has-text("Subscribe"), button:has-text("Get Started"), :has-text("Choose Plan"), :has-text("Payment")').count(),
-    telegramLinks: await page.locator('button:has-text("Telegram"), a:has-text("Bot"), :has-text("@ClixenAIBot"), button:has-text("Open Bot")').count(),
+    telegramLinks: await page.locator('button:has-text("Telegram"), a:has-text("Bot"), :has-text("@clixen_bot"), button:has-text("Open Bot")').count(),
     premiumFeatures: await page.locator(':has-text("Premium"), :has-text("Pro"), :has-text("Enterprise"), :has-text("Advanced")').count(),
     subscriptionStatus: await page.locator(':has-text("Active"), :has-text("Subscription"), :has-text("Plan"), :has-text("Tier")').count(),
     creditInfo: await page.locator(':has-text("Credits"), :has-text("Usage"), :has-text("Remaining")').count()
@@ -432,7 +432,7 @@ test.describe('User Payment States & Dashboard Content', () => {
     const botAccessElements = {
       botLink: await page.locator('button:has-text("Open"), a[href*="t.me"], button:has-text("Telegram")').count(),
       accessCode: await page.locator('code, :has-text("Access Code"), :has-text("Use this code")').count(),
-      instructions: await page.locator(':has-text("@ClixenAIBot"), :has-text("Start"), :has-text("Connect")').count()
+      instructions: await page.locator(':has-text("@clixen_bot"), :has-text("Start"), :has-text("Connect")').count()
     }
     
     console.log(`🤖 [${testName}] PAID USER: Bot access elements:`, botAccessElements)

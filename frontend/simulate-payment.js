@@ -91,7 +91,7 @@ async function simulatePayment(userEmail, plan = 'pro') {
     console.log('\n✅ User can now access:');
     console.log('  - Dashboard with full features');
     console.log('  - Bot access page');
-    console.log('  - Telegram bot @ClixenAIBot');
+    console.log('  - Telegram bot @clixen_bot');
     console.log('  - All ' + plan + ' tier features');
     
   } catch (error) {

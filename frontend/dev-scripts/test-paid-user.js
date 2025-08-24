@@ -60,7 +60,7 @@ const testPassword = 'TestPassword123!';
       
       // Check content
       const content = await page.textContent('body');
-      if (content.includes('ClixenAIBot') || content.includes('telegram')) {
+      if (content.includes('clixen_bot') || content.includes('telegram')) {
         console.log('✅ Bot connection details visible');
       } else if (content.includes('subscription') || content.includes('upgrade')) {
         console.log('⚠️ Still showing upgrade message - tier may not be synced');

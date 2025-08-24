@@ -1,46 +1,45 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { createClient } from '../../lib/supabase-browser'
 import { User } from '@supabase/supabase-js'
 import { Profile } from '../../lib/supabase'
 import { useRouter } from 'next/navigation'
-import { LogOut, User as UserIcon, Settings, Activity, FileText, CreditCard } from 'lucide-react'
+import { useAuth } from '../../components/AuthProvider'
+import { supabase } from '../../lib/supabase-client'
+import { Settings, Activity, FileText, CreditCard, MessageCircle, Bot, Sparkles } from 'lucide-react'
+import GlobalNavigation from '../../components/GlobalNavigation'
 
 interface DashboardStats {
   total_executions: number
   successful_executions: number
   documents_analyzed: number
   total_credits_spent: number
+  trial_active: boolean
+  trial_days_remaining: number
 }
 
 export default function Dashboard() {
   console.log('📊 Dashboard component initializing...')
   
-  const [user, setUser] = useState<User | null>(null)
+  const { user, loading: authLoading } = useAuth()
   const [profile, setProfile] = useState<Profile | null>(null)
   const [stats, setStats] = useState<DashboardStats | null>(null)
   const [loading, setLoading] = useState(true)
   const router = useRouter()
-  const supabase = createClient()
 
   useEffect(() => {
+    if (authLoading) return
+    
+    if (!user) {
+      console.log('📊 No authenticated user found, redirecting to home page...')
+      router.push('/?auth=true')
+      return
+    }
+
     console.log('📊 Dashboard useEffect triggered - fetching user data...')
     
-    // Check if user is authenticated and fetch real data
     const getUserData = async () => {
-      console.log('📊 Getting user from Supabase auth...')
-      const { data: { user } } = await supabase.auth.getUser()
-      
-      if (!user) {
-        console.log('📊 No authenticated user found, redirecting to home page...')
-        // Use Next.js router for better navigation
-        router.push('/?auth=true')
-        return
-      }
-
       console.log('📊 User found:', user.email)
-      setUser(user)
       
       try {
         console.log('📊 Fetching user profile from database...')
@@ -59,10 +58,10 @@ export default function Dashboard() {
         }
 
         console.log('📊 Fetching dashboard stats from user_dashboard view...')
-        // Fetch dashboard stats from the view
+        // Fetch dashboard stats from the view including trial information
         const { data: dashboardData, error: dashboardError } = await supabase
           .from('user_dashboard')
-          .select('total_executions, successful_executions, documents_analyzed, total_credits_spent')
+          .select('total_executions, successful_executions, documents_analyzed, total_credits_spent, trial_active, trial_days_remaining')
           .eq('id', user.id)
           .single()
         
@@ -74,7 +73,9 @@ export default function Dashboard() {
             total_executions: 0,
             successful_executions: 0,
             documents_analyzed: 0,
-            total_credits_spent: 0
+            total_credits_spent: 0,
+            trial_active: false,
+            trial_days_remaining: 0
           })
         } else {
           console.log('📊 Dashboard stats received:', dashboardData)
@@ -82,7 +83,9 @@ export default function Dashboard() {
             total_executions: dashboardData.total_executions || 0,
             successful_executions: dashboardData.successful_executions || 0,
             documents_analyzed: dashboardData.documents_analyzed || 0,
-            total_credits_spent: dashboardData.total_credits_spent || 0
+            total_credits_spent: dashboardData.total_credits_spent || 0,
+            trial_active: dashboardData.trial_active || false,
+            trial_days_remaining: dashboardData.trial_days_remaining || 0
           })
         }
         
@@ -95,23 +98,45 @@ export default function Dashboard() {
     }
 
     getUserData()
+  }, [user, authLoading, router])
 
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_OUT' || !session) {
-        window.location.href = '/'
+
+  const handleStartTrial = async () => {
+    if (!user || !profile) return
+
+    try {
+      console.log('🔥 Starting trial for user:', user.id)
+      
+      const trialStart = new Date()
+      const trialEnd = new Date()
+      trialEnd.setDate(trialEnd.getDate() + 7)
+      
+      const response = await fetch('/api/user/start-trial', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: user.id,
+          trialStartDate: trialStart.toISOString(),
+          trialEndDate: trialEnd.toISOString(),
+          trialCredits: 50
+        })
+      })
+
+      const result = await response.json()
+      
+      if (result.success) {
+        console.log('✅ Trial started successfully')
+        // Refresh the page to show updated trial status
+        router.refresh()
+      } else {
+        console.error('❌ Failed to start trial:', result.message)
+        alert('Failed to start trial: ' + result.message)
       }
-    })
-
-    return () => subscription.unsubscribe()
-  }, [])
-
-  const handleSignOut = async () => {
-    const { error } = await supabase.auth.signOut()
-    if (error) {
-      console.error('Error signing out:', error.message)
-    } else {
-      window.location.href = '/'
+    } catch (error) {
+      console.error('❌ Error starting trial:', error)
+      alert('Error starting trial. Please try again.')
     }
   }
 
@@ -128,44 +153,17 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-gradient-to-r from-blue-50 to-purple-50 shadow-sm border-b border-blue-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">B2C Automation Platform</h1>
-            </div>
-            
-            <div className="flex items-center space-x-4">
-              <button
-                onClick={() => window.location.href = '/profile'}
-                className="flex items-center text-sm text-gray-700 hover:text-gray-900 transition-colors"
-              >
-                <UserIcon className="w-5 h-5 mr-2" />
-                Profile
-              </button>
-              
-              <button
-                onClick={handleSignOut}
-                className="flex items-center text-sm text-gray-700 hover:text-gray-900 transition-colors"
-              >
-                <LogOut className="w-5 h-5 mr-2" />
-                Sign Out
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
+      <GlobalNavigation user={user} />
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Welcome Section */}
         <div className="mb-8">
           <h2 className="text-3xl font-bold text-gray-900 mb-2">
-            Welcome back, <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">{profile?.full_name || 'User'}</span>! 🚀
+            Welcome back, <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">{profile?.full_name || user?.email?.split('@')[0] || 'User'}</span>! 🚀
           </h2>
           <p className="text-lg text-gray-600">
-            Manage your automations and track your usage from this beautiful dashboard.
+            Access your AI automation assistant through Telegram and track your usage.
           </p>
         </div>
 
@@ -189,7 +187,7 @@ export default function Dashboard() {
                 <Activity className="w-6 h-6 text-green-600" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Total Workflows</p>
+                <p className="text-sm font-medium text-gray-600">Bot Interactions</p>
                 <p className="text-2xl font-bold text-gray-900">{stats?.total_executions || 0}</p>
               </div>
             </div>
@@ -201,7 +199,7 @@ export default function Dashboard() {
                 <FileText className="w-6 h-6 text-purple-600" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Documents Processed</p>
+                <p className="text-sm font-medium text-gray-600">Automations Created</p>
                 <p className="text-2xl font-bold text-gray-900">{stats?.documents_analyzed || 0}</p>
               </div>
             </div>
@@ -220,23 +218,87 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Quick Actions */}
+        {/* Bot Access Section */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 mb-8 hover:shadow-lg transition-shadow duration-300">
           <div className="p-6 border-b border-gray-200">
-            <h3 className="text-lg font-medium text-gray-900">Quick Actions</h3>
+            <h3 className="text-lg font-medium text-gray-900 flex items-center gap-2">
+              <Bot className="w-5 h-5 text-blue-600" />
+              Telegram Bot Access
+            </h3>
+            <p className="text-sm text-gray-600 mt-1">Connect with your AI assistant to create automations</p>
           </div>
           <div className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <button className="btn-primary">
-                Create New Workflow
-              </button>
-              <button className="btn-secondary">
-                Upload Document
-              </button>
-              <button className="btn-secondary">
-                View API Documentation
-              </button>
-            </div>
+            {(profile?.tier && profile.tier !== 'free') || stats?.trial_active ? (
+              <div className="space-y-4">
+                {stats?.trial_active ? (
+                  <div className="flex items-center gap-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                    <Sparkles className="w-5 h-5 text-blue-600" />
+                    <span className="text-blue-800 font-medium">
+                      Free Trial Active - {stats.trial_days_remaining} days remaining
+                    </span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-lg">
+                    <Sparkles className="w-5 h-5 text-green-600" />
+                    <span className="text-green-800 font-medium">Premium Access Active</span>
+                  </div>
+                )}
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <button 
+                    onClick={() => router.push('/bot-access')}
+                    className="flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                  >
+                    <MessageCircle className="w-5 h-5" />
+                    Access Telegram Bot
+                  </button>
+                  
+                  <button 
+                    onClick={() => window.open('https://t.me/clixen_bot', '_blank')}
+                    className="flex items-center justify-center gap-2 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+                  >
+                    <Bot className="w-5 h-5" />
+                    Open @clixen_bot
+                  </button>
+                </div>
+                
+                <div className="text-sm text-gray-600">
+                  <p><strong>Your Access Code:</strong> <code className="bg-gray-100 px-2 py-1 rounded">{user?.id?.slice(0, 8).toUpperCase()}</code></p>
+                  <p className="mt-1">Use this code to authenticate with the bot after clicking /start</p>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center space-y-4">
+                <div className="flex items-center gap-2 p-3 bg-orange-50 border border-orange-200 rounded-lg justify-center">
+                  <CreditCard className="w-5 h-5 text-orange-600" />
+                  <span className="text-orange-800 font-medium">No Active Access</span>
+                </div>
+                
+                <p className="text-gray-600">Start a free trial or upgrade to access the Telegram bot</p>
+                
+                <div className="flex flex-col md:flex-row gap-3 justify-center">
+                  <button 
+                    onClick={handleStartTrial}
+                    className="flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                  >
+                    <Sparkles className="w-5 h-5" />
+                    Start 7-Day Free Trial
+                  </button>
+                  
+                  <button 
+                    onClick={() => router.push('/subscription')}
+                    className="flex items-center justify-center gap-2 px-6 py-3 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors font-medium"
+                  >
+                    <CreditCard className="w-5 h-5" />
+                    View Plans
+                  </button>
+                </div>
+                
+                <div className="text-sm text-gray-500">
+                  <p><strong>Free Trial includes:</strong> 50 credits, full bot access, all features</p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -248,12 +310,12 @@ export default function Dashboard() {
                 <Activity className="w-6 h-6 text-emerald-600" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Successful Workflows</p>
+                <p className="text-sm font-medium text-gray-600">Successful Automations</p>
                 <p className="text-2xl font-bold text-gray-900">{stats?.successful_executions || 0}</p>
                 <p className="text-xs text-gray-500">
                   {stats?.total_executions ? 
                     `${Math.round((stats.successful_executions / stats.total_executions) * 100)}% success rate` :
-                    'No executions yet'
+                    'No automations created yet'
                   }
                 </p>
               </div>
@@ -331,11 +393,11 @@ export default function Dashboard() {
                   <h4 className="font-medium text-gray-900 mb-3">Usage Summary</h4>
                   <dl className="space-y-2">
                     <div className="flex justify-between text-sm">
-                      <dt className="text-gray-500">Total Workflows:</dt>
+                      <dt className="text-gray-500">Bot Interactions:</dt>
                       <dd className="text-gray-900">{stats?.total_executions || 0}</dd>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <dt className="text-gray-500">Documents Analyzed:</dt>
+                      <dt className="text-gray-500">Automations Created:</dt>
                       <dd className="text-gray-900">{stats?.documents_analyzed || 0}</dd>
                     </div>
                     <div className="flex justify-between text-sm">

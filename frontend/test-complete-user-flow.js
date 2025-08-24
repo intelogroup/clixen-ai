@@ -256,7 +256,7 @@ const testPassword = 'TestPassword123!';
     
     if (paidUserBotUrl.includes('/bot-access')) {
       const botPageContent = await page.textContent('body');
-      if (botPageContent.includes('ClixenAIBot') || botPageContent.includes('telegram') || botPageContent.includes('bot')) {
+      if (botPageContent.includes('clixen_bot') || botPageContent.includes('telegram') || botPageContent.includes('bot')) {
         console.log('✅ SUCCESS: Bot access granted after payment!');
         console.log('🤖 User can now access Telegram bot features');
       } else if (botPageContent.includes('upgrade') || botPageContent.includes('subscription')) {

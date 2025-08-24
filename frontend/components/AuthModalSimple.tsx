@@ -1,10 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { createClient } from '../lib/supabase-browser'
-import { handleSupabaseError, isSupabaseConfigured } from '../lib/supabase'
-import { useRouter } from 'next/navigation'
 import { X, Mail, Loader2, CheckCircle, AlertCircle } from 'lucide-react'
+import { useAuth } from './AuthProvider'
 
 interface AuthModalProps {
   isOpen: boolean
@@ -16,11 +14,9 @@ interface AuthModalProps {
 export default function AuthModalSimple({ isOpen, onClose, mode, onModeChange }: AuthModalProps) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
-  const router = useRouter()
-  const supabase = createClient()
+  const { signUp, signIn, loading: authLoading } = useAuth()
 
   // Reset state when modal closes or mode changes
   useEffect(() => {
@@ -29,7 +25,6 @@ export default function AuthModalSimple({ isOpen, onClose, mode, onModeChange }:
       setPassword('')
       setError(null)
       setSuccess(false)
-      setIsLoading(false)
     }
   }, [isOpen])
 
@@ -40,99 +35,42 @@ export default function AuthModalSimple({ isOpen, onClose, mode, onModeChange }:
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setIsLoading(true)
     setError(null)
 
-    console.log(`🔐 Attempting ${mode} for:`, email)
+    // Validate input
+    if (!email || !password) {
+      setError('Please fill in all fields.')
+      return
+    }
 
-    // Check if Supabase is properly configured
-    if (!isSupabaseConfigured()) {
-      setError('Authentication service is not properly configured.')
-      setIsLoading(false)
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters long.')
       return
     }
 
     try {
+      let result
+      
       if (mode === 'signup') {
-        // Validate password
-        if (password.length < 6) {
-          setError('Password must be at least 6 characters long.')
-          setIsLoading(false)
-          return
-        }
-
-        console.log('🔐 Calling Supabase signUp...')
-        const { data, error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            emailRedirectTo: `${window.location.origin}/auth/callback`,
-          }
-        })
-
-        if (error) {
-          console.error('🔐 SignUp error:', error)
-          throw error
-        }
-
-        console.log('🔐 SignUp response:', data)
-        
-        if (data.user) {
-          if (data.user.email_confirmed_at) {
-            // Email confirmed, redirect to dashboard
-            console.log('✅ Email already confirmed, redirecting...')
-            window.location.href = '/dashboard'
-          } else {
-            // Email confirmation needed
-            console.log('📧 Email confirmation required')
-            setSuccess(true)
-          }
-        }
+        console.log('📝 [AUTH MODAL] Signing up:', email)
+        result = await signUp(email, password)
       } else {
-        console.log('🔐 Calling Supabase signInWithPassword...')
-        const { data, error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        })
+        console.log('🔓 [AUTH MODAL] Signing in:', email)
+        result = await signIn(email, password)
+      }
 
-        if (error) {
-          console.error('🔐 SignIn error:', error)
-          throw error
-        }
-
-        console.log('🔐 SignIn response:', data)
-        
-        if (data.user && data.session) {
-          console.log('✅ SignIn successful, session established')
-          console.log('🔐 Session details:', {
-            user: data.user.email,
-            expires: data.session.expires_at,
-            token: data.session.access_token ? 'present' : 'missing'
-          })
-          
-          // Close modal first
-          onClose()
-          
-          // Use router.push for client-side navigation
-          // This ensures the middleware can see the new session
-          console.log('🚀 Navigating to dashboard...')
-          router.push('/dashboard')
-          
-          // Also trigger a hard refresh as backup
-          // This ensures cookies are properly synced
-          setTimeout(() => {
-            router.refresh()
-          }, 100)
-        } else {
-          console.error('🔐 SignIn succeeded but no session returned')
-          setError('Authentication succeeded but session creation failed. Please try again.')
-        }
+      if (result.error) {
+        setError(result.error.message)
+      } else if (mode === 'signup') {
+        // Show success message for signup
+        setSuccess(true)
+      } else {
+        // For signin, the AuthProvider handles navigation
+        onClose()
       }
     } catch (error: any) {
-      console.error('🔐 Auth error:', error)
-      setError(handleSupabaseError(error))
-    } finally {
-      setIsLoading(false)
+      console.error('🔐 [AUTH MODAL] Error:', error)
+      setError(error.message || 'An unexpected error occurred.')
     }
   }
 
@@ -226,10 +164,10 @@ export default function AuthModalSimple({ isOpen, onClose, mode, onModeChange }:
 
                 <button
                   type="submit"
-                  disabled={isLoading || !email || !password}
+                  disabled={authLoading || !email || !password}
                   className="w-full bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center justify-center font-medium"
                 >
-                  {isLoading ? (
+                  {authLoading ? (
                     <>
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                       {mode === 'signup' ? 'Creating Account...' : 'Signing In...'}

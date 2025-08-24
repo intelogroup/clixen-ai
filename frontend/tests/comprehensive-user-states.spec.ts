@@ -9,14 +9,14 @@ test.describe('User Payment State Detection', () => {
 
   test.beforeEach(async ({ browser }) => {
     page = await browser.newPage();
-    await page.goto('http://localhost:3000');
+    await page.goto('http://localhost:3004');
     await page.waitForLoadState('networkidle');
   });
 
   test.describe('🆕 New User Experience', () => {
     test('should show payment prompts for new users', async () => {
       // Test as new user (not logged in)
-      await page.goto('http://localhost:3000');
+      await page.goto('http://localhost:3004');
       
       // Check landing page loads correctly
       await expect(page).toHaveTitle(/Clixen AI/);
@@ -41,7 +41,7 @@ test.describe('User Payment State Detection', () => {
 
     test('should redirect to subscription page when trying to access premium features', async () => {
       // Try to access dashboard without auth
-      await page.goto('http://localhost:3000/dashboard');
+      await page.goto('http://localhost:3004/dashboard');
       
       // Should redirect to auth or show login prompt
       await page.waitForURL(/\/(auth|$)/);
@@ -51,7 +51,7 @@ test.describe('User Payment State Detection', () => {
   test.describe('🔄 Unpaid Returning User Flow', () => {
     test('should show payment prompts for authenticated unpaid users', async () => {
       // Login as testuser1 (free tier)
-      await page.goto('http://localhost:3000');
+      await page.goto('http://localhost:3004');
       
       // Open auth modal
       await page.getByRole('navigation').getByRole('button', { name: 'Sign In' }).first().click();
@@ -77,10 +77,10 @@ test.describe('User Payment State Detection', () => {
       await expect(page.getByText('Upgrade')).toBeVisible();
       
       // Should NOT see Telegram bot access yet
-      await expect(page.getByText('Connect to @ClixenAIBot')).not.toBeVisible();
+      await expect(page.getByText('Connect to @clixen_bot')).not.toBeVisible();
       
       // Check subscription page access
-      await page.goto('http://localhost:3000/subscription');
+      await page.goto('http://localhost:3004/subscription');
       await expect(page.getByText('Choose Your Plan')).toBeVisible();
       
       // Should see all pricing tiers
@@ -91,7 +91,7 @@ test.describe('User Payment State Detection', () => {
 
     test('should have limited feature access for unpaid users', async () => {
       // Login as testuser2
-      await page.goto('http://localhost:3000');
+      await page.goto('http://localhost:3004');
       await page.getByRole('navigation').getByRole('button', { name: 'Sign In' }).first().click();
       await page.waitForSelector('[role="dialog"]');
       
@@ -102,14 +102,14 @@ test.describe('User Payment State Detection', () => {
       await page.waitForURL(/\/dashboard/);
       
       // Check profile page access
-      await page.goto('http://localhost:3000/profile');
+      await page.goto('http://localhost:3004/profile');
       await expect(page.getByText('Account Settings')).toBeVisible();
       
       // Should show free tier info
       await expect(page.getByText('free')).toBeVisible();
       
       // Try to access bot access page (should redirect or show upgrade prompt)
-      await page.goto('http://localhost:3000/bot-access');
+      await page.goto('http://localhost:3004/bot-access');
       // This might redirect to subscription or show upgrade prompt
     });
   });
@@ -117,7 +117,7 @@ test.describe('User Payment State Detection', () => {
   test.describe('💰 Paid User Experience', () => {
     test('should create a paid user scenario', async () => {
       // Since we don't have actual paid users, let's test the subscription flow
-      await page.goto('http://localhost:3000/subscription');
+      await page.goto('http://localhost:3004/subscription');
       
       // Should see pricing plans
       await expect(page.getByText('Choose Your Plan')).toBeVisible();
@@ -134,7 +134,7 @@ test.describe('User Payment State Detection', () => {
     test('should show bot access for paid users', async () => {
       // This test would require a user with stripe_customer_id
       // For now, we'll test that the bot-access page exists
-      await page.goto('http://localhost:3000/bot-access');
+      await page.goto('http://localhost:3004/bot-access');
       
       // Might redirect to auth if not logged in
       // Or show the bot access page if authenticated
@@ -151,7 +151,7 @@ test.describe('User Payment State Detection', () => {
       // Test with network offline to simulate API failures
       await page.context().setOffline(true);
       
-      await page.goto('http://localhost:3000');
+      await page.goto('http://localhost:3004');
       
       // Page should still load (might show cached content or error states)
       await page.waitForSelector('body');
@@ -168,7 +168,7 @@ test.describe('User Payment State Detection', () => {
 
     test('should validate user state consistency', async () => {
       // Login as testuser3
-      await page.goto('http://localhost:3000');
+      await page.goto('http://localhost:3004');
       await page.getByRole('navigation').getByRole('button', { name: 'Sign In' }).first().click();
       await page.waitForSelector('[role="dialog"]');
       
@@ -181,7 +181,7 @@ test.describe('User Payment State Detection', () => {
       // Check that user state is consistent across pages
       const dashboardUserInfo = await page.textContent('[data-testid="user-email"], .user-email') || '';
       
-      await page.goto('http://localhost:3000/profile');
+      await page.goto('http://localhost:3004/profile');
       const profileUserInfo = await page.textContent('[data-testid="user-email"], .user-email') || '';
       
       // User info should be consistent
@@ -210,11 +210,11 @@ test.describe('User Payment State Detection', () => {
       const pages = ['/', '/dashboard', '/profile', '/subscription', '/bot-access'];
       
       for (const pagePath of pages) {
-        await page.goto(`http://localhost:3000${pagePath}`);
+        await page.goto(`http://localhost:3004${pagePath}`);
         await page.waitForLoadState('networkidle');
         
         // Check for 404 or other HTTP errors
-        const response = await page.goto(`http://localhost:3000${pagePath}`);
+        const response = await page.goto(`http://localhost:3004${pagePath}`);
         if (response) {
           expect(response.status()).toBeLessThan(400);
         }
@@ -226,7 +226,7 @@ test.describe('User Payment State Detection', () => {
     });
 
     test('should verify all critical UI elements load', async () => {
-      await page.goto('http://localhost:3000');
+      await page.goto('http://localhost:3004');
       
       // Check critical elements exist
       const criticalElements = [
@@ -246,7 +246,7 @@ test.describe('User Payment State Detection', () => {
 
 test.describe('🎨 Visual Regression Testing', () => {
   test('should match landing page visual snapshot', async ({ page }) => {
-    await page.goto('http://localhost:3000');
+    await page.goto('http://localhost:3004');
     await page.waitForLoadState('networkidle');
     
     // Hide dynamic elements that might change
@@ -267,7 +267,7 @@ test.describe('🎨 Visual Regression Testing', () => {
   });
 
   test('should match auth modal visual snapshot', async ({ page }) => {
-    await page.goto('http://localhost:3000');
+    await page.goto('http://localhost:3004');
     await page.getByRole('navigation').getByRole('button', { name: 'Sign In' }).first().click();
     await page.waitForSelector('[role="dialog"]');
     
@@ -282,7 +282,7 @@ test.describe('🌐 Cross-Browser Compatibility', () => {
                              browserName === 'firefox' ? firefox : webkit).launch();
       const page = await browser.newPage();
       
-      await page.goto('http://localhost:3000');
+      await page.goto('http://localhost:3004');
       
       // Basic functionality test
       await expect(page).toHaveTitle(/Clixen AI/);
@@ -303,7 +303,7 @@ test.describe('📱 Responsive Design Testing', () => {
   devices.forEach(device => {
     test(`should be responsive on ${device.name}`, async ({ page }) => {
       await page.setViewportSize({ width: device.width, height: device.height });
-      await page.goto('http://localhost:3000');
+      await page.goto('http://localhost:3004');
       
       // Check that main elements are visible and properly sized
       const header = page.locator('header, nav, [role="navigation"]').first();

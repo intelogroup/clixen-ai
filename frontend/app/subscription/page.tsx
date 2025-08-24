@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '../../lib/supabase-browser'
+import { useAuth } from '../../components/AuthProvider'
 import { User } from '@supabase/supabase-js'
-import { ArrowLeft, Check, X, Zap, Rocket, Crown, Shield, Clock, Users, Sparkles } from 'lucide-react'
+import { Check, X, Zap, Rocket, Crown, Shield, Clock, Users, Sparkles } from 'lucide-react'
 import Script from 'next/script'
+import GlobalNavigation from '../../components/GlobalNavigation'
 
 interface PricingPlan {
   id: string
@@ -89,35 +90,23 @@ const PRICING_PLANS: PricingPlan[] = [
 ]
 
 export default function SubscriptionPage() {
-  const [user, setUser] = useState<User | null>(null)
+  const { user, loading: authLoading } = useAuth()
   const [loading, setLoading] = useState(true)
   const [stripeLoaded, setStripeLoaded] = useState(false)
   const router = useRouter()
-  const supabase = createClient()
 
   useEffect(() => {
-    checkAuth()
-  }, [])
-
-  async function checkAuth() {
-    try {
-      console.log('💳 [SUBSCRIPTION] Checking authentication...')
-      const { data: { user } } = await supabase.auth.getUser()
-      
-      if (!user) {
-        console.log('💳 [SUBSCRIPTION] No user found, redirecting to auth')
-        router.push('/?auth=true&redirect=/subscription')
-        return
-      }
-
-      console.log('💳 [SUBSCRIPTION] User authenticated:', user.email)
-      setUser(user)
-    } catch (error) {
-      console.error('💳 [SUBSCRIPTION] Auth error:', error)
-    } finally {
-      setLoading(false)
+    if (authLoading) return
+    
+    if (!user) {
+      console.log('💳 [SUBSCRIPTION] No user found, redirecting to auth')
+      router.push('/?auth=true&redirect=/subscription')
+      return
     }
-  }
+
+    console.log('💳 [SUBSCRIPTION] User authenticated:', user.email)
+    setLoading(false)
+  }, [user, authLoading, router])
 
   const handleStripeLoad = () => {
     console.log('💳 [SUBSCRIPTION] Stripe Buy Button script loaded')
@@ -140,19 +129,10 @@ export default function SubscriptionPage() {
         onLoad={handleStripeLoad}
       />
 
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-        <div className="container mx-auto px-4 py-12 max-w-7xl">
-          
-          {/* Back Button */}
-          <div className="mb-8">
-            <button
-              onClick={() => router.back()}
-              className="flex items-center text-gray-600 hover:text-gray-900 transition-colors"
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Dashboard
-            </button>
-          </div>
+      <div className="min-h-screen bg-gray-50">
+        <GlobalNavigation user={user} />
+        
+        <div className="container mx-auto px-4 py-8 max-w-7xl">
 
           {/* Header */}
           <div className="text-center mb-12">
@@ -276,7 +256,7 @@ export default function SubscriptionPage() {
               </div>
               <div>
                 <h3 className="font-semibold mb-2">How do I access the Telegram bot?</h3>
-                <p className="text-gray-600">After subscribing, you'll get immediate access to @ClixenAIBot with your personalized setup.</p>
+                <p className="text-gray-600">After subscribing, you'll get immediate access to @clixen_bot with your personalized setup.</p>
               </div>
               <div>
                 <h3 className="font-semibold mb-2">Is there a free trial?</h3>

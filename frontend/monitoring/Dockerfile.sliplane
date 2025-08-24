@@ -1,0 +1,222 @@
+# SlipLane Optimized Dockerfile for Clixen AI Monitoring Stack
+# Multi-service container with Grafana, Loki, Promtail, and n8n MCP Server
+# Optimized for SlipLane $9 server with resource constraints
+
+# Stage 1: Build n8n MCP Server
+FROM node:22-alpine AS mcp-builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production && npm cache clean --force
+COPY n8n-mcp-server.js ./
+COPY *.js ./
+
+# Stage 2: Loki binary
+FROM grafana/loki:3.4.1 AS loki-source
+
+# Stage 3: Promtail binary
+FROM grafana/promtail:3.4.1 AS promtail-source
+
+# Stage 4: Final SlipLane optimized image
+FROM grafana/grafana:11.4.0
+
+# Set labels for SlipLane
+LABEL maintainer="Clixen AI <dev@clixen.ai>"
+LABEL description="Comprehensive monitoring stack for Clixen AI development"
+LABEL version="1.0.0"
+LABEL sliplane.service="clixen-monitoring"
+
+# Switch to root for installation
+USER root
+
+# Install dependencies optimized for Alpine
+RUN apk add --no-cache \
+    curl \
+    jq \
+    docker-cli \
+    supervisor \
+    nodejs \
+    npm \
+    && rm -rf /var/cache/apk/*
+
+# Install Grafana plugins
+RUN grafana-cli plugins install grafana-loki-datasource \
+    && grafana-cli plugins install grafana-clock-panel
+
+# Copy binaries from source images
+COPY --from=loki-source /usr/bin/loki /usr/bin/loki
+COPY --from=promtail-source /usr/bin/promtail /usr/bin/promtail
+
+# Copy n8n MCP Server
+COPY --from=mcp-builder /app /opt/mcp-server
+RUN chmod +x /opt/mcp-server/*.js
+
+# Create necessary directories with proper permissions
+RUN mkdir -p \
+    /var/lib/loki/chunks \
+    /var/lib/loki/rules \
+    /var/lib/promtail \
+    /tmp/positions \
+    /var/log/monitoring \
+    /etc/monitoring \
+    && chown -R grafana:grafana \
+        /var/lib/loki \
+        /var/lib/promtail \
+        /tmp/positions \
+        /var/log/monitoring
+
+# Copy configuration files
+COPY config/loki-dev.yaml /etc/monitoring/loki.yaml
+COPY config/promtail-dev.yaml /etc/monitoring/promtail.yaml
+COPY config/grafana-datasources.yaml /etc/grafana/provisioning/datasources/
+COPY config/grafana-dev-dashboards.yaml /etc/grafana/provisioning/dashboards/
+
+# Create supervisor configuration for SlipLane
+RUN cat > /etc/supervisord.conf << 'EOF'
+[supervisord]
+nodaemon=true
+user=root
+logfile=/var/log/monitoring/supervisord.log
+pidfile=/var/run/supervisord.pid
+loglevel=info
+silent=false
+
+[program:grafana]
+command=/run.sh
+user=grafana
+autorestart=true
+stdout_logfile=/dev/stdout
+stdout_logfile_maxbytes=0
+stderr_logfile=/dev/stderr
+stderr_logfile_maxbytes=0
+environment=GF_SECURITY_ADMIN_PASSWORD="%(ENV_GF_SECURITY_ADMIN_PASSWORD)s",GF_LOG_LEVEL="%(ENV_GF_LOG_LEVEL)s",GF_EXPLORE_ENABLED="true"
+
+[program:loki]
+command=/usr/bin/loki -config.file=/etc/monitoring/loki.yaml
+user=grafana
+autorestart=true
+stdout_logfile=/dev/stdout
+stdout_logfile_maxbytes=0
+stderr_logfile=/dev/stderr
+stderr_logfile_maxbytes=0
+
+[program:promtail]
+command=/usr/bin/promtail -config.file=/etc/monitoring/promtail.yaml
+user=grafana
+autorestart=true
+stdout_logfile=/dev/stdout
+stdout_logfile_maxbytes=0
+stderr_logfile=/dev/stderr
+stderr_logfile_maxbytes=0
+
+[program:mcp-server]
+command=node n8n-mcp-server.js
+directory=/opt/mcp-server
+user=grafana
+autorestart=true
+stdout_logfile=/dev/stdout
+stdout_logfile_maxbytes=0
+stderr_logfile=/dev/stderr
+stderr_logfile_maxbytes=0
+environment=NODE_ENV="%(ENV_NODE_ENV)s",N8N_BASE_URL="%(ENV_N8N_BASE_URL)s",N8N_API_KEY="%(ENV_N8N_API_KEY)s"
+EOF
+
+# Create health check script for SlipLane
+RUN cat > /usr/local/bin/health-check.sh << 'EOF'
+#!/bin/sh
+set -e
+
+echo "Checking Grafana..."
+curl -f http://localhost:3000/api/health || exit 1
+
+echo "Checking Loki..."  
+curl -f http://localhost:3100/ready || exit 1
+
+echo "Checking Promtail..."
+curl -f http://localhost:9080/metrics > /dev/null || exit 1
+
+echo "Checking MCP Server..."
+pgrep -f "n8n-mcp-server.js" > /dev/null || exit 1
+
+echo "All services healthy!"
+exit 0
+EOF
+
+RUN chmod +x /usr/local/bin/health-check.sh
+
+# Create startup script with SlipLane optimizations
+RUN cat > /usr/local/bin/startup.sh << 'EOF'
+#!/bin/sh
+set -e
+
+echo "🚀 Starting Clixen AI Monitoring Stack on SlipLane..."
+
+# Validate required environment variables
+required_vars="N8N_API_KEY N8N_BASE_URL GF_SECURITY_ADMIN_PASSWORD"
+for var in $required_vars; do
+    if [ -z "$(eval echo \$$var)" ]; then
+        echo "❌ Required environment variable $var is not set"
+        exit 1
+    fi
+done
+
+# Set default values for optional variables
+export LOG_LEVEL=${LOG_LEVEL:-"debug"}
+export RETENTION_DAYS=${RETENTION_DAYS:-"30"}  
+export GF_LOG_LEVEL=${GF_LOG_LEVEL:-"debug"}
+export NODE_ENV=${NODE_ENV:-"development"}
+
+echo "✅ Environment validated"
+
+# Initialize Loki data directory
+if [ ! -f /var/lib/loki/.initialized ]; then
+    echo "🔧 Initializing Loki data directory..."
+    chown -R grafana:grafana /var/lib/loki
+    touch /var/lib/loki/.initialized
+fi
+
+# Initialize Grafana data directory  
+if [ ! -f /var/lib/grafana/.initialized ]; then
+    echo "🔧 Initializing Grafana data directory..."
+    chown -R grafana:grafana /var/lib/grafana
+    touch /var/lib/grafana/.initialized
+fi
+
+# Initialize Promtail positions
+if [ ! -f /tmp/positions/.initialized ]; then
+    echo "🔧 Initializing Promtail positions..."
+    chown -R grafana:grafana /tmp/positions
+    touch /tmp/positions/.initialized
+fi
+
+echo "🎯 SlipLane service: ${SLIPLANE_SERVICE_NAME:-clixen-monitoring}"
+echo "🌐 SlipLane domain: ${SLIPLANE_DOMAIN:-monitoring.sliplane.app}"
+
+# Start supervisor with all services
+echo "▶️  Starting all monitoring services..."
+exec /usr/bin/supervisord -c /etc/supervisord.conf
+EOF
+
+RUN chmod +x /usr/local/bin/startup.sh
+
+# SlipLane specific health check configuration
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD /usr/local/bin/health-check.sh
+
+# Expose ports for SlipLane networking
+EXPOSE 3000 3100 9080
+
+# Set working directory
+WORKDIR /opt/mcp-server
+
+# Switch back to grafana user for security
+USER grafana
+
+# Use startup script as entrypoint
+ENTRYPOINT ["/usr/local/bin/startup.sh"]
+
+# Metadata for SlipLane deployment
+LABEL sliplane.ports.grafana="3000:HTTP:public"
+LABEL sliplane.ports.loki="3100:HTTP:private" 
+LABEL sliplane.ports.promtail="9080:HTTP:private"
+LABEL sliplane.health.path="/api/health"
+LABEL sliplane.health.port="3000"

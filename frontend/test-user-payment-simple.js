@@ -148,7 +148,7 @@ const testPassword = 'TestPassword123!';
         
         if (postPaymentUrl.includes('/bot-access')) {
           const content = await page.textContent('body');
-          if (content.includes('ClixenAIBot') || content.includes('telegram')) {
+          if (content.includes('clixen_bot') || content.includes('telegram')) {
             console.log('✅ SUCCESS: Bot access granted after payment!');
           } else if (content.includes('subscription') || content.includes('upgrade')) {
             console.log('⚠️ Payment may still be processing...');

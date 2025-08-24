@@ -1,10 +1,12 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { createClient } from '../../lib/supabase-browser'
 import { User } from '@supabase/supabase-js'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, Save, Eye, EyeOff, Copy, RefreshCw } from 'lucide-react'
+import { useAuth } from '../../components/AuthProvider'
+import { supabase } from '../../lib/supabase-client'
+import { Save, Eye, EyeOff, Copy, RefreshCw } from 'lucide-react'
+import GlobalNavigation from '../../components/GlobalNavigation'
 
 interface UserProfile {
   id: string
@@ -17,7 +19,7 @@ interface UserProfile {
 }
 
 export default function Profile() {
-  const [user, setUser] = useState<User | null>(null)
+  const { user, loading: authLoading } = useAuth()
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -27,19 +29,17 @@ export default function Profile() {
     email: ''
   })
   const router = useRouter()
-  const supabase = createClient()
 
   useEffect(() => {
-    const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      
-      if (!user) {
-        console.log('👤 No authenticated user found, redirecting to home page...')
-        router.push('/?auth=true')
-        return
-      }
+    if (authLoading) return
+    
+    if (!user) {
+      console.log('👤 No authenticated user found, redirecting to home page...')
+      router.push('/?auth=true')
+      return
+    }
 
-      setUser(user)
+    const getProfile = async () => {
       
       // Mock profile data
       const mockProfile: UserProfile = {
@@ -60,8 +60,8 @@ export default function Profile() {
       setLoading(false)
     }
 
-    getUser()
-  }, [])
+    getProfile()
+  }, [user, authLoading, router])
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -126,24 +126,16 @@ export default function Profile() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center h-16">
-            <button
-              onClick={() => window.location.href = '/dashboard'}
-              className="flex items-center text-sm text-gray-700 hover:text-gray-900 transition-colors mr-4"
-            >
-              <ArrowLeft className="w-5 h-5 mr-2" />
-              Back to Dashboard
-            </button>
-            <h1 className="text-xl font-semibold text-gray-900">Profile Settings</h1>
-          </div>
-        </div>
-      </header>
+      <GlobalNavigation user={user} />
 
       {/* Main Content */}
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Page Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">Profile Settings</h1>
+          <p className="text-gray-600">Manage your account information and preferences</p>
+        </div>
+        
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           
           {/* Profile Form */}

@@ -2,11 +2,13 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { useAuth } from '../../components/AuthProvider'
+import { supabase } from '../../lib/supabase-client'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
+import GlobalNavigation from '../../components/GlobalNavigation'
 import { 
   MessageCircle, 
   Copy, 
@@ -22,28 +24,28 @@ import {
 } from 'lucide-react'
 
 export default function BotAccessPage() {
-  const [user, setUser] = useState<any>(null)
+  const { user, loading: authLoading } = useAuth()
   const [loading, setLoading] = useState(true)
   const [copied, setCopied] = useState(false)
   const [subscription, setSubscription] = useState<any>(null)
   const router = useRouter()
-  const supabase = createClientComponentClient()
 
-  const TELEGRAM_BOT_LINK = 'https://t.me/ClixenAIBot'
-  const BOT_USERNAME = '@ClixenAIBot'
+  const TELEGRAM_BOT_LINK = 'https://t.me/clixen_bot'
+  const BOT_USERNAME = '@clixen_bot'
 
   useEffect(() => {
+    if (authLoading) return
+    
+    if (!user) {
+      router.push('/?auth=true')
+      return
+    }
+
     checkAuth()
-  }, [])
+  }, [user, authLoading, router])
 
   async function checkAuth() {
     try {
-      const { data: { user } } = await supabase.auth.getUser()
-      
-      if (!user) {
-        router.push('/?auth=true')
-        return
-      }
 
       // Get user profile with subscription info
       const { data: profile } = await supabase
@@ -52,7 +54,6 @@ export default function BotAccessPage() {
         .eq('id', user.id)
         .single()
 
-      setUser(user)
       setSubscription(profile)
       
       // Check if user has active subscription (free tier users need to upgrade)
@@ -81,8 +82,10 @@ export default function BotAccessPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
-      <div className="container mx-auto px-4 py-12 max-w-6xl">
+    <div className="min-h-screen bg-gray-50">
+      <GlobalNavigation user={user} />
+      
+      <div className="container mx-auto px-4 py-8 max-w-6xl">
         {/* Welcome Header */}
         <div className="text-center mb-12">
           <Badge className="mb-4" variant="default">

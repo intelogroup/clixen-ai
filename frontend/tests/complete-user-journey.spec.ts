@@ -169,7 +169,7 @@ test.describe('Complete User Journey: Sign Up → Payment → Bot Access', () =>
     console.log('✅ [TEST] Bot access page loaded successfully')
 
     // Verify key elements on bot access page
-    await expect(page.locator(':has-text("@ClixenAIBot")')).toBeVisible()
+    await expect(page.locator(':has-text("@clixen_bot")')).toBeVisible()
     await expect(page.locator('button:has-text("Open Telegram Bot")')).toBeVisible()
     await expect(page.locator(':has-text("Your Access Code")')).toBeVisible()
     console.log('✅ [TEST] All bot access elements verified')

@@ -188,7 +188,7 @@ const testPassword = 'TestPassword123!';
     
     if (paidBotUrl.includes('/bot-access')) {
       const botContent = await page.textContent('body');
-      if (botContent.includes('ClixenAIBot') || botContent.includes('telegram')) {
+      if (botContent.includes('clixen_bot') || botContent.includes('telegram')) {
         console.log('✅ SUCCESS! Paid user has bot access');
       } else {
         console.log('⚠️ Bot access page loaded but content unclear');

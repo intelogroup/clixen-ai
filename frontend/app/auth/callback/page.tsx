@@ -1,11 +1,57 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { supabase } from '../../../lib/supabase'
+import { useRouter } from 'next/navigation'
+import { supabase } from '../../../lib/supabase-client'
 
 export default function AuthCallback() {
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading')
   const [message, setMessage] = useState('')
+  const router = useRouter()
+
+  const ensureUserProfile = async (user: any) => {
+    try {
+      console.log('👤 Checking if user profile exists...')
+      
+      // Check if profile already exists
+      const { data: existingProfile, error: fetchError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', user.id)
+        .single()
+        
+      if (!existingProfile && fetchError?.code === 'PGRST116') {
+        console.log('👤 Profile not found, creating new profile...')
+        
+        // Create new profile
+        const { error: insertError } = await supabase
+          .from('profiles')
+          .insert({
+            id: user.id,
+            email: user.email,
+            full_name: user.user_metadata?.full_name || null,
+            tier: 'free',
+            trial_active: true,
+            trial_started_at: new Date().toISOString(),
+            trial_expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+            credits_remaining: 50,
+            credits_used: 0
+          })
+          
+        if (insertError) {
+          console.error('👤 Error creating profile:', insertError)
+        } else {
+          console.log('✅ User profile created successfully')
+        }
+      } else if (existingProfile) {
+        console.log('✅ User profile already exists')
+      } else if (fetchError) {
+        console.error('👤 Error checking profile:', fetchError)
+      }
+    } catch (error) {
+      console.error('👤 Error ensuring user profile:', error)
+    }
+  }
 
   useEffect(() => {
     const handleAuthCallback = async () => {
@@ -24,12 +70,16 @@ export default function AuthCallback() {
 
         if (data?.session) {
           console.log('✅ Valid session found, user authenticated')
+          
+          // Ensure user profile exists
+          await ensureUserProfile(data.session.user)
+          
           setStatus('success')
           setMessage('Authentication successful! Redirecting to dashboard...')
           
           // Redirect to dashboard after a brief delay
           setTimeout(() => {
-            window.location.href = '/dashboard'
+            router.push('/dashboard')
           }, 1500)
         } else {
           // Check for auth code in URL and exchange it
@@ -46,11 +96,15 @@ export default function AuthCallback() {
             
             if (sessionData?.session) {
               console.log('✅ Session exchange successful')
+              
+              // Ensure user profile exists
+              await ensureUserProfile(sessionData.session.user)
+              
               setStatus('success')
               setMessage('Authentication successful! Redirecting to dashboard...')
               
               setTimeout(() => {
-                window.location.href = '/dashboard'
+                router.push('/dashboard')
               }, 1500)
             } else {
               throw new Error('Failed to create session from code')
@@ -66,7 +120,7 @@ export default function AuthCallback() {
         
         // Redirect to home page after error
         setTimeout(() => {
-          window.location.href = '/?auth=true'
+          router.push('/?auth=true')
         }, 3000)
       }
     }
@@ -107,7 +161,7 @@ export default function AuthCallback() {
             <h2 className="text-xl font-semibold text-gray-900 mb-2">Authentication Failed</h2>
             <p className="text-gray-600 mb-4">{message}</p>
             <button
-              onClick={() => window.location.href = '/'}
+              onClick={() => router.push('/')}
               className="btn-primary"
             >
               Return to Home
