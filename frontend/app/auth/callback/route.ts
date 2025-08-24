@@ -1,10 +1,11 @@
-import { createClient } from '../../../lib/supabase-server'
+import { createServerClient } from '@supabase/ssr'
 import { NextResponse } from 'next/server'
 import { NextRequest } from 'next/server'
+import { cookies } from 'next/headers'
 
 export async function GET(request: NextRequest) {
   console.log('🔐 [AUTH CALLBACK] Processing auth callback...')
-  
+
   const requestUrl = new URL(request.url)
   const code = requestUrl.searchParams.get('code')
   const origin = requestUrl.origin
@@ -12,11 +13,27 @@ export async function GET(request: NextRequest) {
 
   if (code) {
     console.log('🔐 [AUTH CALLBACK] Found auth code, exchanging for session...')
-    
-    const supabase = createClient()
-    
+
+    const cookieStore = await cookies()
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return cookieStore.getAll()
+          },
+          setAll(cookiesToSet) {
+            cookiesToSet.forEach(({ name, value, options }) => {
+              cookieStore.set(name, value, options)
+            })
+          },
+        },
+      }
+    )
+
     const { data, error } = await supabase.auth.exchangeCodeForSession(code)
-    
+
     if (error) {
       console.error('❌ [AUTH CALLBACK] Error exchanging code for session:', error)
       return NextResponse.redirect(`${origin}/?error=auth_callback_error`)
