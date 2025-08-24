@@ -5,7 +5,7 @@ import { User } from '@supabase/supabase-js'
 import { Profile } from '../../lib/supabase'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '../../components/AuthProvider'
-import { supabase } from '../../lib/supabase-client'
+import { createClient } from '../../lib/supabase-browser'
 import { Settings, Activity, FileText, CreditCard, MessageCircle, Bot, Sparkles } from 'lucide-react'
 import GlobalNavigation from '../../components/GlobalNavigation'
 
