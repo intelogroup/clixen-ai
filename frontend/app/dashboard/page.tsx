@@ -1,61 +1,60 @@
-'use client'
+"use client";
 
-import { useRouter } from 'next/navigation'
-import { 
-  Settings, 
-  Activity, 
-  FileText, 
-  CreditCard, 
-  MessageCircle, 
-  Bot, 
-  Sparkles,
-  TrendingUp,
-  Calendar,
-  Zap,
-  CheckCircle,
-  Clock,
-  AlertCircle,
-  ExternalLink,
-  Users,
-  Mail,
-  Languages,
-  CloudRain,
-  Shield
-} from 'lucide-react'
+import { useUser, UserButton } from "@stackframe/stack";
+import { useEffect, useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { getUserData, getAllUsers } from "@/app/actions";
 
 export default function Dashboard() {
-  const router = useRouter()
+  const user = useUser({ or: "redirect" });
+  const [userData, setUserData] = useState<any>(null);
+  const [allUsers, setAllUsers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Temporary placeholder data
-  const user = { email: 'demo@example.com' }
-  const profile = {
-    tier: 'free',
-    trial_active: true,
-    quota_limit: 50,
-    quota_used: 12
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const [userResult, usersResult] = await Promise.all([
+          getUserData(),
+          getAllUsers()
+        ]);
+        setUserData(userResult);
+        setAllUsers(usersResult);
+      } catch (error) {
+        console.error('Error loading data:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    if (user) {
+      loadData();
+    }
+  }, [user]);
+
+  if (!user) {
+    return <div>Loading...</div>;
   }
 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200">
+      <header className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center space-x-4">
-              <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                <Bot className="w-5 h-5 text-white" />
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center space-x-2">
+              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-sm">C</span>
               </div>
-              <h1 className="text-xl font-bold text-gray-900">Clixen AI</h1>
+              <span className="text-xl font-bold text-gray-900">Clixen AI</span>
             </div>
-            
             <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-600">Welcome back!</span>
-              <button
-                onClick={() => router.push('/')}
-                className="text-gray-600 hover:text-gray-900 transition-colors"
-              >
-                Back to Home
-              </button>
+              <span className="text-sm text-gray-700">
+                Welcome, {user.displayName || user.primaryEmail}
+              </span>
+              <UserButton />
             </div>
           </div>
         </div>
@@ -63,166 +62,114 @@ export default function Dashboard() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Migration Notice */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
-          <div className="flex items-start space-x-3">
-            <AlertCircle className="w-6 h-6 text-blue-600 flex-shrink-0 mt-0.5" />
-            <div>
-              <h3 className="text-lg font-semibold text-blue-900 mb-2">
-                🚧 Authentication System Migration in Progress
-              </h3>
-              <p className="text-blue-800 mb-4">
-                We're migrating from Supabase to Neon Auth for better performance and features. 
-                Your dashboard will be fully functional again shortly!
-              </p>
-              <div className="space-y-2">
-                <div className="flex items-center text-sm text-blue-700">
-                  <CheckCircle className="w-4 h-4 mr-2" />
-                  Database migration completed
-                </div>
-                <div className="flex items-center text-sm text-blue-700">
-                  <Clock className="w-4 h-4 mr-2" />
-                  Setting up Neon Auth + Stack Auth
-                </div>
-                <div className="flex items-center text-sm text-blue-700">
-                  <Clock className="w-4 h-4 mr-2" />
-                  Implementing new auth UI
-                </div>
-              </div>
-            </div>
-          </div>
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+          <p className="text-gray-600 mt-2">Welcome to your Clixen AI workspace</p>
         </div>
 
-        {/* Dashboard Preview */}
-        <div className="grid lg:grid-cols-3 gap-8">
-          {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Stats Cards */}
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <div className="bg-white p-6 rounded-lg border border-gray-200">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-gray-600">Credits Used</p>
-                    <p className="text-2xl font-bold text-gray-900">12</p>
+        {/* User Info Card */}
+        <div className="grid gap-6 mb-8">
+          <Card>
+            <CardHeader>
+              <CardTitle>Your Profile</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {loading ? (
+                <div>Loading...</div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="flex items-center space-x-4">
+                    <div>
+                      <p className="font-medium">{user.displayName || "No display name"}</p>
+                      <p className="text-sm text-gray-600">{user.primaryEmail}</p>
+                      <div className="flex items-center space-x-2 mt-2">
+                        <Badge variant={user.primaryEmailVerified ? "default" : "secondary"}>
+                          {user.primaryEmailVerified ? "Verified" : "Unverified"}
+                        </Badge>
+                        <Badge variant="outline">
+                          Signed up: {new Date(user.signedUpAt).toLocaleDateString()}
+                        </Badge>
+                      </div>
+                    </div>
                   </div>
-                  <Zap className="w-8 h-8 text-blue-500" />
+                  
+                  {userData && (
+                    <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+                      <h4 className="font-medium mb-2">Database Record</h4>
+                      <p className="text-sm text-gray-600">ID: {userData.id}</p>
+                      <p className="text-sm text-gray-600">Created: {new Date(userData.created_at).toLocaleString()}</p>
+                    </div>
+                  )}
                 </div>
-              </div>
-              
-              <div className="bg-white p-6 rounded-lg border border-gray-200">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-gray-600">Credits Remaining</p>
-                    <p className="text-2xl font-bold text-gray-900">38</p>
-                  </div>
-                  <Activity className="w-8 h-8 text-green-500" />
-                </div>
-              </div>
-              
-              <div className="bg-white p-6 rounded-lg border border-gray-200">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-gray-600">Automations</p>
-                    <p className="text-2xl font-bold text-gray-900">25</p>
-                  </div>
-                  <Bot className="w-8 h-8 text-purple-500" />
-                </div>
-              </div>
-              
-              <div className="bg-white p-6 rounded-lg border border-gray-200">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-gray-600">Success Rate</p>
-                    <p className="text-2xl font-bold text-gray-900">96%</p>
-                  </div>
-                  <TrendingUp className="w-8 h-8 text-orange-500" />
-                </div>
-              </div>
-            </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
 
-            {/* Recent Activity */}
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
-              <div className="space-y-4">
-                <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                  <CloudRain className="w-5 h-5 text-blue-500" />
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-900">Weather Check - Tokyo</p>
-                    <p className="text-xs text-gray-500">2 minutes ago</p>
-                  </div>
-                  <CheckCircle className="w-4 h-4 text-green-500" />
-                </div>
-                
-                <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                  <Mail className="w-5 h-5 text-purple-500" />
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-900">Email Scan - Invoices</p>
-                    <p className="text-xs text-gray-500">15 minutes ago</p>
-                  </div>
-                  <CheckCircle className="w-4 h-4 text-green-500" />
-                </div>
-                
-                <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                  <Languages className="w-5 h-5 text-green-500" />
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-900">Translation - Spanish to English</p>
-                    <p className="text-xs text-gray-500">1 hour ago</p>
-                  </div>
-                  <CheckCircle className="w-4 h-4 text-green-500" />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Trial Status */}
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Trial Status</h3>
-              <div className="space-y-4">
-                <div className="bg-green-50 p-4 rounded-lg">
-                  <div className="flex items-center space-x-2 mb-2">
-                    <Sparkles className="w-5 h-5 text-green-600" />
-                    <span className="text-sm font-medium text-green-900">Free Trial Active</span>
-                  </div>
-                  <p className="text-xs text-green-700">5 days remaining</p>
-                </div>
-                
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Credits Used</span>
-                    <span className="font-medium">12/50</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div className="bg-blue-600 h-2 rounded-full" style={{ width: '24%' }}></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Quick Actions */}
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+        {/* Users List */}
+        <Card>
+          <CardHeader>
+            <CardTitle>All Users ({allUsers.length})</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {loading ? (
+              <div>Loading users...</div>
+            ) : (
               <div className="space-y-3">
-                <button className="w-full flex items-center space-x-3 p-3 text-left hover:bg-gray-50 rounded-lg transition-colors">
-                  <Bot className="w-5 h-5 text-blue-500" />
-                  <span className="text-sm font-medium text-gray-900">Access Telegram Bot</span>
-                </button>
-                
-                <button className="w-full flex items-center space-x-3 p-3 text-left hover:bg-gray-50 rounded-lg transition-colors">
-                  <CreditCard className="w-5 h-5 text-purple-500" />
-                  <span className="text-sm font-medium text-gray-900">Upgrade Plan</span>
-                </button>
-                
-                <button className="w-full flex items-center space-x-3 p-3 text-left hover:bg-gray-50 rounded-lg transition-colors">
-                  <Settings className="w-5 h-5 text-gray-500" />
-                  <span className="text-sm font-medium text-gray-900">Account Settings</span>
-                </button>
+                {allUsers.map((dbUser) => (
+                  <div key={dbUser.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div>
+                      <p className="font-medium">{dbUser.name || "No name"}</p>
+                      <p className="text-sm text-gray-600">{dbUser.email}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm text-gray-500">
+                        {new Date(dbUser.created_at).toLocaleDateString()}
+                      </p>
+                      <Badge variant={dbUser.id === user.id ? "default" : "outline"}>
+                        {dbUser.id === user.id ? "You" : "User"}
+                      </Badge>
+                    </div>
+                  </div>
+                ))}
               </div>
-            </div>
-          </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Quick Actions */}
+        <div className="grid md:grid-cols-3 gap-6 mt-8">
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+            <CardHeader>
+              <CardTitle className="text-lg">Lead Generation</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-gray-600 mb-4">Start generating qualified leads with AI-powered targeting.</p>
+              <Button className="w-full">Start Campaign</Button>
+            </CardContent>
+          </Card>
+
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+            <CardHeader>
+              <CardTitle className="text-lg">Analytics</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-gray-600 mb-4">View detailed insights and performance metrics.</p>
+              <Button variant="outline" className="w-full">View Analytics</Button>
+            </CardContent>
+          </Card>
+
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+            <CardHeader>
+              <CardTitle className="text-lg">Settings</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-gray-600 mb-4">Configure your account and automation preferences.</p>
+              <Button variant="outline" className="w-full">Open Settings</Button>
+            </CardContent>
+          </Card>
         </div>
       </main>
     </div>
-  )
+  );
 }
