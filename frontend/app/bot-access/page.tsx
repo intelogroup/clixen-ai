@@ -1,281 +1,153 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { useAuth } from '../../components/AuthProvider'
-import { supabase } from '../../lib/supabase-client'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Separator } from '@/components/ui/separator'
-import GlobalNavigation from '../../components/GlobalNavigation'
-import { 
-  MessageCircle, 
-  Copy, 
-  CheckCircle2, 
-  ArrowRight, 
-  Zap,
-  Clock,
-  Shield,
-  Bot,
-  Sparkles,
-  Terminal,
-  Rocket
-} from 'lucide-react'
+import { useUser, UserButton } from "@stackframe/stack";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 export default function BotAccessPage() {
-  const { user, loading: authLoading } = useAuth()
-  const [loading, setLoading] = useState(true)
-  const [copied, setCopied] = useState(false)
-  const [subscription, setSubscription] = useState<any>(null)
-  const router = useRouter()
+  const user = useUser({ or: "redirect" });
 
-  const TELEGRAM_BOT_LINK = 'https://t.me/clixen_bot'
-  const BOT_USERNAME = '@clixen_bot'
-
-  useEffect(() => {
-    if (authLoading) return
-    
-    if (!user) {
-      router.push('/?auth=true')
-      return
-    }
-
-    checkAuth()
-  }, [user, authLoading, router])
-
-  async function checkAuth() {
-    try {
-
-      // Get user profile with subscription info
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single()
-
-      setSubscription(profile)
-      
-      // Check if user has active subscription (free tier users need to upgrade)
-      if (!profile?.tier || profile.tier === 'free') {
-        router.push('/subscription')
-      }
-    } catch (error) {
-      console.error('Auth error:', error)
-    } finally {
-      setLoading(false)
-    }
+  if (!user) {
+    return <div>Loading...</div>;
   }
 
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      </div>
-    )
-  }
+  const handleTelegramLink = () => {
+    // This would typically generate a unique link for the user
+    const botUsername = process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME || "clixen_bot";
+    const startParam = `user_${user.id}`;
+    const telegramUrl = `https://t.me/${botUsername}?start=${startParam}`;
+    window.open(telegramUrl, '_blank');
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <GlobalNavigation user={user} />
-      
-      <div className="container mx-auto px-4 py-8 max-w-6xl">
-        {/* Welcome Header */}
-        <div className="text-center mb-12">
-          <Badge className="mb-4" variant="default">
-            <Sparkles className="w-3 h-3 mr-1" />
-            Premium Access Activated
-          </Badge>
-          <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            Welcome to Clixen AI Bot
-          </h1>
-          <p className="text-xl text-gray-600 dark:text-gray-400">
-            Your AI automation assistant is ready to help you build powerful workflows
-          </p>
-        </div>
-
-        {/* Main Access Card */}
-        <Card className="mb-8 border-2 border-blue-500/20 shadow-xl">
-          <CardHeader className="bg-gradient-to-r from-blue-500/10 to-purple-500/10">
-            <CardTitle className="text-2xl flex items-center gap-2">
-              <Bot className="w-8 h-8 text-blue-600" />
-              Access Your AI Assistant
-            </CardTitle>
-            <CardDescription className="text-lg">
-              Connect with our Telegram bot to start automating
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="pt-6">
-            <div className="grid md:grid-cols-2 gap-6">
-              <div className="space-y-4">
-                <h3 className="font-semibold text-lg flex items-center gap-2">
-                  <MessageCircle className="w-5 h-5 text-blue-600" />
-                  Quick Start
-                </h3>
-                <div className="space-y-3">
-                  <Button 
-                    size="lg" 
-                    className="w-full bg-blue-600 hover:bg-blue-700"
-                    onClick={() => window.open(TELEGRAM_BOT_LINK, '_blank')}
-                  >
-                    <MessageCircle className="mr-2 h-5 w-5" />
-                    Open Telegram Bot
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                  
-                  <div className="flex items-center gap-2">
-                    <input
-                      readOnly
-                      value={BOT_USERNAME}
-                      className="flex-1 px-4 py-2 border rounded-lg bg-gray-50 dark:bg-gray-800"
-                    />
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => copyToClipboard(BOT_USERNAME)}
-                    >
-                      {copied ? (
-                        <CheckCircle2 className="h-4 w-4 text-green-600" />
-                      ) : (
-                        <Copy className="h-4 w-4" />
-                      )}
-                    </Button>
-                  </div>
-                </div>
+      {/* Header */}
+      <header className="bg-white border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center space-x-2">
+              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-sm">C</span>
               </div>
-
-              <div className="space-y-4">
-                <h3 className="font-semibold text-lg flex items-center gap-2">
-                  <Shield className="w-5 h-5 text-green-600" />
-                  Your Access Code
-                </h3>
-                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                    Use this code to authenticate with the bot:
-                  </p>
-                  <div className="flex items-center gap-2">
-                    <code className="flex-1 px-3 py-2 bg-white dark:bg-gray-900 border rounded font-mono text-sm">
-                      {user?.id?.slice(0, 8).toUpperCase()}
-                    </code>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => copyToClipboard(user?.id?.slice(0, 8).toUpperCase() || '')}
-                    >
-                      Copy
-                    </Button>
-                  </div>
-                </div>
-              </div>
+              <span className="text-xl font-bold text-gray-900">Clixen AI</span>
             </div>
-          </CardContent>
-        </Card>
+            <div className="flex items-center space-x-4">
+              <Button variant="ghost" onClick={() => window.location.href = "/dashboard"}>
+                Dashboard
+              </Button>
+              <UserButton />
+            </div>
+          </div>
+        </div>
+      </header>
 
-        {/* Getting Started Guide */}
-        <div className="grid md:grid-cols-3 gap-6 mb-8">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Terminal className="w-5 h-5 text-blue-600" />
-                Step 1: Connect
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                Click the button above or search for {BOT_USERNAME} in Telegram
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Zap className="w-5 h-5 text-yellow-600" />
-                Step 2: Authenticate
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                Send /start and enter your access code when prompted
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Rocket className="w-5 h-5 text-purple-600" />
-                Step 3: Automate
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                Describe your automation needs in natural language
-              </p>
-            </CardContent>
-          </Card>
+      {/* Main Content */}
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">Bot Access</h1>
+          <p className="text-gray-600 mt-2">Connect with the Clixen AI Telegram bot</p>
         </div>
 
-        {/* Available Commands */}
-        <Card>
+        {/* Bot Information */}
+        <Card className="mb-8">
           <CardHeader>
-            <CardTitle className="text-xl">Bot Commands</CardTitle>
-            <CardDescription>
-              Use these commands to interact with the bot
-            </CardDescription>
+            <CardTitle>Telegram Bot</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <div className="flex items-start gap-3">
-                  <code className="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded text-sm">/start</code>
-                  <span className="text-sm text-gray-600 dark:text-gray-400">Initialize and authenticate</span>
+            <div className="space-y-6">
+              <div className="flex items-center space-x-4">
+                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <span className="text-blue-600 text-2xl">🤖</span>
                 </div>
-                <div className="flex items-start gap-3">
-                  <code className="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded text-sm">/new</code>
-                  <span className="text-sm text-gray-600 dark:text-gray-400">Create a new automation</span>
+                <div>
+                  <h3 className="text-lg font-medium">Clixen AI Bot</h3>
+                  <p className="text-gray-600">Get instant access to lead generation tools via Telegram</p>
                 </div>
-                <div className="flex items-start gap-3">
-                  <code className="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded text-sm">/templates</code>
-                  <span className="text-sm text-gray-600 dark:text-gray-400">Browse pre-built templates</span>
-                </div>
+                <Badge variant="default">Active</Badge>
               </div>
-              <div className="space-y-2">
-                <div className="flex items-start gap-3">
-                  <code className="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded text-sm">/list</code>
-                  <span className="text-sm text-gray-600 dark:text-gray-400">View your automations</span>
-                </div>
-                <div className="flex items-start gap-3">
-                  <code className="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded text-sm">/status</code>
-                  <span className="text-sm text-gray-600 dark:text-gray-400">Check automation status</span>
-                </div>
-                <div className="flex items-start gap-3">
-                  <code className="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded text-sm">/help</code>
-                  <span className="text-sm text-gray-600 dark:text-gray-400">Get help and documentation</span>
-                </div>
+
+              <div className="border-t pt-6">
+                <h4 className="font-medium text-gray-900 mb-3">Bot Features</h4>
+                <ul className="space-y-2">
+                  <li className="flex items-center">
+                    <span className="text-green-500 mr-2">✓</span>
+                    Generate leads on-demand
+                  </li>
+                  <li className="flex items-center">
+                    <span className="text-green-500 mr-2">✓</span>
+                    Real-time campaign updates
+                  </li>
+                  <li className="flex items-center">
+                    <span className="text-green-500 mr-2">✓</span>
+                    Quick analytics and reports
+                  </li>
+                  <li className="flex items-center">
+                    <span className="text-green-500 mr-2">✓</span>
+                    Direct message automation
+                  </li>
+                </ul>
+              </div>
+
+              <div className="border-t pt-6">
+                <h4 className="font-medium text-gray-900 mb-3">Getting Started</h4>
+                <ol className="space-y-2 text-sm text-gray-600">
+                  <li>1. Click the "Connect to Bot" button below</li>
+                  <li>2. You'll be redirected to Telegram</li>
+                  <li>3. Start a conversation with the bot</li>
+                  <li>4. Begin using AI-powered lead generation tools</li>
+                </ol>
+              </div>
+
+              <div className="flex space-x-4">
+                <Button 
+                  onClick={handleTelegramLink}
+                  className="px-8"
+                >
+                  Connect to Bot
+                </Button>
+                <Button variant="outline">
+                  View Instructions
+                </Button>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* Subscription Info */}
-        {subscription && (
-          <div className="mt-8 text-center">
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              Your Plan: <Badge variant="default">{subscription.tier || 'Premium'}</Badge>
-            </p>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-              Credits Remaining: <span className="font-semibold">{subscription.credits_remaining || 0}</span>
-            </p>
-          </div>
-        )}
-      </div>
+        {/* User Connection Status */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Your Connection</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="font-medium">Account Status</h4>
+                  <p className="text-sm text-gray-600">Your account is ready for bot integration</p>
+                </div>
+                <Badge variant="default">Ready</Badge>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="font-medium">User ID</h4>
+                  <p className="text-sm text-gray-600 font-mono">{user.id}</p>
+                </div>
+                <Badge variant="outline">Active</Badge>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="font-medium">Bot Access Level</h4>
+                  <p className="text-sm text-gray-600">Full access to all features</p>
+                </div>
+                <Badge variant="default">Premium</Badge>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </main>
     </div>
-  )
+  );
 }
