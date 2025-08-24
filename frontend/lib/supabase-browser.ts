@@ -18,19 +18,23 @@ export function createClient() {
       {
         cookies: {
           get(name: string) {
+            if (typeof document === 'undefined') return undefined
+
             const value = document.cookie
               .split('; ')
               .find(row => row.startsWith(`${name}=`))
               ?.split('=')[1]
-            
+
             console.log(`🍪 [CLIENT] Getting cookie ${name}:`, value ? 'found' : 'not found')
             return value
           },
           set(name: string, value: string, options: any) {
+            if (typeof document === 'undefined') return
+
             console.log(`🍪 [CLIENT] Setting cookie ${name}`)
-            
+
             let cookieString = `${name}=${value}`
-            
+
             if (options?.maxAge) {
               cookieString += `; Max-Age=${options.maxAge}`
             }
@@ -49,21 +53,23 @@ export function createClient() {
             if (options?.sameSite) {
               cookieString += `; SameSite=${options.sameSite}`
             }
-            
+
             document.cookie = cookieString
           },
           remove(name: string, options: any) {
+            if (typeof document === 'undefined') return
+
             console.log(`🍪 [CLIENT] Removing cookie ${name}`)
-            
+
             let cookieString = `${name}=; Max-Age=0`
-            
+
             if (options?.path) {
               cookieString += `; Path=${options.path}`
             }
             if (options?.domain) {
               cookieString += `; Domain=${options.domain}`
             }
-            
+
             document.cookie = cookieString
           }
         }
