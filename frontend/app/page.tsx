@@ -1,5 +1,5 @@
-import LandingPage from './landing'
+import LandingPage from "./landing";
 
-export default function Home() {
-  return <LandingPage />
+export default function HomePage() {
+  return <LandingPage />;
 }
