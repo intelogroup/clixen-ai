@@ -391,10 +391,8 @@ export default function LandingPage() {
               <ArrowRight className="w-5 h-5" />
             </button>
             
-            <a 
-              href="https://t.me/clixen_bot" 
-              target="_blank" 
-              rel="noopener noreferrer"
+            <a
+              {...getBotButtonProps('LANDING_CTA')}
               className="w-full sm:w-auto bg-transparent hover:bg-white/10 text-white px-8 py-4 rounded-xl font-semibold text-lg transition-all border-2 border-white/20 hover:border-white/40 flex items-center justify-center space-x-2"
             >
               <Bot className="w-5 h-5" />
