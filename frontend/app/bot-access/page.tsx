@@ -296,13 +296,53 @@ export default function BotAccessPage() {
 
         {/* Subscription Info */}
         {subscription && (
-          <div className="mt-8 text-center">
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              Your Plan: <Badge variant="default">{subscription.tier || 'Premium'}</Badge>
-            </p>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-              Credits Remaining: <span className="font-semibold">{subscription.credits_remaining || 0}</span>
-            </p>
+          <div className="mt-8">
+            <Card className="max-w-2xl mx-auto">
+              <CardHeader className="text-center">
+                <CardTitle className="text-lg">Account Status</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid md:grid-cols-2 gap-4 text-center">
+                  <div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Current Plan</p>
+                    <Badge variant={subscription.trial_active ? "secondary" : "default"} className="text-sm">
+                      {subscription.trial_active
+                        ? 'Free Trial'
+                        : subscription.tier === 'free'
+                          ? 'Free'
+                          : subscription.tier?.charAt(0).toUpperCase() + subscription.tier?.slice(1) || 'Premium'
+                      }
+                    </Badge>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Credits Available</p>
+                    <span className="font-semibold text-lg">{subscription.credits_remaining || 0}</span>
+                  </div>
+                </div>
+
+                {subscription.trial_active && (
+                  <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg text-center">
+                    <p className="text-sm text-blue-800 dark:text-blue-200 font-medium">
+                      🎉 Free Trial Active
+                    </p>
+                    <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
+                      Enjoying the bot? <a href="/subscription" className="underline hover:text-blue-600">Upgrade to continue</a> after your trial ends.
+                    </p>
+                  </div>
+                )}
+
+                {!subscription.trial_active && subscription.tier === 'free' && (
+                  <div className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-lg text-center">
+                    <p className="text-sm text-yellow-800 dark:text-yellow-200 font-medium">
+                      Limited Access
+                    </p>
+                    <p className="text-sm text-yellow-700 dark:text-yellow-300 mt-1">
+                      <a href="/subscription" className="underline hover:text-yellow-600">Upgrade your plan</a> for unlimited automations.
+                    </p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </div>
         )}
       </div>
