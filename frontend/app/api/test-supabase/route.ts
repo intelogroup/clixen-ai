@@ -54,7 +54,7 @@ export async function GET() {
         success: false,
         error: 'Database connection failed',
         details: connectionError.message
-      }, { status: 500 })
+      }, { status: 500, headers: corsHeaders })
     }
     
     // Check if essential tables exist
@@ -103,7 +103,7 @@ export async function GET() {
         tables: tableStatus,
         testUser: userStatus
       }
-    })
+    }, { headers: corsHeaders })
     
   } catch (error) {
     console.error('Supabase test error:', error)
@@ -111,7 +111,7 @@ export async function GET() {
       success: false,
       error: 'Test failed',
       details: error.message
-    }, { status: 500 })
+    }, { status: 500, headers: corsHeaders })
   }
 }
 
