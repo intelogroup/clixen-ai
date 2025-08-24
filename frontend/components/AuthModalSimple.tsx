@@ -295,6 +295,16 @@ export default function AuthModalSimple({ isOpen, onClose, mode, onModeChange }:
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                       {mode === 'signup' ? 'Creating Account...' : 'Signing In...'}
                     </>
+                  ) : emailCheckLoading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Checking Email...
+                    </>
+                  ) : mode === 'signup' && emailExists === true ? (
+                    <>
+                      <AlertCircle className="w-4 h-4 mr-2" />
+                      Switch to Sign In
+                    </>
                   ) : (
                     <>
                       <Mail className="w-4 h-4 mr-2" />
