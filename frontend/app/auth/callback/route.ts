@@ -97,9 +97,9 @@ export async function GET(request: NextRequest) {
         // Continue with redirect even if profile creation fails
       }
       
-      // Redirect to the intended destination
-      console.log('🔄 [AUTH CALLBACK] Redirecting to:', redirectTo)
-      return NextResponse.redirect(`${origin}${redirectTo}`)
+      // Always redirect to dashboard after successful authentication
+      console.log('🔄 [AUTH CALLBACK] Authentication successful, redirecting to dashboard')
+      return NextResponse.redirect(`${origin}/dashboard`)
     }
   }
 
