@@ -35,20 +35,27 @@ export async function GET(request: NextRequest) {
         
         if (!existingProfile && fetchError?.code === 'PGRST116') {
           console.log('👤 [AUTH CALLBACK] Creating user profile...')
-          
+
+          // Prepare profile data for new isolation schema
+          const profileData = {
+            auth_user_id: data.session.user.id, // Use auth_user_id instead of id
+            email: data.session.user.email,
+            full_name: data.session.user.user_metadata?.full_name || null,
+            tier: 'free',
+            trial_active: true,
+            trial_started_at: new Date().toISOString(),
+            trial_expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+            quota_limit: 50, // Use quota_limit instead of credits_remaining
+            quota_used: 0,   // Use quota_used instead of credits_used
+            last_activity_at: new Date().toISOString(),
+            user_metadata: {}
+          }
+
+          console.log('👤 [AUTH CALLBACK] Profile data to insert:', JSON.stringify(profileData, null, 2))
+
           const { error: insertError } = await supabase
             .from('profiles')
-            .insert({
-              id: data.session.user.id,
-              email: data.session.user.email,
-              full_name: data.session.user.user_metadata?.full_name || null,
-              tier: 'free',
-              trial_active: true,
-              trial_started_at: new Date().toISOString(),
-              trial_expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-              credits_remaining: 50,
-              credits_used: 0
-            })
+            .insert(profileData)
           
           if (insertError) {
             console.error('❌ [AUTH CALLBACK] Error creating profile:', {
