@@ -184,15 +184,56 @@ export default function AuthModalSimple({ isOpen, onClose, mode, onModeChange }:
                   <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
                     Email Address
                   </label>
-                  <input
-                    id="email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    placeholder="your@email.com"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
+                  <div className="relative">
+                    <input
+                      id="email"
+                      type="email"
+                      value={email}
+                      onChange={(e) => {
+                        setEmail(e.target.value)
+                        setError(null) // Clear error when user starts typing
+                      }}
+                      required
+                      placeholder="your@email.com"
+                      className={`w-full px-3 py-2 pr-10 border rounded-lg focus:outline-none focus:ring-2 focus:border-transparent ${
+                        emailExists === true && mode === 'signup'
+                          ? 'border-yellow-300 focus:ring-yellow-500'
+                          : emailExists === false && mode === 'signup'
+                          ? 'border-green-300 focus:ring-green-500'
+                          : 'border-gray-300 focus:ring-blue-500'
+                      }`}
+                    />
+                    {emailCheckLoading && (
+                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                        <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
+                      </div>
+                    )}
+                    {!emailCheckLoading && emailExists === true && mode === 'signup' && (
+                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                        <AlertCircle className="w-4 h-4 text-yellow-500" />
+                      </div>
+                    )}
+                    {!emailCheckLoading && emailExists === false && mode === 'signup' && (
+                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                        <CheckCircle className="w-4 h-4 text-green-500" />
+                      </div>
+                    )}
+                  </div>
+                  {emailExists === true && mode === 'signup' && (
+                    <div className="mt-1 flex items-center justify-between">
+                      <p className="text-xs text-yellow-600">This email is already registered</p>
+                      <button
+                        type="button"
+                        onClick={() => handleModeSwitch('signin')}
+                        className="text-xs text-blue-600 hover:text-blue-700 font-medium"
+                      >
+                        Switch to Sign In
+                      </button>
+                    </div>
+                  )}
+                  {emailExists === false && mode === 'signup' && (
+                    <p className="text-xs text-green-600 mt-1">✓ Email available</p>
+                  )}
                 </div>
 
                 <div>
