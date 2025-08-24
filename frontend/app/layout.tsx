@@ -40,8 +40,6 @@ export const viewport = {
   initialScale: 1,
 }
 
-import { AuthProvider } from '../components/AuthProvider'
-
 export default function RootLayout({
   children,
 }: {
