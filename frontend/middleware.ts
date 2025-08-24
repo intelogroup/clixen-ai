@@ -1,14 +1,15 @@
+import { type NextRequest } from 'next/server'
 import { updateSession } from './lib/supabase-middleware'
 
-export async function middleware(request) {
+export async function middleware(request: NextRequest) {
   console.log(`🔒 [MIDDLEWARE] Processing request: ${request.nextUrl.pathname}`)
 
   try {
     return await updateSession(request)
   } catch (error) {
     console.error('🚨 [MIDDLEWARE] Error processing request:', error)
-    // Return the original request if middleware fails
-    return new Response(null, { status: 200 })
+    // Continue with original request if middleware fails
+    return NextResponse.next()
   }
 }
 
