@@ -281,7 +281,13 @@ export default function AuthModalSimple({ isOpen, onClose, mode, onModeChange }:
 
                 <button
                   type="submit"
-                  disabled={authLoading || !email || !password}
+                  disabled={
+                    authLoading ||
+                    !email ||
+                    !password ||
+                    emailCheckLoading ||
+                    (mode === 'signup' && emailExists === true)
+                  }
                   className="w-full bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center justify-center font-medium"
                 >
                   {authLoading ? (
