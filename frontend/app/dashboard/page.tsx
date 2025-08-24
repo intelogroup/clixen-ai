@@ -338,9 +338,6 @@ export default function Dashboard() {
                   <a
                     key={index}
                     href={action.href}
-                    onClick={action.onClick}
-                    target={action.external ? '_blank' : '_self'}
-                    rel={action.external ? 'noopener noreferrer' : undefined}
                     className={`flex items-center space-x-3 p-3 rounded-lg transition-colors ${action.color}`}
                   >
                     <action.icon className="w-5 h-5" />
@@ -348,7 +345,7 @@ export default function Dashboard() {
                       <h4 className="font-medium">{action.title}</h4>
                       <p className="text-sm opacity-80">{action.description}</p>
                     </div>
-                    {action.external && <ExternalLink className="w-4 h-4" />}
+                    <ArrowRight className="w-4 h-4" />
                   </a>
                 ))}
               </div>
