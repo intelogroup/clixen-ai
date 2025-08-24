@@ -1,9 +1,20 @@
-// Middleware disabled - using client-side Auth Provider instead
-// export async function middleware(request: NextRequest) {
-//   // No middleware needed for client-only auth
-// }
+import { updateSession } from './lib/supabase-middleware'
 
-// Keep config for potential future use
+export async function middleware(request) {
+  // Update session and handle authentication redirects
+  return await updateSession(request)
+}
+
 export const config = {
-  matcher: [],
+  matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - public folder
+     * - api routes (let them handle their own auth)
+     */
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$|api).*)',
+  ],
 }
