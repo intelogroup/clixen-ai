@@ -104,18 +104,35 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* CTA Section */}
+      {/* Status Section */}
       <section className="py-16 px-4 sm:px-6 lg:px-8 bg-blue-50">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl font-bold text-gray-900 mb-4">
-            Ready to Transform Your Lead Generation?
+            ✅ Full Auth System Ready
           </h2>
           <p className="text-xl text-gray-600 mb-8">
-            Join thousands of businesses already using Clixen AI to grow their sales pipeline.
+            Stack Auth + Neon Database integration is now fully operational!
           </p>
-          <Button size="lg" onClick={handleSignUp} className="px-8 py-3">
-            Start Your Free Trial Today
-          </Button>
+          <div className="grid md:grid-cols-2 gap-6 text-left">
+            <div className="bg-white p-6 rounded-lg">
+              <h3 className="font-semibold mb-2">🔐 Auth Features:</h3>
+              <ul className="space-y-1 text-sm text-gray-600">
+                <li>• User registration & login</li>
+                <li>• Protected routes</li>
+                <li>• Session management</li>
+                <li>• Database user sync</li>
+              </ul>
+            </div>
+            <div className="bg-white p-6 rounded-lg">
+              <h3 className="font-semibold mb-2">🚀 Ready for:</h3>
+              <ul className="space-y-1 text-sm text-gray-600">
+                <li>• User onboarding</li>
+                <li>• Dashboard access</li>
+                <li>• Profile management</li>
+                <li>• Bot integration</li>
+              </ul>
+            </div>
+          </div>
         </div>
       </section>
 

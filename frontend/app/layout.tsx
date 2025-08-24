@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { StackAuthProvider } from "@/components/StackAuthProvider";
 
 export const metadata: Metadata = {
   title: "Clixen AI - Automated B2B Lead Generation",
@@ -14,7 +15,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        {children}
+        <StackAuthProvider>
+          {children}
+        </StackAuthProvider>
       </body>
     </html>
   );
