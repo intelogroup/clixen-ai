@@ -339,6 +339,7 @@ export default function Dashboard() {
                   <a
                     key={index}
                     href={action.href}
+                    onClick={action.onClick}
                     target={action.external ? '_blank' : '_self'}
                     rel={action.external ? 'noopener noreferrer' : undefined}
                     className={`flex items-center space-x-3 p-3 rounded-lg transition-colors ${action.color}`}
