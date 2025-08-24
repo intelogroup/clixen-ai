@@ -1,20 +1,11 @@
-import { updateSession } from './lib/supabase-middleware'
+// Temporarily disabled to fix infinite loop
+// import { updateSession } from './lib/supabase-middleware'
 
 export async function middleware(request) {
-  // Update session and handle authentication redirects
-  return await updateSession(request)
+  // Middleware temporarily disabled to fix app loading issues
+  return
 }
 
 export const config = {
-  matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - public folder
-     * - api routes (let them handle their own auth)
-     */
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$|api).*)',
-  ],
+  matcher: [],
 }
