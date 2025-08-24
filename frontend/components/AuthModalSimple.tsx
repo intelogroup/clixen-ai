@@ -16,6 +16,8 @@ export default function AuthModalSimple({ isOpen, onClose, mode, onModeChange }:
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
+  const [emailCheckLoading, setEmailCheckLoading] = useState(false)
+  const [emailExists, setEmailExists] = useState<boolean | null>(null)
   const { signUp, signIn, loading: authLoading } = useAuth()
 
   // Reset state when modal closes or mode changes
