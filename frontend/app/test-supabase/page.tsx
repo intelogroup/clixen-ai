@@ -49,16 +49,31 @@ export default function TestSupabasePage() {
   const createTestUser = async () => {
     setUserLoading(true)
     try {
+      console.log('�� Starting user creation test...')
       const response = await fetch('/api/test-supabase', {
-        method: 'POST'
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        cache: 'no-cache'
       })
+
+      console.log('📡 User creation response status:', response.status)
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+      }
+
       const data = await response.json()
+      console.log('✅ User creation response data:', data)
       setUserCreationResult(data)
     } catch (error) {
+      console.error('❌ User creation failed:', error)
       setUserCreationResult({
         success: false,
         error: 'Failed to create user',
-        details: error.message
+        details: `${error.name}: ${error.message}`,
+        timestamp: new Date().toISOString()
       })
     } finally {
       setUserLoading(false)
