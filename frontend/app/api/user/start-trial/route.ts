@@ -3,138 +3,96 @@ import { createClient } from '../../../../lib/supabase-server'
 import { cookies } from 'next/headers'
 
 export async function POST(request: NextRequest) {
-  console.log('🎯 [TRIAL API] Starting free trial...')
-  
   try {
-    const body = await request.json()
-    const { userId, trialStartDate, trialEndDate, trialCredits } = body
-    
-    if (!userId || !trialStartDate || !trialEndDate || !trialCredits) {
-      return NextResponse.json(
-        { error: 'Missing required fields' },
-        { status: 400 }
-      )
-    }
-
-    // Create Supabase client with service role for admin operations
     const supabase = createClient()
     
-    // Verify user authentication
+    // Get the authenticated user
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     
-    if (authError || !user || user.id !== userId) {
-      console.error('🎯 [TRIAL API] Authentication failed:', authError)
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+    if (authError || !user) {
+      console.error('🔐 [START-TRIAL] Authentication error:', authError)
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Get current user profile to verify eligibility
-    const { data: profile, error: profileError } = await supabase
+    console.log('🚀 [START-TRIAL] Starting trial for user:', user.email)
+
+    // Check if user already has a profile
+    const { data: existingProfile, error: fetchError } = await supabase
       .from('profiles')
       .select('*')
-      .eq('id', userId)
+      .eq('id', user.id)
       .single()
 
-    if (profileError || !profile) {
-      console.error('🎯 [TRIAL API] Profile fetch error:', profileError)
-      return NextResponse.json(
-        { error: 'User profile not found' },
-        { status: 404 }
-      )
+    if (fetchError && fetchError.code !== 'PGRST116') {
+      console.error('📋 [START-TRIAL] Error fetching profile:', fetchError)
+      return NextResponse.json({ error: 'Database error' }, { status: 500 })
     }
 
-    // Check trial eligibility
-    if (profile.tier !== 'free') {
-      return NextResponse.json(
-        { error: 'Trial only available for free tier users' },
-        { status: 400 }
-      )
-    }
-
-    if (profile.trial_started_at) {
-      return NextResponse.json(
-        { error: 'Trial already used' },
-        { status: 400 }
-      )
-    }
-
-    // Check if signup was recent (within 24 hours)
-    const signupDate = new Date(profile.created_at)
+    // Calculate trial dates
     const now = new Date()
-    const hoursSinceSignup = (now.getTime() - signupDate.getTime()) / (1000 * 60 * 60)
-    
-    if (hoursSinceSignup > 24) {
-      return NextResponse.json(
-        { error: 'Trial period expired. Must start within 24 hours of signup.' },
-        { status: 400 }
-      )
-    }
+    const trialExpires = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000) // 7 days
 
-    // Update user profile with trial information
-    const { data: updatedProfile, error: updateError } = await supabase
-      .from('profiles')
-      .update({
-        trial_started_at: trialStartDate,
-        trial_expires_at: trialEndDate,
-        credits_remaining: profile.credits_remaining + trialCredits,
-        updated_at: new Date().toISOString(),
+    if (existingProfile) {
+      // Update existing profile to activate trial
+      const { data: updatedProfile, error: updateError } = await supabase
+        .from('profiles')
+        .update({
+          trial_active: true,
+          trial_started_at: now.toISOString(),
+          trial_expires_at: trialExpires.toISOString(),
+          tier: 'trial',
+          credits_remaining: 50,
+          updated_at: now.toISOString()
+        })
+        .eq('id', user.id)
+        .select()
+        .single()
+
+      if (updateError) {
+        console.error('📋 [START-TRIAL] Error updating profile:', updateError)
+        return NextResponse.json({ error: 'Failed to start trial' }, { status: 500 })
+      }
+
+      console.log('✅ [START-TRIAL] Trial activated for existing user')
+      return NextResponse.json({ 
+        success: true, 
+        message: 'Trial activated successfully',
+        profile: updatedProfile
       })
-      .eq('id', userId)
-      .select()
+    } else {
+      // Create new profile with trial
+      const { data: newProfile, error: createError } = await supabase
+        .from('profiles')
+        .insert({
+          id: user.id,
+          email: user.email,
+          trial_active: true,
+          trial_started_at: now.toISOString(),
+          trial_expires_at: trialExpires.toISOString(),
+          tier: 'trial',
+          credits_remaining: 50,
+          credits_used: 0,
+          created_at: now.toISOString(),
+          updated_at: now.toISOString()
+        })
+        .select()
+        .single()
 
-    if (updateError) {
-      console.error('🎯 [TRIAL API] Profile update error:', updateError)
-      return NextResponse.json(
-        { error: 'Failed to start trial' },
-        { status: 500 }
-      )
-    }
+      if (createError) {
+        console.error('📋 [START-TRIAL] Error creating profile:', createError)
+        return NextResponse.json({ error: 'Failed to create trial account' }, { status: 500 })
+      }
 
-    // Log trial start event
-    const { error: logError } = await supabase
-      .from('workflow_executions')
-      .insert({
-        user_id: userId,
-        workflow_type: 'trial_started',
-        status: 'completed',
-        credits_used: 0,
-        execution_data: {
-          trial_start: trialStartDate,
-          trial_end: trialEndDate,
-          credits_granted: trialCredits,
-        },
+      console.log('✅ [START-TRIAL] Trial profile created for new user')
+      return NextResponse.json({ 
+        success: true, 
+        message: 'Trial account created successfully',
+        profile: newProfile
       })
-
-    if (logError) {
-      console.warn('🎯 [TRIAL API] Logging failed:', logError)
-      // Don't fail the request if logging fails
     }
-
-    console.log('✅ [TRIAL API] Trial started successfully for user:', userId)
-    console.log('📊 [TRIAL API] Trial details:', {
-      start: trialStartDate,
-      end: trialEndDate,
-      credits: trialCredits,
-    })
-
-    return NextResponse.json({
-      success: true,
-      message: 'Free trial started successfully!',
-      trial: {
-        startDate: trialStartDate,
-        endDate: trialEndDate,
-        credits: trialCredits,
-        daysRemaining: 7,
-      },
-    })
 
   } catch (error) {
-    console.error('🎯 [TRIAL API] Unexpected error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    console.error('🚨 [START-TRIAL] Unexpected error:', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
