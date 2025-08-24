@@ -33,7 +33,47 @@ export default function AuthModalSimple({ isOpen, onClose, mode, onModeChange }:
   useEffect(() => {
     setError(null)
     setSuccess(false)
+    setEmailExists(null)
   }, [mode])
+
+  // Check if email exists when user types (for signup mode only)
+  useEffect(() => {
+    if (!email || mode !== 'signup') {
+      setEmailExists(null)
+      return
+    }
+
+    const delayedCheck = setTimeout(async () => {
+      if (email.includes('@') && email.includes('.')) {
+        setEmailCheckLoading(true)
+        try {
+          const response = await fetch('/api/auth/check-email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email })
+          })
+
+          const data = await response.json()
+          if (response.ok) {
+            setEmailExists(data.exists)
+
+            // If email exists, suggest switching to sign in
+            if (data.exists) {
+              setError('This email is already registered. Please sign in instead.')
+            } else {
+              setError(null)
+            }
+          }
+        } catch (error) {
+          console.error('Email check error:', error)
+        } finally {
+          setEmailCheckLoading(false)
+        }
+      }
+    }, 1000) // Check 1 second after user stops typing
+
+    return () => clearTimeout(delayedCheck)
+  }, [email, mode])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
