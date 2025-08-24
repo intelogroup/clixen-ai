@@ -40,8 +40,9 @@ export default function Dashboard() {
     
     const getUserData = async () => {
       console.log('📊 User found:', user.email)
-      
+
       try {
+        const supabase = createClient()
         console.log('📊 Fetching user profile from database...')
         // Fetch user profile from database
         const { data: profileData, error: profileError } = await supabase
