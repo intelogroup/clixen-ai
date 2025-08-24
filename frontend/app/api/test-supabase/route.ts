@@ -1,12 +1,29 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 
+// Add CORS headers
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+}
+
+export async function OPTIONS() {
+  return new NextResponse(null, { status: 200, headers: corsHeaders })
+}
+
 export async function GET() {
   try {
     console.log('🔗 Testing Supabase connection...')
-    
+
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
     const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+    console.log('Environment check:', {
+      url: supabaseUrl ? 'Found' : 'Missing',
+      serviceKey: supabaseServiceKey ? 'Found' : 'Missing',
+      nodeEnv: process.env.NODE_ENV
+    })
     
     if (!supabaseUrl || !supabaseServiceKey) {
       return NextResponse.json({
