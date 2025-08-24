@@ -174,19 +174,20 @@ export async function POST() {
       }, { status: 500, headers: corsHeaders })
     }
     
-    // Create profile
+    // Create profile using new schema
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
       .insert({
-        id: authUser.user.id,
-        auth_user_id: authUser.user.id,
+        auth_user_id: authUser.user.id, // Use auth_user_id, let id auto-generate
         email: testEmail,
         tier: 'free',
         trial_active: true,
         trial_started_at: new Date().toISOString(),
         trial_expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
         quota_used: 0,
-        quota_limit: 50
+        quota_limit: 50,
+        last_activity_at: new Date().toISOString(),
+        user_metadata: {}
       })
       .select()
       .single()
