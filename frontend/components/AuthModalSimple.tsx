@@ -90,6 +90,13 @@ export default function AuthModalSimple({ isOpen, onClose, mode, onModeChange }:
       return
     }
 
+    // Prevent signup if email already exists
+    if (mode === 'signup' && emailExists === true) {
+      setError('This email is already registered. Please sign in instead.')
+      handleModeSwitch('signin')
+      return
+    }
+
     try {
       let result
       
