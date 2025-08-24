@@ -60,7 +60,25 @@ export default function AuthModalSimple({ isOpen, onClose, mode, onModeChange }:
       }
 
       if (result.error) {
-        setError(result.error.message)
+        // Handle specific error cases
+        if (result.error.message.includes('User already registered') ||
+            result.error.message.includes('already registered')) {
+          setError(`This email is already registered. Please sign in instead or use a different email.`)
+          // Auto-suggest switching to sign in mode
+          setTimeout(() => {
+            if (mode === 'signup') {
+              handleModeSwitch('signin')
+            }
+          }, 2000)
+        } else if (result.error.message.includes('Invalid login credentials') ||
+                   result.error.message.includes('invalid password')) {
+          setError('Invalid email or password. Please check your credentials and try again.')
+        } else if (result.error.message.includes('Email not confirmed')) {
+          setError('Please check your email and click the confirmation link before signing in.')
+        } else {
+          // Fallback to original error message for other cases
+          setError(result.error.message)
+        }
       } else if (mode === 'signup') {
         // Show success message for signup
         setSuccess(true)
