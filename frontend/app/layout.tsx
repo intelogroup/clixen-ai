@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { StackProvider, StackTheme } from "@stackframe/stack";
-import { stackServerApp } from "@/stack";
 
 export const metadata: Metadata = {
   title: "Clixen AI - Automated B2B Lead Generation",
@@ -16,11 +14,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <StackProvider app={stackServerApp}>
-          <StackTheme>
-            {children}
-          </StackTheme>
-        </StackProvider>
+        {children}
       </body>
     </html>
   );
