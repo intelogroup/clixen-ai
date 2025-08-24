@@ -189,10 +189,8 @@ export default function Dashboard() {
                   <span>{stats.trial_days_remaining} days left in trial</span>
                 </div>
               )}
-              <a 
-                href="https://t.me/clixen_bot" 
-                target="_blank" 
-                rel="noopener noreferrer"
+              <a
+                {...getBotButtonProps('DASHBOARD')}
                 className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2"
               >
                 <Bot className="w-4 h-4" />
