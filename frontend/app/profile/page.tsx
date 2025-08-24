@@ -1,294 +1,168 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { User } from '@supabase/supabase-js'
 import { useRouter } from 'next/navigation'
-import { useAuth } from '../../components/AuthProvider'
-import { supabase } from '../../lib/supabase-client'
-import { Save, Eye, EyeOff, Copy, RefreshCw } from 'lucide-react'
-import GlobalNavigation from '../../components/GlobalNavigation'
-
-interface UserProfile {
-  id: string
-  email: string
-  full_name: string | null
-  credits_remaining: number
-  tier: string
-  api_key: string
-  created_at: string
-}
+import { User, Settings, ArrowLeft, AlertCircle, Mail, Calendar, Shield } from 'lucide-react'
 
 export default function Profile() {
-  const { user, loading: authLoading } = useAuth()
-  const [profile, setProfile] = useState<UserProfile | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
-  const [showApiKey, setShowApiKey] = useState(false)
-  const [formData, setFormData] = useState({
-    full_name: '',
-    email: ''
-  })
   const router = useRouter()
-
-  useEffect(() => {
-    if (authLoading) return
-    
-    if (!user) {
-      console.log('👤 No authenticated user found, redirecting to home page...')
-      router.push('/?auth=true')
-      return
-    }
-
-    const getProfile = async () => {
-      
-      // Mock profile data
-      const mockProfile: UserProfile = {
-        id: user.id,
-        email: user.email || '',
-        full_name: user.user_metadata?.full_name || '',
-        credits_remaining: 100,
-        tier: 'free',
-        api_key: 'ap_test_' + Math.random().toString(36).substr(2, 32),
-        created_at: user.created_at || new Date().toISOString()
-      }
-      
-      setProfile(mockProfile)
-      setFormData({
-        full_name: mockProfile.full_name || '',
-        email: mockProfile.email
-      })
-      setLoading(false)
-    }
-
-    getProfile()
-  }, [user, authLoading, router])
-
-  const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setSaving(true)
-
-    try {
-      // Update user metadata
-      const { error } = await supabase.auth.updateUser({
-        data: {
-          full_name: formData.full_name
-        }
-      })
-
-      if (error) throw error
-
-      // Update local state
-      if (profile) {
-        setProfile({
-          ...profile,
-          full_name: formData.full_name
-        })
-      }
-
-      alert('Profile updated successfully!')
-    } catch (error: any) {
-      console.error('Error updating profile:', error.message)
-      alert('Error updating profile: ' + error.message)
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  const copyApiKey = () => {
-    if (profile?.api_key) {
-      navigator.clipboard.writeText(profile.api_key)
-      alert('API key copied to clipboard!')
-    }
-  }
-
-  const regenerateApiKey = () => {
-    if (confirm('Are you sure you want to regenerate your API key? This will invalidate the current key.')) {
-      if (profile) {
-        setProfile({
-          ...profile,
-          api_key: 'ap_test_' + Math.random().toString(36).substr(2, 32)
-        })
-        alert('API key regenerated!')
-      }
-    }
-  }
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading profile...</p>
-        </div>
-      </div>
-    )
-  }
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <GlobalNavigation user={user} />
+      {/* Header */}
+      <header className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center space-x-4">
+              <button
+                onClick={() => router.back()}
+                className="flex items-center text-gray-600 hover:text-gray-900 transition-colors"
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back
+              </button>
+              <User className="w-6 h-6 text-gray-600" />
+              <h1 className="text-xl font-bold text-gray-900">Profile</h1>
+            </div>
+          </div>
+        </div>
+      </header>
 
       {/* Main Content */}
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Page Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Profile Settings</h1>
-          <p className="text-gray-600">Manage your account information and preferences</p>
-        </div>
-        
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
-          {/* Profile Form */}
-          <div className="lg:col-span-2">
-            <div className="bg-white rounded-lg shadow">
-              <div className="p-6 border-b border-gray-200">
-                <h2 className="text-lg font-medium text-gray-900">Personal Information</h2>
-              </div>
-              
-              <form onSubmit={handleSave} className="p-6 space-y-6">
-                <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                    Email Address
-                  </label>
-                  <input
-                    id="email"
-                    type="email"
-                    value={formData.email}
-                    disabled
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-500"
-                  />
-                  <p className="text-sm text-gray-500 mt-1">Email cannot be changed.</p>
-                </div>
-
-                <div>
-                  <label htmlFor="full_name" className="block text-sm font-medium text-gray-700 mb-1">
-                    Full Name
-                  </label>
-                  <input
-                    id="full_name"
-                    type="text"
-                    value={formData.full_name}
-                    onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
-                    placeholder="Enter your full name"
-                  />
-                </div>
-
-                <div>
-                  <button
-                    type="submit"
-                    disabled={saving}
-                    className="btn-primary flex items-center disabled:opacity-50"
-                  >
-                    {saving ? (
-                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                    ) : (
-                      <Save className="w-5 h-5 mr-2" />
-                    )}
-                    {saving ? 'Saving...' : 'Save Changes'}
-                  </button>
-                </div>
-              </form>
+        {/* Migration Notice */}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
+          <div className="flex items-start space-x-3">
+            <AlertCircle className="w-6 h-6 text-blue-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <h3 className="text-lg font-semibold text-blue-900 mb-2">
+                🚧 Profile Management Temporarily Unavailable
+              </h3>
+              <p className="text-blue-800 mb-4">
+                We're migrating to a new authentication system with Neon Auth. 
+                Profile management will be available once the migration is complete!
+              </p>
             </div>
+          </div>
+        </div>
 
-            {/* API Key Section */}
-            <div className="bg-white rounded-lg shadow mt-6">
-              <div className="p-6 border-b border-gray-200">
-                <h2 className="text-lg font-medium text-gray-900">API Access</h2>
+        {/* Profile Preview */}
+        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+          {/* Profile Header */}
+          <div className="bg-gradient-to-r from-blue-500 to-purple-600 px-6 py-8">
+            <div className="flex items-center space-x-4">
+              <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
+                <User className="w-8 h-8 text-white" />
               </div>
-              
-              <div className="p-6 space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    API Key
-                  </label>
-                  <div className="flex space-x-2">
-                    <div className="flex-1 relative">
-                      <input
-                        type={showApiKey ? 'text' : 'password'}
-                        value={profile?.api_key || ''}
-                        readOnly
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 font-mono text-sm"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowApiKey(!showApiKey)}
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                      >
-                        {showApiKey ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                      </button>
-                    </div>
-                    <button
-                      onClick={copyApiKey}
-                      className="btn-secondary flex items-center"
-                    >
-                      <Copy className="w-4 h-4 mr-2" />
-                      Copy
-                    </button>
-                    <button
-                      onClick={regenerateApiKey}
-                      className="btn-secondary flex items-center"
-                    >
-                      <RefreshCw className="w-4 h-4 mr-2" />
-                      Regenerate
-                    </button>
-                  </div>
-                  <p className="text-sm text-gray-500 mt-2">
-                    Use this API key to authenticate your requests to the B2C Automation Platform API.
-                  </p>
-                </div>
+              <div>
+                <h2 className="text-2xl font-bold text-white">Demo User</h2>
+                <p className="text-blue-100">demo@example.com</p>
               </div>
             </div>
           </div>
 
-          {/* Account Info Sidebar */}
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow">
-              <div className="p-6 border-b border-gray-200">
-                <h2 className="text-lg font-medium text-gray-900">Account Information</h2>
+          {/* Profile Content */}
+          <div className="p-6">
+            <div className="grid md:grid-cols-2 gap-8">
+              {/* Account Information */}
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Account Information</h3>
+                  <div className="space-y-4">
+                    <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                      <Mail className="w-5 h-5 text-gray-500" />
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">Email</p>
+                        <p className="text-sm text-gray-600">demo@example.com</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                      <Calendar className="w-5 h-5 text-gray-500" />
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">Member Since</p>
+                        <p className="text-sm text-gray-600">August 2024</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                      <Shield className="w-5 h-5 text-gray-500" />
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">Account Status</p>
+                        <p className="text-sm text-green-600">Active Trial</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Subscription Info */}
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Subscription</h3>
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-sm font-medium text-green-900">Free Trial</span>
+                      <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">Active</span>
+                    </div>
+                    <p className="text-sm text-green-700">5 days remaining</p>
+                    <div className="mt-3">
+                      <div className="flex justify-between text-xs text-green-600 mb-1">
+                        <span>Credits Used</span>
+                        <span>12/50</span>
+                      </div>
+                      <div className="w-full bg-green-200 rounded-full h-2">
+                        <div className="bg-green-600 h-2 rounded-full" style={{ width: '24%' }}></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
-              
-              <div className="p-6 space-y-4">
+
+              {/* Settings */}
+              <div className="space-y-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Account Tier</label>
-                  <p className="text-lg font-semibold text-gray-900 capitalize">{profile?.tier}</p>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Settings</h3>
+                  <div className="space-y-3">
+                    <button className="w-full flex items-center justify-between p-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors">
+                      <div className="flex items-center space-x-3">
+                        <Settings className="w-5 h-5 text-gray-500" />
+                        <span className="text-sm font-medium text-gray-900">Account Settings</span>
+                      </div>
+                      <span className="text-xs text-gray-500">Coming Soon</span>
+                    </button>
+                    
+                    <button className="w-full flex items-center justify-between p-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors">
+                      <div className="flex items-center space-x-3">
+                        <Shield className="w-5 h-5 text-gray-500" />
+                        <span className="text-sm font-medium text-gray-900">Privacy Settings</span>
+                      </div>
+                      <span className="text-xs text-gray-500">Coming Soon</span>
+                    </button>
+                    
+                    <button className="w-full flex items-center justify-between p-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors">
+                      <div className="flex items-center space-x-3">
+                        <Mail className="w-5 h-5 text-gray-500" />
+                        <span className="text-sm font-medium text-gray-900">Notification Preferences</span>
+                      </div>
+                      <span className="text-xs text-gray-500">Coming Soon</span>
+                    </button>
+                  </div>
                 </div>
 
+                {/* Danger Zone */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Credits Remaining</label>
-                  <p className="text-lg font-semibold text-gray-900">{profile?.credits_remaining}</p>
+                  <h3 className="text-lg font-semibold text-red-900 mb-4">Danger Zone</h3>
+                  <div className="border border-red-200 rounded-lg p-4">
+                    <h4 className="text-sm font-medium text-red-900 mb-2">Delete Account</h4>
+                    <p className="text-sm text-red-700 mb-3">
+                      Permanently delete your account and all associated data.
+                    </p>
+                    <button
+                      disabled
+                      className="bg-red-100 text-red-400 px-4 py-2 rounded-lg text-sm font-medium cursor-not-allowed"
+                    >
+                      Delete Account (Coming Soon)
+                    </button>
+                  </div>
                 </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Member Since</label>
-                  <p className="text-sm text-gray-600">
-                    {profile?.created_at ? new Date(profile.created_at).toLocaleDateString() : 'N/A'}
-                  </p>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">User ID</label>
-                  <p className="text-xs text-gray-500 font-mono break-all">{profile?.id}</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Account Actions */}
-            <div className="bg-white rounded-lg shadow mt-6">
-              <div className="p-6 border-b border-gray-200">
-                <h2 className="text-lg font-medium text-gray-900">Account Actions</h2>
-              </div>
-              
-              <div className="p-6 space-y-3">
-                <button className="w-full btn-secondary">
-                  Download Data
-                </button>
-                <button className="w-full btn-secondary">
-                  Change Password
-                </button>
-                <button className="w-full bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors">
-                  Delete Account
-                </button>
               </div>
             </div>
           </div>
