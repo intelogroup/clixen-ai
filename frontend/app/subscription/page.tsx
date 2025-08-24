@@ -230,6 +230,7 @@ export default function SubscriptionPage() {
                       <stripe-buy-button
                         buy-button-id={plan.buyButtonId}
                         publishable-key="pk_test_51Qpb3I010OCMBFJxSyiNrUtC88p5ikKlyRZWoPJN4o8CAMWBdBBO3EzwNQm20uv1KR6Z47Eotb29r3VCg61mZ2f200KQ8LK6FF"
+                        customer-email={user?.email}
                       />
                     ) : (
                       <div className="h-12 bg-gray-100 rounded-lg flex items-center justify-center">
