@@ -61,6 +61,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     getInitialSession()
 
     // Listen for auth changes
+    const supabase = createClient()
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log('🔐 [AUTH] Auth state change:', event, session ? 'Session exists' : 'No session')
@@ -94,6 +95,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setLoading(true)
     
     try {
+      const supabase = createClient()
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -147,6 +149,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setLoading(true)
     
     try {
+      const supabase = createClient()
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -209,6 +212,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setLoading(true)
     
     try {
+      const supabase = createClient()
       const { error } = await supabase.auth.signOut()
       
       if (error) {
