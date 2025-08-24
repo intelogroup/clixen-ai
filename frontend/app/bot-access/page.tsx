@@ -46,22 +46,38 @@ export default function BotAccessPage() {
 
   async function checkAuth() {
     try {
-
       // Get user profile with subscription info
-      const { data: profile } = await supabase
+      const { data: profile, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', user.id)
         .single()
 
-      setSubscription(profile)
-      
-      // Check if user has active subscription (free tier users need to upgrade)
-      if (!profile?.tier || profile.tier === 'free') {
+      if (error) {
+        console.error('🔐 [BOT-ACCESS] Error fetching profile:', error)
         router.push('/subscription')
+        return
       }
+
+      setSubscription(profile)
+
+      // Check if user has access (trial, paid plan, or valid subscription)
+      const hasAccess = profile && (
+        profile.trial_active ||
+        (profile.tier && profile.tier !== 'free') ||
+        profile.credits_remaining > 0
+      )
+
+      if (!hasAccess) {
+        console.log('🚫 [BOT-ACCESS] User does not have bot access, redirecting to subscription')
+        router.push('/subscription')
+        return
+      }
+
+      console.log('✅ [BOT-ACCESS] User has bot access:', profile.tier, 'Trial:', profile.trial_active)
     } catch (error) {
-      console.error('Auth error:', error)
+      console.error('��� [BOT-ACCESS] Auth error:', error)
+      router.push('/subscription')
     } finally {
       setLoading(false)
     }
