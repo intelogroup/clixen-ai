@@ -49,10 +49,9 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (authLoading) return
-    
+
     if (!user) {
-      console.log('📊 No authenticated user found, redirecting to home page...')
-      router.push('/?auth=true')
+      console.log('📊 No authenticated user found, middleware will handle redirect')
       return
     }
 
