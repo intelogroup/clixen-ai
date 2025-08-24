@@ -93,11 +93,12 @@ export default function SubscriptionPage() {
   const { user, loading: authLoading } = useAuth()
   const [loading, setLoading] = useState(true)
   const [stripeLoaded, setStripeLoaded] = useState(false)
+  const [profile, setProfile] = useState(null)
   const router = useRouter()
 
   useEffect(() => {
     if (authLoading) return
-    
+
     if (!user) {
       console.log('💳 [SUBSCRIPTION] No user found, redirecting to auth')
       router.push('/?auth=true&redirect=/subscription')
@@ -105,8 +106,36 @@ export default function SubscriptionPage() {
     }
 
     console.log('💳 [SUBSCRIPTION] User authenticated:', user.email)
-    setLoading(false)
+    checkUserProfile()
   }, [user, authLoading, router])
+
+  const checkUserProfile = async () => {
+    try {
+      const supabase = createClient()
+      const { data: profileData, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single()
+
+      if (error) {
+        console.error('💳 [SUBSCRIPTION] Error fetching profile:', error)
+      } else {
+        setProfile(profileData)
+
+        // If user already has a paid plan, redirect to bot access
+        if (profileData?.tier && profileData.tier !== 'free' && profileData.tier !== 'trial') {
+          console.log('💳 [SUBSCRIPTION] User already has paid plan, redirecting to bot access')
+          router.push('/bot-access')
+          return
+        }
+      }
+    } catch (error) {
+      console.error('💳 [SUBSCRIPTION] Error:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const handleStripeLoad = () => {
     console.log('💳 [SUBSCRIPTION] Stripe Buy Button script loaded')
