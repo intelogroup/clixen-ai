@@ -5,8 +5,8 @@ import { cookies } from 'next/headers'
  * Creates a Supabase client for server components with proper cookie handling
  * This ensures session persistence between client and server
  */
-export function createClient() {
-  const cookieStore = cookies()
+export async function createClient() {
+  const cookieStore = await cookies()
 
   console.log('🔐 [SERVER] Creating Supabase server client with cookie handling')
 
