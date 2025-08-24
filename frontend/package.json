@@ -28,6 +28,7 @@
     "@sentry/browser": "^10.5.0",
     "@sentry/nextjs": "^10.5.0",
     "@sentry/node": "^10.5.0",
+    "@stackframe/stack": "^2.8.32",
     "@stripe/mcp": "^0.2.4",
     "@stripe/stripe-js": "^7.8.0",
     "@supabase/ssr": "^0.7.0",
