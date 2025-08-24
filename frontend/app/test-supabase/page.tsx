@@ -12,14 +12,34 @@ export default function TestSupabasePage() {
   const testConnection = async () => {
     setLoading(true)
     try {
-      const response = await fetch('/api/test-supabase')
+      console.log('🔗 Starting connection test...')
+      const response = await fetch('/api/test-supabase', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        cache: 'no-cache'
+      })
+
+      console.log('📡 Response status:', response.status)
+      console.log('📡 Response headers:', Object.fromEntries(response.headers.entries()))
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+      }
+
       const data = await response.json()
+      console.log('✅ Response data:', data)
       setTestResults(data)
     } catch (error) {
+      console.error('❌ Connection test failed:', error)
       setTestResults({
         success: false,
         error: 'Failed to test connection',
-        details: error.message
+        details: `${error.name}: ${error.message}`,
+        timestamp: new Date().toISOString(),
+        userAgent: navigator.userAgent,
+        currentUrl: window.location.href
       })
     } finally {
       setLoading(false)
