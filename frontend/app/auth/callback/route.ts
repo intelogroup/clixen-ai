@@ -29,8 +29,8 @@ export async function GET(request: NextRequest) {
       try {
         const { data: existingProfile, error: fetchError } = await supabase
           .from('profiles')
-          .select('id')
-          .eq('id', data.session.user.id)
+          .select('id, auth_user_id')
+          .eq('auth_user_id', data.session.user.id)
           .single()
         
         if (!existingProfile && fetchError?.code === 'PGRST116') {
