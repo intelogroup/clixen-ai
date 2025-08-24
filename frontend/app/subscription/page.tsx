@@ -292,10 +292,10 @@ export default function SubscriptionPage() {
 
                   {/* Plan Action */}
                   <div className="text-center">
-                    {plan.id === 'starter' && !profile?.trial_active && !profile?.tier ? (
+                    {plan.id === 'starter' && !profile?.trial_active && (!profile?.tier || profile?.tier === 'free') ? (
                       // Free trial for new users
                       <button
-                        onClick={() => router.push('/bot-access')}
+                        onClick={handleStartTrial}
                         className="w-full py-3 px-4 rounded-xl font-semibold transition-all bg-green-600 hover:bg-green-700 text-white shadow-lg hover:shadow-xl"
                       >
                         Start 7-Day Free Trial
