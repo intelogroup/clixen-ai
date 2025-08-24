@@ -126,7 +126,7 @@ export async function POST() {
       return NextResponse.json({
         success: false,
         error: 'Missing Supabase credentials'
-      }, { status: 500 })
+      }, { status: 500, headers: corsHeaders })
     }
     
     const supabase = createClient(supabaseUrl, supabaseServiceKey, {
@@ -156,7 +156,7 @@ export async function POST() {
           tier: existingUser.tier,
           trial_active: existingUser.trial_active
         }
-      })
+      }, { headers: corsHeaders })
     }
     
     // Create auth user
@@ -171,7 +171,7 @@ export async function POST() {
         success: false,
         error: 'Auth user creation failed',
         details: authError.message
-      }, { status: 500 })
+      }, { status: 500, headers: corsHeaders })
     }
     
     // Create profile
@@ -196,7 +196,7 @@ export async function POST() {
         success: false,
         error: 'Profile creation failed',
         details: profileError.message
-      }, { status: 500 })
+      }, { status: 500, headers: corsHeaders })
     }
     
     return NextResponse.json({
@@ -209,7 +209,7 @@ export async function POST() {
         trial_active: profile.trial_active,
         trial_expires: profile.trial_expires_at
       }
-    })
+    }, { headers: corsHeaders })
     
   } catch (error) {
     console.error('User creation error:', error)
@@ -217,6 +217,6 @@ export async function POST() {
       success: false,
       error: 'User creation failed',
       details: error.message
-    }, { status: 500 })
+    }, { status: 500, headers: corsHeaders })
   }
 }
