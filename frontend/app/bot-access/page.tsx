@@ -76,7 +76,7 @@ export default function BotAccessPage() {
 
       console.log('✅ [BOT-ACCESS] User has bot access:', profile.tier, 'Trial:', profile.trial_active)
     } catch (error) {
-      console.error('��� [BOT-ACCESS] Auth error:', error)
+      console.error('🚨 [BOT-ACCESS] Auth error:', error)
       router.push('/subscription')
     } finally {
       setLoading(false)
@@ -106,14 +106,28 @@ export default function BotAccessPage() {
         <div className="text-center mb-12">
           <Badge className="mb-4" variant="default">
             <Sparkles className="w-3 h-3 mr-1" />
-            Premium Access Activated
+            {subscription?.trial_active
+              ? 'Free Trial Active'
+              : subscription?.tier === 'free'
+                ? 'Free Access'
+                : 'Premium Access Activated'
+            }
           </Badge>
           <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
             Welcome to Clixen AI Bot
           </h1>
           <p className="text-xl text-gray-600 dark:text-gray-400">
-            Your AI automation assistant is ready to help you build powerful workflows
+            {subscription?.trial_active
+              ? 'Your 7-day free trial is active! Start automating your workflows now.'
+              : 'Your AI automation assistant is ready to help you build powerful workflows'
+            }
           </p>
+          {subscription?.trial_active && (
+            <div className="mt-4 inline-flex items-center px-4 py-2 bg-blue-50 text-blue-700 rounded-full text-sm font-medium">
+              <Clock className="w-4 h-4 mr-2" />
+              Trial expires in {Math.max(0, Math.ceil((new Date(subscription.trial_expires_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))} days
+            </div>
+          )}
         </div>
 
         {/* Main Access Card */}
