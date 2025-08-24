@@ -92,12 +92,12 @@ export async function updateSession(request: NextRequest) {
     return response
   }
 
-  // Redirect authenticated users from landing page to dashboard 
-  // (unless they have specific params or are forcing landing page)
-  if (request.nextUrl.pathname === '/' && user && 
-      !request.nextUrl.searchParams.has('force') && 
+  // Only redirect authenticated users from landing page if they don't have auth params
+  // This prevents redirect loops during authentication flow
+  if (request.nextUrl.pathname === '/' && user &&
       !request.nextUrl.searchParams.has('auth') &&
-      !request.nextUrl.searchParams.has('redirect')) {
+      !request.nextUrl.searchParams.has('redirect') &&
+      !request.nextUrl.searchParams.has('force')) {
     console.log('🔒 [MIDDLEWARE] Redirecting authenticated user to dashboard')
     return NextResponse.redirect(new URL('/dashboard', request.url))
   }
