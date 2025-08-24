@@ -3,22 +3,23 @@
 import { useState, useEffect, useCallback } from 'react'
 import AuthModalSimple from '../components/AuthModalSimple'
 import GlobalErrorHandler from '../components/GlobalErrorHandler'
-import { 
-  Bot, 
-  Check, 
-  ArrowRight, 
-  Zap, 
-  Shield, 
-  Cloud, 
-  Mail, 
-  FileText, 
-  Languages, 
+import {
+  Bot,
+  Check,
+  ArrowRight,
+  Zap,
+  Shield,
+  Cloud,
+  Mail,
+  FileText,
+  Languages,
   Calendar,
   CloudRain,
   Sparkles,
   Users,
   Star
 } from 'lucide-react'
+import { getBotButtonProps, trackBotAccess, BotAccessPresets } from '../lib/telegram-utils'
 
 export default function LandingPage() {
   const [showAuthModal, setShowAuthModal] = useState(false)
@@ -217,10 +218,8 @@ export default function LandingPage() {
                 <ArrowRight className="w-5 h-5" />
               </button>
               
-              <a 
-                href="https://t.me/clixen_bot" 
-                target="_blank" 
-                rel="noopener noreferrer"
+              <a
+                {...getBotButtonProps('LANDING_HERO')}
                 className="w-full sm:w-auto bg-white hover:bg-gray-50 text-gray-900 px-8 py-4 rounded-xl font-semibold text-lg transition-all border border-gray-200 shadow-sm hover:shadow-md flex items-center justify-center space-x-2"
               >
                 <Bot className="w-5 h-5" />
