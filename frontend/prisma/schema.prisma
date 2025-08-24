@@ -1,0 +1,42 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  // uncomment next line if you use Prisma <5.10
+  // directUrl = env("DATABASE_URL_UNPOOLED")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+model Profile {
+  id               String   @id @default(cuid())
+  authUserId       String   @unique @map("auth_user_id")
+  email            String   @unique
+  fullName         String?  @map("full_name")
+  tier             String   @default("free")
+  trialActive      Boolean  @default(true) @map("trial_active")
+  trialStartedAt   DateTime @default(now()) @map("trial_started_at")
+  trialExpiresAt   DateTime @map("trial_expires_at")
+  quotaLimit       Int      @default(50) @map("quota_limit")
+  quotaUsed        Int      @default(0) @map("quota_used")
+  lastActivityAt   DateTime @default(now()) @map("last_activity_at")
+  userMetadata     Json     @default("{}") @map("user_metadata")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  @@map("profiles")
+}
