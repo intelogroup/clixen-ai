@@ -134,12 +134,11 @@ export default function Dashboard() {
 
   const quickActions = [
     {
-      title: 'Message @clixen_bot',
-      description: 'Start automating right now',
+      title: 'Access Bot',
+      description: 'Start free trial or upgrade',
       icon: Bot,
-      href: getBotButtonProps('DASHBOARD').href,
-      onClick: getBotButtonProps('DASHBOARD').onClick,
-      external: true,
+      href: '/subscription',
+      external: false,
       color: 'bg-blue-50 text-blue-600 hover:bg-blue-100'
     },
     {
