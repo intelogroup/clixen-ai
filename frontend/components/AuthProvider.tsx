@@ -65,18 +65,21 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log('🔐 [AUTH] Auth state change:', event, session ? 'Session exists' : 'No session')
-        
+
         setSession(session)
         setUser(session?.user ?? null)
         setLoading(false)
-        
+
         // Handle auth events
         switch (event) {
           case 'SIGNED_IN':
-            console.log('✅ [AUTH] User signed in')
+            console.log('✅ [AUTH] User signed in, redirecting to dashboard')
+            // Small delay to ensure state is properly set
+            setTimeout(() => router.push('/dashboard'), 100)
             break
           case 'SIGNED_OUT':
-            console.log('👋 [AUTH] User signed out')
+            console.log('👋 [AUTH] User signed out, redirecting to home')
+            router.push('/')
             break
           case 'TOKEN_REFRESHED':
             console.log('🔄 [AUTH] Token refreshed')
@@ -197,10 +200,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
           console.error('📝 [AUTH] Profile check error:', error)
         }
       }
-      
-      // Navigate to dashboard on successful signin
-      router.push('/dashboard')
-      
+
+      // Let middleware handle the redirect after authentication state changes
+      console.log('✅ [AUTH] Sign in completed, waiting for auth state change')
+
       return { user: data.user, error: null }
     } finally {
       setLoading(false)
