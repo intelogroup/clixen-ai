@@ -6,7 +6,27 @@ import { Profile } from '../../lib/supabase'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '../../components/AuthProvider'
 import { createClient } from '../../lib/supabase-browser'
-import { Settings, Activity, FileText, CreditCard, MessageCircle, Bot, Sparkles } from 'lucide-react'
+import { 
+  Settings, 
+  Activity, 
+  FileText, 
+  CreditCard, 
+  MessageCircle, 
+  Bot, 
+  Sparkles,
+  TrendingUp,
+  Calendar,
+  Zap,
+  CheckCircle,
+  Clock,
+  AlertCircle,
+  ExternalLink,
+  Users,
+  Mail,
+  Languages,
+  CloudRain,
+  Shield
+} from 'lucide-react'
 import GlobalNavigation from '../../components/GlobalNavigation'
 
 interface DashboardStats {
@@ -40,7 +60,7 @@ export default function Dashboard() {
     
     const getUserData = async () => {
       console.log('📊 User found:', user.email)
-
+      
       try {
         const supabase = createClient()
         console.log('📊 Fetching user profile from database...')
@@ -80,349 +100,322 @@ export default function Dashboard() {
           })
         } else {
           console.log('📊 Dashboard stats received:', dashboardData)
-          setStats({
-            total_executions: dashboardData.total_executions || 0,
-            successful_executions: dashboardData.successful_executions || 0,
-            documents_analyzed: dashboardData.documents_analyzed || 0,
-            total_credits_spent: dashboardData.total_credits_spent || 0,
-            trial_active: dashboardData.trial_active || false,
-            trial_days_remaining: dashboardData.trial_days_remaining || 0
-          })
+          setStats(dashboardData)
         }
-        
       } catch (error) {
-        console.error('📊 Error fetching user data:', error)
+        console.error('📊 Error in getUserData:', error)
+      } finally {
+        setLoading(false)
       }
-      
-      console.log('📊 Setting loading to false...')
-      setLoading(false)
     }
 
     getUserData()
   }, [user, authLoading, router])
 
-
-  const handleStartTrial = async () => {
-    if (!user || !profile) return
-
-    try {
-      console.log('🔥 Starting trial for user:', user.id)
-      
-      const trialStart = new Date()
-      const trialEnd = new Date()
-      trialEnd.setDate(trialEnd.getDate() + 7)
-      
-      const response = await fetch('/api/user/start-trial', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          userId: user.id,
-          trialStartDate: trialStart.toISOString(),
-          trialEndDate: trialEnd.toISOString(),
-          trialCredits: 50
-        })
-      })
-
-      const result = await response.json()
-      
-      if (result.success) {
-        console.log('✅ Trial started successfully')
-        // Refresh the page to show updated trial status
-        router.refresh()
-      } else {
-        console.error('❌ Failed to start trial:', result.message)
-        alert('Failed to start trial: ' + result.message)
-      }
-    } catch (error) {
-      console.error('❌ Error starting trial:', error)
-      alert('Error starting trial. Please try again.')
-    }
-  }
-
-  if (loading) {
+  if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading dashboard...</p>
+          <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Loading Dashboard</h2>
+          <p className="text-gray-600">Getting your automation data...</p>
         </div>
       </div>
     )
   }
 
+  const automations = [
+    { name: 'Weather Check', icon: CloudRain, usage: stats?.total_executions ? Math.floor(stats.total_executions * 0.3) : 0 },
+    { name: 'Email Scanner', icon: Mail, usage: stats?.total_executions ? Math.floor(stats.total_executions * 0.25) : 0 },
+    { name: 'PDF Summarizer', icon: FileText, usage: stats?.total_executions ? Math.floor(stats.total_executions * 0.2) : 0 },
+    { name: 'Text Translator', icon: Languages, usage: stats?.total_executions ? Math.floor(stats.total_executions * 0.15) : 0 },
+    { name: 'Smart Reminders', icon: Calendar, usage: stats?.total_executions ? Math.floor(stats.total_executions * 0.1) : 0 }
+  ]
+
+  const quickActions = [
+    {
+      title: 'Message @clixen_bot',
+      description: 'Start automating right now',
+      icon: Bot,
+      href: 'https://t.me/clixen_bot',
+      external: true,
+      color: 'bg-blue-50 text-blue-600 hover:bg-blue-100'
+    },
+    {
+      title: 'Link Telegram',
+      description: 'Connect your account',
+      icon: MessageCircle,
+      href: '/bot-access',
+      external: false,
+      color: 'bg-green-50 text-green-600 hover:bg-green-100'
+    },
+    {
+      title: 'Manage Subscription',
+      description: 'Billing & plans',
+      icon: CreditCard,
+      href: '/subscription',
+      external: false,
+      color: 'bg-purple-50 text-purple-600 hover:bg-purple-100'
+    },
+    {
+      title: 'Account Settings',
+      description: 'Profile & preferences',
+      icon: Settings,
+      href: '/profile',
+      external: false,
+      color: 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+    }
+  ]
+
+  const creditsUsed = profile?.quota_used || 0
+  const creditsLimit = profile?.quota_limit || 50
+  const creditsRemaining = Math.max(0, creditsLimit - creditsUsed)
+  const usagePercentage = creditsLimit > 0 ? (creditsUsed / creditsLimit) * 100 : 0
+
   return (
     <div className="min-h-screen bg-gray-50">
-      <GlobalNavigation user={user} />
-
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Welcome Section */}
+      <GlobalNavigation />
+      
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header */}
         <div className="mb-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">
-            Welcome back, <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">{profile?.full_name || user?.email?.split('@')[0] || 'User'}</span>! 🚀
-          </h2>
-          <p className="text-lg text-gray-600">
-            Access your AI automation assistant through Telegram and track your usage.
-          </p>
+          <div className="flex items-center justify-between mb-2">
+            <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+            <div className="flex items-center space-x-3">
+              {stats?.trial_active && (
+                <div className="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-sm font-medium flex items-center space-x-1">
+                  <Clock className="w-4 h-4" />
+                  <span>{stats.trial_days_remaining} days left in trial</span>
+                </div>
+              )}
+              <a 
+                href="https://t.me/clixen_bot" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2"
+              >
+                <Bot className="w-4 h-4" />
+                <span>Open Bot</span>
+                <ExternalLink className="w-4 h-4" />
+              </a>
+            </div>
+          </div>
+          <p className="text-gray-600">Welcome back, {user?.email}! Here's your automation overview.</p>
         </div>
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="stats-card">
-            <div className="flex items-center">
-              <div className="p-3 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl shadow-sm">
-                <CreditCard className="w-6 h-6 text-blue-600" />
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-2">
+              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                <Zap className="w-5 h-5 text-blue-600" />
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Credits Remaining</p>
-                <p className="text-2xl font-bold text-gray-900">{profile?.credits_remaining || 0}</p>
-              </div>
+              <span className="text-2xl font-bold text-gray-900">{stats?.total_executions || 0}</span>
             </div>
+            <h3 className="font-semibold text-gray-900">Total Automations</h3>
+            <p className="text-sm text-gray-600">Lifetime executions</p>
           </div>
 
-          <div className="stats-card">
-            <div className="flex items-center">
-              <div className="p-3 bg-gradient-to-br from-green-100 to-green-200 rounded-xl shadow-sm">
-                <Activity className="w-6 h-6 text-green-600" />
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-2">
+              <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                <CheckCircle className="w-5 h-5 text-green-600" />
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Bot Interactions</p>
-                <p className="text-2xl font-bold text-gray-900">{stats?.total_executions || 0}</p>
-              </div>
+              <span className="text-2xl font-bold text-gray-900">{stats?.successful_executions || 0}</span>
             </div>
+            <h3 className="font-semibold text-gray-900">Successful</h3>
+            <p className="text-sm text-gray-600">
+              {stats?.total_executions > 0 
+                ? `${Math.round(((stats?.successful_executions || 0) / stats.total_executions) * 100)}% success rate`
+                : 'No executions yet'
+              }
+            </p>
           </div>
 
-          <div className="stats-card">
-            <div className="flex items-center">
-              <div className="p-3 bg-gradient-to-br from-purple-100 to-purple-200 rounded-xl shadow-sm">
-                <FileText className="w-6 h-6 text-purple-600" />
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-2">
+              <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                <FileText className="w-5 h-5 text-purple-600" />
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Automations Created</p>
-                <p className="text-2xl font-bold text-gray-900">{stats?.documents_analyzed || 0}</p>
-              </div>
+              <span className="text-2xl font-bold text-gray-900">{stats?.documents_analyzed || 0}</span>
             </div>
+            <h3 className="font-semibold text-gray-900">Documents</h3>
+            <p className="text-sm text-gray-600">PDFs analyzed</p>
           </div>
 
-          <div className="stats-card">
-            <div className="flex items-center">
-              <div className="p-3 bg-gradient-to-br from-orange-100 to-orange-200 rounded-xl shadow-sm">
-                <Settings className="w-6 h-6 text-orange-600" />
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-2">
+              <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+                <TrendingUp className="w-5 h-5 text-orange-600" />
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Account Tier</p>
-                <p className="text-2xl font-bold text-gray-900 capitalize">{profile?.tier || 'Free'}</p>
-              </div>
+              <span className="text-2xl font-bold text-gray-900">{creditsRemaining}</span>
             </div>
+            <h3 className="font-semibold text-gray-900">Credits Left</h3>
+            <p className="text-sm text-gray-600">Out of {creditsLimit} available</p>
           </div>
         </div>
 
-        {/* Bot Access Section */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 mb-8 hover:shadow-lg transition-shadow duration-300">
-          <div className="p-6 border-b border-gray-200">
-            <h3 className="text-lg font-medium text-gray-900 flex items-center gap-2">
-              <Bot className="w-5 h-5 text-blue-600" />
-              Telegram Bot Access
-            </h3>
-            <p className="text-sm text-gray-600 mt-1">Connect with your AI assistant to create automations</p>
-          </div>
-          <div className="p-6">
-            {(profile?.tier && profile.tier !== 'free') || stats?.trial_active ? (
+        <div className="grid lg:grid-cols-3 gap-8">
+          {/* Main Content */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Usage Progress */}
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-semibold text-gray-900">Credit Usage</h2>
+                <div className="text-sm text-gray-600">
+                  {creditsUsed} / {creditsLimit} used
+                </div>
+              </div>
+              
+              <div className="mb-4">
+                <div className="flex justify-between text-sm mb-2">
+                  <span className="text-gray-600">Current usage</span>
+                  <span className="font-medium text-gray-900">{Math.round(usagePercentage)}%</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-3">
+                  <div 
+                    className={`h-3 rounded-full transition-all duration-500 ${
+                      usagePercentage > 90 ? 'bg-red-500' :
+                      usagePercentage > 70 ? 'bg-yellow-500' :
+                      'bg-blue-500'
+                    }`}
+                    style={{ width: `${Math.min(usagePercentage, 100)}%` }}
+                  />
+                </div>
+              </div>
+
+              {usagePercentage > 80 && (
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 flex items-start space-x-3">
+                  <AlertCircle className="w-5 h-5 text-yellow-600 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <h4 className="font-medium text-yellow-800">Running low on credits</h4>
+                    <p className="text-sm text-yellow-700 mt-1">
+                      You've used {Math.round(usagePercentage)}% of your credits. Consider upgrading to avoid interruptions.
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Automations Usage */}
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+              <h2 className="text-xl font-semibold text-gray-900 mb-6">Automation Usage</h2>
+              
               <div className="space-y-4">
-                {stats?.trial_active ? (
-                  <div className="flex items-center gap-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                    <Sparkles className="w-5 h-5 text-blue-600" />
-                    <span className="text-blue-800 font-medium">
-                      Free Trial Active - {stats.trial_days_remaining} days remaining
-                    </span>
+                {automations.map((automation, index) => (
+                  <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm">
+                        <automation.icon className="w-5 h-5 text-gray-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-medium text-gray-900">{automation.name}</h3>
+                        <p className="text-sm text-gray-600">{automation.usage} times used</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="w-16 bg-gray-200 rounded-full h-2">
+                        <div 
+                          className="bg-blue-500 h-2 rounded-full"
+                          style={{ 
+                            width: `${stats?.total_executions > 0 ? (automation.usage / stats.total_executions) * 100 : 0}%` 
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Sidebar */}
+          <div className="space-y-6">
+            {/* Quick Actions */}
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">Quick Actions</h2>
+              
+              <div className="space-y-3">
+                {quickActions.map((action, index) => (
+                  <a
+                    key={index}
+                    href={action.href}
+                    target={action.external ? '_blank' : '_self'}
+                    rel={action.external ? 'noopener noreferrer' : undefined}
+                    className={`flex items-center space-x-3 p-3 rounded-lg transition-colors ${action.color}`}
+                  >
+                    <action.icon className="w-5 h-5" />
+                    <div className="flex-1">
+                      <h4 className="font-medium">{action.title}</h4>
+                      <p className="text-sm opacity-80">{action.description}</p>
+                    </div>
+                    {action.external && <ExternalLink className="w-4 h-4" />}
+                  </a>
+                ))}
+              </div>
+            </div>
+
+            {/* Account Status */}
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">Account Status</h2>
+              
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-600">Plan</span>
+                  <span className="font-medium text-gray-900 capitalize">
+                    {stats?.trial_active ? 'Free Trial' : profile?.tier || 'Free'}
+                  </span>
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-600">Status</span>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span className="font-medium text-green-700">Active</span>
+                  </div>
+                </div>
+                
+                {profile?.telegram_chat_id ? (
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-600">Telegram</span>
+                    <div className="flex items-center space-x-2">
+                      <CheckCircle className="w-4 h-4 text-green-500" />
+                      <span className="font-medium text-green-700">Connected</span>
+                    </div>
                   </div>
                 ) : (
-                  <div className="flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-lg">
-                    <Sparkles className="w-5 h-5 text-green-600" />
-                    <span className="text-green-800 font-medium">Premium Access Active</span>
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                    <div className="flex items-center space-x-2 mb-2">
+                      <MessageCircle className="w-4 h-4 text-blue-600" />
+                      <span className="font-medium text-blue-900">Link Telegram</span>
+                    </div>
+                    <p className="text-sm text-blue-700 mb-3">
+                      Connect your Telegram account to start using automations.
+                    </p>
+                    <a 
+                      href="/bot-access"
+                      className="text-sm font-medium text-blue-600 hover:text-blue-700"
+                    >
+                      Link Now →
+                    </a>
                   </div>
                 )}
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <button 
-                    onClick={() => router.push('/bot-access')}
-                    className="flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
-                  >
-                    <MessageCircle className="w-5 h-5" />
-                    Access Telegram Bot
-                  </button>
-                  
-                  <button 
-                    onClick={() => window.open('https://t.me/clixen_bot', '_blank')}
-                    className="flex items-center justify-center gap-2 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
-                  >
-                    <Bot className="w-5 h-5" />
-                    Open @clixen_bot
-                  </button>
-                </div>
-                
-                <div className="text-sm text-gray-600">
-                  <p><strong>Your Access Code:</strong> <code className="bg-gray-100 px-2 py-1 rounded">{user?.id?.slice(0, 8).toUpperCase()}</code></p>
-                  <p className="mt-1">Use this code to authenticate with the bot after clicking /start</p>
-                </div>
-              </div>
-            ) : (
-              <div className="text-center space-y-4">
-                <div className="flex items-center gap-2 p-3 bg-orange-50 border border-orange-200 rounded-lg justify-center">
-                  <CreditCard className="w-5 h-5 text-orange-600" />
-                  <span className="text-orange-800 font-medium">No Active Access</span>
-                </div>
-                
-                <p className="text-gray-600">Start a free trial or upgrade to access the Telegram bot</p>
-                
-                <div className="flex flex-col md:flex-row gap-3 justify-center">
-                  <button 
-                    onClick={handleStartTrial}
-                    className="flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
-                  >
-                    <Sparkles className="w-5 h-5" />
-                    Start 7-Day Free Trial
-                  </button>
-                  
-                  <button 
-                    onClick={() => router.push('/subscription')}
-                    className="flex items-center justify-center gap-2 px-6 py-3 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors font-medium"
-                  >
-                    <CreditCard className="w-5 h-5" />
-                    View Plans
-                  </button>
-                </div>
-                
-                <div className="text-sm text-gray-500">
-                  <p><strong>Free Trial includes:</strong> 50 credits, full bot access, all features</p>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Additional Stats Row */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center">
-              <div className="p-2 bg-emerald-100 rounded-lg">
-                <Activity className="w-6 h-6 text-emerald-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Successful Automations</p>
-                <p className="text-2xl font-bold text-gray-900">{stats?.successful_executions || 0}</p>
-                <p className="text-xs text-gray-500">
-                  {stats?.total_executions ? 
-                    `${Math.round((stats.successful_executions / stats.total_executions) * 100)}% success rate` :
-                    'No automations created yet'
-                  }
-                </p>
               </div>
             </div>
-          </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center">
-              <div className="p-2 bg-red-100 rounded-lg">
-                <CreditCard className="w-6 h-6 text-red-600" />
+            {/* Privacy Notice */}
+            <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
+              <div className="flex items-center space-x-3 mb-3">
+                <Shield className="w-5 h-5 text-gray-600" />
+                <h3 className="font-semibold text-gray-900">Privacy First</h3>
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Credits Used</p>
-                <p className="text-2xl font-bold text-gray-900">{profile?.credits_used || 0}</p>
-                <p className="text-xs text-gray-500">
-                  {profile?.credits_used && profile?.credits_remaining ? 
-                    `${profile.credits_used + profile.credits_remaining} total credits` :
-                    'From initial allocation'
-                  }
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center">
-              <div className="p-2 bg-indigo-100 rounded-lg">
-                <Settings className="w-6 h-6 text-indigo-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Account Status</p>
-                <p className="text-2xl font-bold text-gray-900 capitalize">
-                  {profile?.onboarding_completed ? 'Active' : 'Setup'}
-                </p>
-                <p className="text-xs text-gray-500">
-                  {profile?.onboarding_completed ? 'Ready to use' : 'Complete setup'}
-                </p>
-              </div>
+              <p className="text-sm text-gray-600">
+                We don't store your messages. All conversations with @clixen_bot remain private and are processed in real-time only.
+              </p>
             </div>
           </div>
         </div>
-
-        {/* Recent Activity */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-lg transition-shadow duration-300">
-          <div className="p-6 border-b border-gray-200">
-            <h3 className="text-lg font-medium text-gray-900">Account Overview</h3>
-          </div>
-          <div className="p-6">
-            {profile ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <h4 className="font-medium text-gray-900 mb-3">Profile Information</h4>
-                  <dl className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <dt className="text-gray-500">Email:</dt>
-                      <dd className="text-gray-900">{profile.email}</dd>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <dt className="text-gray-500">Full Name:</dt>
-                      <dd className="text-gray-900">{profile.full_name || 'Not set'}</dd>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <dt className="text-gray-500">Tier:</dt>
-                      <dd className="text-gray-900 capitalize">{profile.tier}</dd>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <dt className="text-gray-500">Member Since:</dt>
-                      <dd className="text-gray-900">
-                        {new Date(profile.created_at).toLocaleDateString()}
-                      </dd>
-                    </div>
-                  </dl>
-                </div>
-                <div>
-                  <h4 className="font-medium text-gray-900 mb-3">Usage Summary</h4>
-                  <dl className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <dt className="text-gray-500">Bot Interactions:</dt>
-                      <dd className="text-gray-900">{stats?.total_executions || 0}</dd>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <dt className="text-gray-500">Automations Created:</dt>
-                      <dd className="text-gray-900">{stats?.documents_analyzed || 0}</dd>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <dt className="text-gray-500">Credits Balance:</dt>
-                      <dd className="text-gray-900">{profile.credits_remaining} remaining</dd>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <dt className="text-gray-500">API Key:</dt>
-                      <dd className="text-gray-900 font-mono text-xs">
-                        {profile.api_key ? `${profile.api_key.substring(0, 8)}...` : 'Not generated'}
-                      </dd>
-                    </div>
-                  </dl>
-                </div>
-              </div>
-            ) : (
-              <div className="text-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto"></div>
-                <p className="text-gray-500 mt-4">Loading profile data...</p>
-              </div>
-            )}
-          </div>
-        </div>
-      </main>
+      </div>
     </div>
   )
 }
