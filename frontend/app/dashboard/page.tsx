@@ -137,7 +137,8 @@ export default function Dashboard() {
       title: 'Message @clixen_bot',
       description: 'Start automating right now',
       icon: Bot,
-      href: 'https://t.me/clixen_bot',
+      href: getBotButtonProps('DASHBOARD').href,
+      onClick: getBotButtonProps('DASHBOARD').onClick,
       external: true,
       color: 'bg-blue-50 text-blue-600 hover:bg-blue-100'
     },
