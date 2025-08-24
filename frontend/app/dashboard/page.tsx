@@ -190,12 +190,12 @@ export default function Dashboard() {
                 </div>
               )}
               <a
-                {...getBotButtonProps('DASHBOARD')}
+                href="/subscription"
                 className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2"
               >
                 <Bot className="w-4 h-4" />
-                <span>Open Bot</span>
-                <ExternalLink className="w-4 h-4" />
+                <span>Access Bot</span>
+                <ArrowRight className="w-4 h-4" />
               </a>
             </div>
           </div>
