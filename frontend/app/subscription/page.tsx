@@ -167,17 +167,26 @@ export default function SubscriptionPage() {
           {/* Header */}
           <div className="text-center mb-12">
             <div className="flex items-center justify-center mb-4">
-              <div className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">
-                <Sparkles className="w-3 h-3 inline mr-1" />
-                Limited Time - First Month 50% OFF
-              </div>
+              {profile?.trial_active ? (
+                <div className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
+                  <Clock className="w-3 h-3 inline mr-1" />
+                  Free Trial Active - Upgrade to Continue After Trial
+                </div>
+              ) : (
+                <div className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">
+                  <Sparkles className="w-3 h-3 inline mr-1" />
+                  Start Your Free Trial or Choose a Plan
+                </div>
+              )}
             </div>
             <h1 className="text-4xl font-bold mb-4">
-              Choose Your Automation Plan
+              Access Clixen AI Bot
             </h1>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Start automating your business workflows with our AI-powered Telegram bot. 
-              No coding required.
+              Start automating your business workflows with our AI-powered Telegram bot.
+              {profile?.trial_active
+                ? " Your trial is active! Upgrade to continue using the bot after your trial ends."
+                : " Choose a plan to get instant access to @clixen_bot."}
             </p>
           </div>
 
