@@ -1,11 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { User } from '@supabase/supabase-js'
-import { Profile } from '../../lib/supabase'
 import { useRouter } from 'next/navigation'
-import { useAuth } from '../../components/AuthProvider'
-import { createClient } from '../../lib/supabase-browser'
 import { 
   Settings, 
   Activity, 
