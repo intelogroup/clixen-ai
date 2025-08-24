@@ -174,9 +174,18 @@ export default function AuthModalSimple({ isOpen, onClose, mode, onModeChange }:
                 </div>
 
                 {error && (
-                  <div className="flex items-center space-x-2 p-3 bg-red-50 border border-red-200 rounded-lg">
-                    <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0" />
-                    <p className="text-sm text-red-600">{error}</p>
+                  <div className="space-y-2">
+                    <div className="flex items-start space-x-2 p-3 bg-red-50 border border-red-200 rounded-lg">
+                      <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
+                      <div className="flex-1">
+                        <p className="text-sm text-red-600">{error}</p>
+                        {error.includes('already registered') && (
+                          <div className="mt-2 text-xs text-red-500">
+                            <p>Switching to sign in mode in 2 seconds, or click "Sign in" below.</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 )}
 
