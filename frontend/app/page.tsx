@@ -1,6 +1,69 @@
 import Link from "next/link";
+import { Suspense } from "react";
+
+// Loading component for navigation links
+function NavigationLinks() {
+  try {
+    return (
+      <div className="flex items-center space-x-4">
+        <Link
+          href="/auth/signin"
+          className="text-gray-700 hover:text-indigo-600 px-3 py-2 text-sm font-medium"
+        >
+          Sign In
+        </Link>
+        <Link
+          href="/auth/signup"
+          className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+        >
+          Get Started
+        </Link>
+      </div>
+    );
+  } catch (error) {
+    console.error('Error rendering navigation links:', error);
+    return (
+      <div className="flex items-center space-x-4">
+        <span className="text-red-500 text-sm">Navigation Error</span>
+      </div>
+    );
+  }
+}
+
+// Error boundary for pricing section
+function PricingSection() {
+  try {
+    return (
+      <div className="bg-gray-50 py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="sm:flex sm:flex-col sm:align-center">
+            <h1 className="text-5xl font-extrabold text-gray-900 sm:text-center">Pricing Plans</h1>
+            <p className="mt-5 text-xl text-gray-500 sm:text-center">
+              Start with a free trial, upgrade when you need more
+            </p>
+          </div>
+          <div className="mt-12 space-y-4 sm:mt-16 sm:space-y-0 sm:grid sm:grid-cols-2 sm:gap-6 lg:max-w-4xl lg:mx-auto xl:max-w-none xl:mx-0 xl:grid-cols-3">
+            {/* Pricing cards will go here */}
+          </div>
+        </div>
+      </div>
+    );
+  } catch (error) {
+    console.error('Error rendering pricing section:', error);
+    return (
+      <div className="bg-red-50 py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <p className="text-red-600">Error loading pricing information</p>
+        </div>
+      </div>
+    );
+  }
+}
 
 export default function Home() {
+  console.log('Landing page rendering started');
+  
+  try {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       {/* Navigation */}
@@ -12,20 +75,9 @@ export default function Home() {
                 <h1 className="text-2xl font-bold text-indigo-600">Clixen AI</h1>
               </div>
             </div>
-            <div className="flex items-center space-x-4">
-              <Link
-                href="/auth/signin"
-                className="text-gray-700 hover:text-indigo-600 px-3 py-2 text-sm font-medium"
-              >
-                Sign In
-              </Link>
-              <Link
-                href="/auth/signup"
-                className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium"
-              >
-                Get Started
-              </Link>
-            </div>
+            <Suspense fallback={<div className="animate-pulse">Loading...</div>}>
+              <NavigationLinks />
+            </Suspense>
           </div>
         </div>
       </nav>
@@ -285,4 +337,33 @@ export default function Home() {
       </footer>
     </div>
   );
+  } catch (error) {
+    console.error('Critical error in Home component:', error);
+    return (
+      <div className="min-h-screen bg-red-50 flex items-center justify-center">
+        <div className="max-w-md w-full bg-white shadow-lg rounded-lg p-6">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-red-600 mb-4">Application Error</h1>
+            <p className="text-gray-600 mb-4">
+              We're experiencing technical difficulties. Please try refreshing the page.
+            </p>
+            <button 
+              onClick={() => window.location.reload()} 
+              className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+            >
+              Refresh Page
+            </button>
+            {process.env.NODE_ENV === 'development' && (
+              <details className="mt-4 text-left">
+                <summary className="cursor-pointer text-sm text-gray-500">Error Details</summary>
+                <pre className="mt-2 text-xs bg-gray-100 p-2 rounded overflow-auto">
+                  {error instanceof Error ? error.stack : String(error)}
+                </pre>
+              </details>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
 }
