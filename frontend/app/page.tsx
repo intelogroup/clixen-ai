@@ -14,13 +14,13 @@ export default function Home() {
             </div>
             <div className="flex items-center space-x-4">
               <Link
-                href="/handler/sign-in"
+                href="/auth/signin"
                 className="text-gray-700 hover:text-indigo-600 px-3 py-2 text-sm font-medium"
               >
                 Sign In
               </Link>
               <Link
-                href="/handler/sign-up"
+                href="/auth/signup"
                 className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium"
               >
                 Get Started
@@ -43,7 +43,7 @@ export default function Home() {
           <div className="mt-5 max-w-md mx-auto sm:flex sm:justify-center md:mt-8">
             <div className="rounded-md shadow">
               <Link
-                href="/handler/sign-up"
+                href="/auth/signup"
                 className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 md:py-4 md:text-lg md:px-10"
               >
                 Start Free Trial
@@ -150,7 +150,7 @@ export default function Home() {
                   <span className="text-base font-medium text-gray-500">/7 days</span>
                 </p>
                 <Link
-                  href="/handler/sign-up"
+                  href="/auth/signup"
                   className="mt-8 block w-full bg-gray-800 border border-gray-800 rounded-md py-2 text-sm font-semibold text-white text-center hover:bg-gray-900"
                 >
                   Start Free Trial
@@ -185,7 +185,7 @@ export default function Home() {
                   <span className="text-base font-medium text-gray-500">/month</span>
                 </p>
                 <Link
-                  href="/handler/sign-up"
+                  href="/auth/signup"
                   className="mt-8 block w-full bg-indigo-600 border border-transparent rounded-md py-2 text-sm font-semibold text-white text-center hover:bg-indigo-700"
                 >
                   Get Started
@@ -220,7 +220,7 @@ export default function Home() {
                   <span className="text-base font-medium text-gray-500">/month</span>
                 </p>
                 <Link
-                  href="/handler/sign-up"
+                  href="/auth/signup"
                   className="mt-8 block w-full bg-gray-800 border border-gray-800 rounded-md py-2 text-sm font-semibold text-white text-center hover:bg-gray-900"
                 >
                   Upgrade to Pro
@@ -259,7 +259,7 @@ export default function Home() {
             No credit card required. Start automating with @clixen_bot in minutes.
           </p>
           <Link
-            href="/handler/sign-up"
+            href="/auth/signup"
             className="mt-8 w-full inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-indigo-600 bg-white hover:bg-indigo-50 sm:w-auto"
           >
             Start Free Trial

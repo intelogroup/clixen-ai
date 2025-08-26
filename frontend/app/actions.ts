@@ -1,99 +1,107 @@
 "use server";
 
-import { stackServerApp } from "@/stack";
-import { sql } from "@/lib/database";
+import { neonAuth } from "@/lib/neon-auth";
+import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
-import { UserProfile } from "@/lib/database";
+import type { Profile } from "@prisma/client";
 
 export async function createUserProfile() {
-  const user = await stackServerApp.getUser();
+  const user = await neonAuth.getUser();
   
   if (!user) {
-    redirect("/handler/sign-in");
+    redirect("/auth/signin");
   }
 
   // Check if profile already exists
-  const existingProfile = await sql`
-    SELECT * FROM profiles WHERE stack_user_id = ${user.id}
-  `;
+  const existingProfile = await prisma.profile.findUnique({
+    where: { neonAuthUserId: user.id }
+  });
 
-  if (existingProfile.length === 0) {
-    // Create new profile in your existing database
-    await sql`
-      INSERT INTO profiles (
-        stack_user_id,
-        email,
-        display_name,
-        trial_started_at,
-        trial_expires_at,
-        trial_active,
-        quota_used,
-        quota_limit,
-        tier,
-        created_at,
-        last_activity_at
-      ) VALUES (
-        ${user.id},
-        ${user.primaryEmail},
-        ${user.displayName || user.primaryEmail},
-        NOW(),
-        NOW() + INTERVAL '7 days',
-        true,
-        0,
-        50,
-        'free',
-        NOW(),
-        NOW()
-      )
-    `;
+  if (!existingProfile) {
+    // Create new profile using Prisma
+    await prisma.profile.create({
+      data: {
+        neonAuthUserId: user.id,
+        email: user.primaryEmail!,
+        displayName: user.displayName || user.primaryEmail!,
+        tier: "FREE",
+        trialActive: true,
+        quotaUsed: 0,
+        quotaLimit: 50,
+      }
+    });
   }
 
   return user;
 }
 
-export async function getUserData(): Promise<{user: any, profile: UserProfile | null}> {
-  const user = await stackServerApp.getUser();
+export async function getUserData(): Promise<{user: any, profile: Profile | null}> {
+  const user = await neonAuth.getUser();
   
   if (!user) {
     return { user: null, profile: null };
   }
 
-  const profile = await sql`
-    SELECT * FROM profiles WHERE stack_user_id = ${user.id}
-  `;
+  const profile = await prisma.profile.findUnique({
+    where: { neonAuthUserId: user.id }
+  });
 
-  return {
-    user,
-    profile: (profile[0] as UserProfile) || null
-  };
+  return { user, profile };
 }
 
 export async function updateUserQuota(amount: number = 1) {
-  const user = await stackServerApp.getUser();
+  const user = await neonAuth.getUser();
   
   if (!user) {
     throw new Error('User not authenticated');
   }
 
-  await sql`
-    UPDATE profiles 
-    SET quota_used = quota_used + ${amount}, last_activity_at = NOW()
-    WHERE stack_user_id = ${user.id}
-  `;
+  await prisma.profile.update({
+    where: { neonAuthUserId: user.id },
+    data: {
+      quotaUsed: { increment: amount },
+      lastActivityAt: new Date(),
+    }
+  });
 }
 
-export async function linkTelegramAccount(chatId: string, username?: string) {
-  const user = await stackServerApp.getUser();
+export async function linkTelegramAccount(chatId: string, username?: string, firstName?: string, lastName?: string) {
+  const user = await neonAuth.getUser();
   
   if (!user) {
     throw new Error('User not authenticated');
   }
 
-  await sql`
-    UPDATE profiles 
-    SET telegram_chat_id = ${chatId}, 
-        telegram_username = ${username},
-        last_activity_at = NOW()
-    WHERE stack_user_id = ${user.id}
-  `;
+  await prisma.profile.update({
+    where: { neonAuthUserId: user.id },
+    data: {
+      telegramChatId: chatId,
+      telegramUsername: username,
+      telegramFirstName: firstName,
+      telegramLastName: lastName,
+      telegramLinkedAt: new Date(),
+      lastActivityAt: new Date(),
+    }
+  });
+}
+
+export async function logUsage(action: string, success: boolean = true, errorMessage?: string, processingTime?: number, telegramChatId?: string, telegramMessageId?: bigint) {
+  const user = await neonAuth.getUser();
+  
+  if (!user) {
+    return; // Skip logging for unauthenticated users
+  }
+
+  await prisma.usageLog.create({
+    data: {
+      profileId: user.id,
+      neonAuthUserId: user.id,
+      action,
+      success,
+      errorMessage,
+      processingTimeMs: processingTime,
+      telegramChatId,
+      telegramMessageId,
+    }
+  });
 }

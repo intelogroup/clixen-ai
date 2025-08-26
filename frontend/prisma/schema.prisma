@@ -1,5 +1,5 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+// Clixen AI - NeonAuth + NeonDB + Prisma Schema
+// This integrates with Neon's native authentication system
 
 generator client {
   provider = "prisma-client-js"
@@ -8,35 +8,99 @@ generator client {
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
-  // uncomment next line if you use Prisma <5.10
-  // directUrl = env("DATABASE_URL_UNPOOLED")
+  directUrl = env("DATABASE_URL_UNPOOLED")
 }
 
-model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String?
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  @@map("users")
-}
-
+// User profiles linked to NeonAuth users
 model Profile {
-  id               String   @id @default(cuid())
-  authUserId       String   @unique @map("auth_user_id")
-  email            String   @unique
-  fullName         String?  @map("full_name")
-  tier             String   @default("free")
-  trialActive      Boolean  @default(true) @map("trial_active")
-  trialStartedAt   DateTime @default(now()) @map("trial_started_at")
-  trialExpiresAt   DateTime @map("trial_expires_at")
-  quotaLimit       Int      @default(50) @map("quota_limit")
-  quotaUsed        Int      @default(0) @map("quota_used")
-  lastActivityAt   DateTime @default(now()) @map("last_activity_at")
-  userMetadata     Json     @default("{}") @map("user_metadata")
-  createdAt        DateTime @default(now()) @map("created_at")
-  updatedAt        DateTime @updatedAt @map("updated_at")
-
+  id                   String   @id @default(cuid())
+  neonAuthUserId       String   @unique @map("neon_auth_user_id") // Links to NeonAuth user
+  email                String   @unique
+  displayName          String?  @map("display_name")
+  
+  // Telegram Integration
+  telegramChatId       String?  @unique @map("telegram_chat_id")
+  telegramUsername     String?  @map("telegram_username")
+  telegramFirstName    String?  @map("telegram_first_name")
+  telegramLastName     String?  @map("telegram_last_name")
+  telegramLinkedAt     DateTime? @map("telegram_linked_at")
+  
+  // Subscription & Trial Management
+  tier                 Tier     @default(FREE)
+  trialStartedAt       DateTime @default(now()) @map("trial_started_at")
+  trialExpiresAt       DateTime @default(dbgenerated("NOW() + INTERVAL '7 days'")) @map("trial_expires_at")
+  trialActive          Boolean  @default(true) @map("trial_active")
+  
+  // Usage & Quota Management
+  quotaUsed            Int      @default(0) @map("quota_used")
+  quotaLimit           Int      @default(50) @map("quota_limit") // -1 for unlimited
+  
+  // Stripe Integration
+  stripeCustomerId     String?  @unique @map("stripe_customer_id")
+  stripeSubscriptionId String?  @map("stripe_subscription_id")
+  
+  // Metadata & Tracking
+  userMetadata         Json     @default("{}") @map("user_metadata")
+  lastActivityAt       DateTime @default(now()) @map("last_activity_at")
+  createdAt            DateTime @default(now()) @map("created_at")
+  updatedAt            DateTime @updatedAt @map("updated_at")
+  
+  // Relations
+  usageLogs            UsageLog[]
+  
   @@map("profiles")
+}
+
+// Usage tracking for automation requests
+model UsageLog {
+  id                   BigInt   @id @default(autoincrement())
+  profileId            String   @map("profile_id")
+  neonAuthUserId       String   @map("neon_auth_user_id")
+  
+  // Telegram Context
+  telegramChatId       String?  @map("telegram_chat_id")
+  telegramMessageId    BigInt?  @map("telegram_message_id")
+  
+  // Automation Details
+  action               String   // e.g., "weather", "email_scan", "translate"
+  workflowType         String?  @map("workflow_type")
+  
+  // Performance & Success Tracking
+  success              Boolean  @default(true)
+  errorMessage         String?  @map("error_message")
+  processingTimeMs     Int?     @map("processing_time_ms")
+  
+  createdAt            DateTime @default(now()) @map("created_at")
+  
+  // Relations
+  profile              Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  
+  @@index([profileId])
+  @@index([neonAuthUserId])
+  @@index([createdAt])
+  @@map("usage_logs")
+}
+
+// Telegram temporary users (for unlinked bot interactions)
+model TelegramTempUser {
+  id                   BigInt   @id @default(autoincrement())
+  telegramChatId       String   @unique @map("telegram_chat_id")
+  telegramUsername     String?  @map("telegram_username")
+  telegramFirstName    String?  @map("telegram_first_name")
+  telegramLastName     String?  @map("telegram_last_name")
+  
+  interactionCount     Int      @default(1) @map("interaction_count")
+  firstInteractionAt   DateTime @default(now()) @map("first_interaction_at")
+  lastInteractionAt    DateTime @default(now()) @map("last_interaction_at")
+  
+  context              Json     @default("{}") // Store conversation context
+  
+  @@map("telegram_temp_users")
+}
+
+// Enums
+enum Tier {
+  FREE     @map("free")
+  STARTER  @map("starter")
+  PRO      @map("pro")
 }

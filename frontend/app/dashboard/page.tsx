@@ -1,13 +1,14 @@
-import { stackServerApp } from "@/stack";
+import { neonAuth } from "@/lib/neon-auth";
 import { getUserData, createUserProfile } from "@/app/actions";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { UserButton } from "@stackframe/stack";
 
 export default async function Dashboard() {
-  const user = await stackServerApp.getUser();
+  const user = await neonAuth.getUser();
   
   if (!user) {
-    redirect("/handler/sign-in");
+    redirect("/auth/signin");
   }
 
   // Ensure user profile exists
@@ -15,11 +16,11 @@ export default async function Dashboard() {
   
   const { profile } = await getUserData();
 
-  const trialDaysLeft = profile?.trial_expires_at 
-    ? Math.max(0, Math.ceil((new Date(profile.trial_expires_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
+  const trialDaysLeft = profile?.trialExpiresAt 
+    ? Math.max(0, Math.ceil((new Date(profile.trialExpiresAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
     : 0;
 
-  const isTrialExpired = trialDaysLeft === 0 && profile?.tier === 'free';
+  const isTrialExpired = trialDaysLeft === 0 && profile?.tier === 'FREE';
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -34,12 +35,7 @@ export default async function Dashboard() {
             </div>
             <div className="flex items-center space-x-4">
               <span className="text-gray-700">Welcome, {user.displayName || user.primaryEmail}</span>
-              <a
-                href={stackServerApp.urls.signOut}
-                className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm font-medium"
-              >
-                Sign Out
-              </a>
+              <UserButton />
             </div>
           </div>
         </div>
@@ -78,7 +74,7 @@ export default async function Dashboard() {
         )}
 
         {/* Trial Warning */}
-        {!isTrialExpired && trialDaysLeft <= 3 && profile?.tier === 'free' && (
+        {!isTrialExpired && trialDaysLeft <= 3 && profile?.tier === 'FREE' && (
           <div className="mb-6 bg-yellow-50 border border-yellow-200 rounded-md p-4">
             <div className="flex">
               <div className="flex-shrink-0">
@@ -114,8 +110,8 @@ export default async function Dashboard() {
                         Account Status
                       </dt>
                       <dd className="text-lg font-medium text-gray-900">
-                        {profile?.tier === 'free' ? 'Free Trial' : 
-                         profile?.tier === 'starter' ? 'Starter Plan' : 'Pro Plan'}
+                        {profile?.tier === 'FREE' ? 'Free Trial' : 
+                         profile?.tier === 'STARTER' ? 'Starter Plan' : 'Pro Plan'}
                       </dd>
                     </dl>
                   </div>
@@ -123,7 +119,7 @@ export default async function Dashboard() {
                 <div className="mt-4">
                   <div className="text-sm text-gray-600">
                     <p><strong>Email:</strong> {user.primaryEmail}</p>
-                    {profile?.tier === 'free' && (
+                    {profile?.tier === 'FREE' && (
                       <p><strong>Trial Days Left:</strong> {trialDaysLeft}</p>
                     )}
                   </div>
@@ -144,7 +140,7 @@ export default async function Dashboard() {
                         Usage This Month
                       </dt>
                       <dd className="text-lg font-medium text-gray-900">
-                        {profile?.quota_used || 0} / {profile?.quota_limit === -1 ? '∞' : profile?.quota_limit || 50}
+                        {profile?.quotaUsed || 0} / {profile?.quotaLimit === -1 ? '∞' : profile?.quotaLimit || 50}
                       </dd>
                     </dl>
                   </div>
@@ -154,8 +150,8 @@ export default async function Dashboard() {
                     <div
                       className="bg-indigo-600 h-2 rounded-full"
                       style={{
-                        width: profile?.quota_limit === -1 ? '0%' : 
-                               `${Math.min(100, ((profile?.quota_used || 0) / (profile?.quota_limit || 50)) * 100)}%`
+                        width: profile?.quotaLimit === -1 ? '0%' : 
+                               `${Math.min(100, ((profile?.quotaUsed || 0) / (profile?.quotaLimit || 50)) * 100)}%`
                       }}
                     ></div>
                   </div>
@@ -179,17 +175,17 @@ export default async function Dashboard() {
                         Telegram Bot
                       </dt>
                       <dd className="text-lg font-medium text-gray-900">
-                        {profile?.telegram_chat_id ? 'Connected' : 'Not Connected'}
+                        {profile?.telegramChatId ? 'Connected' : 'Not Connected'}
                       </dd>
                     </dl>
                   </div>
                 </div>
                 <div className="mt-4">
-                  {profile?.telegram_chat_id ? (
+                  {profile?.telegramChatId ? (
                     <div className="text-green-600">
                       <p className="text-sm">✅ Telegram account linked!</p>
                       <p className="text-xs text-gray-600 mt-2">
-                        Username: @{profile.telegram_username || 'Unknown'}
+                        Username: @{profile.telegramUsername || 'Unknown'}
                       </p>
                     </div>
                   ) : (
@@ -269,7 +265,7 @@ export default async function Dashboard() {
           </div>
 
           {/* Upgrade Section */}
-          {profile?.tier === 'free' && (
+          {profile?.tier === 'FREE' && (
             <div className="mt-8">
               <div className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-lg shadow-lg overflow-hidden">
                 <div className="px-6 py-8 text-white">
