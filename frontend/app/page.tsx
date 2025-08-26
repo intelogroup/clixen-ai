@@ -1,164 +1,288 @@
-"use client";
+import Link from "next/link";
 
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
-export default function HomePage() {
-  const [showModal, setShowModal] = useState(false);
-  const [modalType, setModalType] = useState<"signin" | "signup">("signin");
-
-  const handleSignIn = () => {
-    setModalType("signin");
-    setShowModal(true);
-  };
-
-  const handleSignUp = () => {
-    setModalType("signup");
-    setShowModal(true);
-  };
-
+export default function Home() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white">
-      {/* Header */}
-      <header className="border-b bg-white/80 backdrop-blur-sm">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      {/* Navigation */}
+      <nav className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">C</span>
+          <div className="flex justify-between h-16">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <h1 className="text-2xl font-bold text-indigo-600">Clixen AI</h1>
               </div>
-              <span className="text-xl font-bold text-gray-900">Clixen AI</span>
             </div>
             <div className="flex items-center space-x-4">
-              <Button variant="ghost" onClick={handleSignIn}>
+              <Link
+                href="/handler/sign-in"
+                className="text-gray-700 hover:text-indigo-600 px-3 py-2 text-sm font-medium"
+              >
                 Sign In
-              </Button>
-              <Button onClick={handleSignUp}>
+              </Link>
+              <Link
+                href="/handler/sign-up"
+                className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+              >
                 Get Started
-              </Button>
+              </Link>
             </div>
           </div>
         </div>
-      </header>
+      </nav>
 
       {/* Hero Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-5xl font-bold text-gray-900 mb-6">
-            AI-Powered Lead Generation
-            <span className="text-blue-600 block">Made Simple</span>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+        <div className="text-center">
+          <h1 className="text-4xl font-extrabold text-gray-900 sm:text-5xl md:text-6xl">
+            <span className="block">AI-Powered Automation</span>
+            <span className="block text-indigo-600">Through Telegram</span>
           </h1>
-          <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-            Transform your business with intelligent automation. Generate qualified leads, 
-            engage prospects, and scale your sales pipeline with advanced AI technology.
+          <p className="mt-3 max-w-md mx-auto text-base text-gray-500 sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">
+            Access powerful automation workflows through our Telegram bot. Get weather updates, scan emails, translate text, and more - all through natural language commands.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" onClick={handleSignUp} className="px-8 py-3">
-              Start Free Trial
-            </Button>
-            <Button size="lg" variant="outline" onClick={handleSignIn}>
-              Sign In
-            </Button>
+          <div className="mt-5 max-w-md mx-auto sm:flex sm:justify-center md:mt-8">
+            <div className="rounded-md shadow">
+              <Link
+                href="/handler/sign-up"
+                className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 md:py-4 md:text-lg md:px-10"
+              >
+                Start Free Trial
+              </Link>
+            </div>
+            <div className="mt-3 rounded-md shadow sm:mt-0 sm:ml-3">
+              <a
+                href="https://t.me/clixen_bot"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-indigo-600 bg-white hover:bg-gray-50 md:py-4 md:text-lg md:px-10"
+              >
+                Try @clixen_bot
+              </a>
+            </div>
           </div>
         </div>
-      </section>
+      </div>
 
-      {/* Features */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-white">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
-            Powerful Features for Modern Businesses
-          </h2>
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="text-center p-6">
-              <div className="w-12 h-12 bg-blue-100 rounded-lg mx-auto mb-4 flex items-center justify-center">
-                <span className="text-blue-600 text-xl">🎯</span>
+      {/* Features Section */}
+      <div className="py-12 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="lg:text-center">
+            <h2 className="text-base text-indigo-600 font-semibold tracking-wide uppercase">Features</h2>
+            <p className="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-gray-900 sm:text-4xl">
+              Powerful Automation at Your Fingertips
+            </p>
+            <p className="mt-4 max-w-2xl text-xl text-gray-500 lg:mx-auto">
+              Just message @clixen_bot on Telegram with natural language commands
+            </p>
+          </div>
+
+          <div className="mt-10">
+            <dl className="space-y-10 md:space-y-0 md:grid md:grid-cols-2 md:gap-x-8 md:gap-y-10">
+              <div className="relative">
+                <dt>
+                  <div className="absolute flex items-center justify-center h-12 w-12 rounded-md bg-indigo-500 text-white">
+                    🌤️
+                  </div>
+                  <p className="ml-16 text-lg leading-6 font-medium text-gray-900">Weather Updates</p>
+                </dt>
+                <dd className="mt-2 ml-16 text-base text-gray-500">
+                  Get current weather for any city worldwide with a simple message.
+                </dd>
               </div>
-              <h3 className="text-xl font-semibold mb-2">Smart Targeting</h3>
-              <p className="text-gray-600">AI-powered prospect identification and segmentation for maximum conversion rates.</p>
+
+              <div className="relative">
+                <dt>
+                  <div className="absolute flex items-center justify-center h-12 w-12 rounded-md bg-indigo-500 text-white">
+                    📧
+                  </div>
+                  <p className="ml-16 text-lg leading-6 font-medium text-gray-900">Email Scanner</p>
+                </dt>
+                <dd className="mt-2 ml-16 text-base text-gray-500">
+                  Scan your inbox for invoices and payments, get spending summaries.
+                </dd>
+              </div>
+
+              <div className="relative">
+                <dt>
+                  <div className="absolute flex items-center justify-center h-12 w-12 rounded-md bg-indigo-500 text-white">
+                    🌍
+                  </div>
+                  <p className="ml-16 text-lg leading-6 font-medium text-gray-900">Text Translation</p>
+                </dt>
+                <dd className="mt-2 ml-16 text-base text-gray-500">
+                  Translate text between any languages instantly.
+                </dd>
+              </div>
+
+              <div className="relative">
+                <dt>
+                  <div className="absolute flex items-center justify-center h-12 w-12 rounded-md bg-indigo-500 text-white">
+                    📄
+                  </div>
+                  <p className="ml-16 text-lg leading-6 font-medium text-gray-900">PDF Summarizer</p>
+                </dt>
+                <dd className="mt-2 ml-16 text-base text-gray-500">
+                  Upload and get AI-powered summaries of PDF documents.
+                </dd>
+              </div>
+            </dl>
+          </div>
+        </div>
+      </div>
+
+      {/* Pricing Section */}
+      <div className="bg-gray-50 py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="sm:flex sm:flex-col sm:align-center">
+            <h1 className="text-5xl font-extrabold text-gray-900 sm:text-center">Pricing Plans</h1>
+            <p className="mt-5 text-xl text-gray-500 sm:text-center">
+              Start with a free trial, upgrade when you need more
+            </p>
+          </div>
+          <div className="mt-12 space-y-4 sm:mt-16 sm:space-y-0 sm:grid sm:grid-cols-2 sm:gap-6 lg:max-w-4xl lg:mx-auto xl:max-w-none xl:mx-0 xl:grid-cols-3">
+            {/* Free Trial */}
+            <div className="border border-gray-200 rounded-lg shadow-sm divide-y divide-gray-200">
+              <div className="p-6">
+                <h2 className="text-lg leading-6 font-medium text-gray-900">Free Trial</h2>
+                <p className="mt-4 text-sm text-gray-500">Perfect for trying out Clixen AI</p>
+                <p className="mt-8">
+                  <span className="text-4xl font-extrabold text-gray-900">$0</span>
+                  <span className="text-base font-medium text-gray-500">/7 days</span>
+                </p>
+                <Link
+                  href="/handler/sign-up"
+                  className="mt-8 block w-full bg-gray-800 border border-gray-800 rounded-md py-2 text-sm font-semibold text-white text-center hover:bg-gray-900"
+                >
+                  Start Free Trial
+                </Link>
+              </div>
+              <div className="pt-6 pb-8 px-6">
+                <h3 className="text-xs font-medium text-gray-900 tracking-wide uppercase">What's included</h3>
+                <ul role="list" className="mt-6 space-y-4">
+                  <li className="flex space-x-3">
+                    <span className="text-green-500">✓</span>
+                    <span className="text-sm text-gray-500">50 automation requests</span>
+                  </li>
+                  <li className="flex space-x-3">
+                    <span className="text-green-500">✓</span>
+                    <span className="text-sm text-gray-500">All core features</span>
+                  </li>
+                  <li className="flex space-x-3">
+                    <span className="text-green-500">✓</span>
+                    <span className="text-sm text-gray-500">Telegram bot access</span>
+                  </li>
+                </ul>
+              </div>
             </div>
-            <div className="text-center p-6">
-              <div className="w-12 h-12 bg-green-100 rounded-lg mx-auto mb-4 flex items-center justify-center">
-                <span className="text-green-600 text-xl">⚡</span>
+
+            {/* Starter Plan */}
+            <div className="border border-indigo-200 rounded-lg shadow-sm divide-y divide-gray-200">
+              <div className="p-6">
+                <h2 className="text-lg leading-6 font-medium text-gray-900">Starter</h2>
+                <p className="mt-4 text-sm text-gray-500">For regular users</p>
+                <p className="mt-8">
+                  <span className="text-4xl font-extrabold text-gray-900">$9</span>
+                  <span className="text-base font-medium text-gray-500">/month</span>
+                </p>
+                <Link
+                  href="/handler/sign-up"
+                  className="mt-8 block w-full bg-indigo-600 border border-transparent rounded-md py-2 text-sm font-semibold text-white text-center hover:bg-indigo-700"
+                >
+                  Get Started
+                </Link>
               </div>
-              <h3 className="text-xl font-semibold mb-2">Automated Outreach</h3>
-              <p className="text-gray-600">Scale your outreach with personalized messaging and intelligent follow-ups.</p>
+              <div className="pt-6 pb-8 px-6">
+                <h3 className="text-xs font-medium text-gray-900 tracking-wide uppercase">Everything in Free, plus</h3>
+                <ul role="list" className="mt-6 space-y-4">
+                  <li className="flex space-x-3">
+                    <span className="text-green-500">✓</span>
+                    <span className="text-sm text-gray-500">1,000 requests/month</span>
+                  </li>
+                  <li className="flex space-x-3">
+                    <span className="text-green-500">✓</span>
+                    <span className="text-sm text-gray-500">Email support</span>
+                  </li>
+                  <li className="flex space-x-3">
+                    <span className="text-green-500">✓</span>
+                    <span className="text-sm text-gray-500">Priority processing</span>
+                  </li>
+                </ul>
+              </div>
             </div>
-            <div className="text-center p-6">
-              <div className="w-12 h-12 bg-purple-100 rounded-lg mx-auto mb-4 flex items-center justify-center">
-                <span className="text-purple-600 text-xl">📊</span>
+
+            {/* Pro Plan */}
+            <div className="border border-gray-200 rounded-lg shadow-sm divide-y divide-gray-200">
+              <div className="p-6">
+                <h2 className="text-lg leading-6 font-medium text-gray-900">Pro</h2>
+                <p className="mt-4 text-sm text-gray-500">For power users</p>
+                <p className="mt-8">
+                  <span className="text-4xl font-extrabold text-gray-900">$49</span>
+                  <span className="text-base font-medium text-gray-500">/month</span>
+                </p>
+                <Link
+                  href="/handler/sign-up"
+                  className="mt-8 block w-full bg-gray-800 border border-gray-800 rounded-md py-2 text-sm font-semibold text-white text-center hover:bg-gray-900"
+                >
+                  Upgrade to Pro
+                </Link>
               </div>
-              <h3 className="text-xl font-semibold mb-2">Analytics & Insights</h3>
-              <p className="text-gray-600">Track performance and optimize campaigns with detailed analytics and reporting.</p>
+              <div className="pt-6 pb-8 px-6">
+                <h3 className="text-xs font-medium text-gray-900 tracking-wide uppercase">Everything in Starter, plus</h3>
+                <ul role="list" className="mt-6 space-y-4">
+                  <li className="flex space-x-3">
+                    <span className="text-green-500">✓</span>
+                    <span className="text-sm text-gray-500">Unlimited requests</span>
+                  </li>
+                  <li className="flex space-x-3">
+                    <span className="text-green-500">✓</span>
+                    <span className="text-sm text-gray-500">Priority support</span>
+                  </li>
+                  <li className="flex space-x-3">
+                    <span className="text-green-500">✓</span>
+                    <span className="text-sm text-gray-500">Advanced features</span>
+                  </li>
+                </ul>
+              </div>
             </div>
           </div>
         </div>
-      </section>
+      </div>
 
       {/* CTA Section */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-blue-50">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">
-            Ready to Transform Your Lead Generation?
+      <div className="bg-indigo-700">
+        <div className="max-w-2xl mx-auto text-center py-16 px-4 sm:py-20 sm:px-6 lg:px-8">
+          <h2 className="text-3xl font-extrabold text-white sm:text-4xl">
+            <span className="block">Ready to get started?</span>
+            <span className="block">Start your free trial today.</span>
           </h2>
-          <p className="text-xl text-gray-600 mb-8">
-            Join thousands of businesses already using Clixen AI to grow their sales pipeline.
+          <p className="mt-4 text-lg leading-6 text-indigo-200">
+            No credit card required. Start automating with @clixen_bot in minutes.
           </p>
-          <Button size="lg" onClick={handleSignUp} className="px-8 py-3">
-            Start Your Free Trial Today
-          </Button>
+          <Link
+            href="/handler/sign-up"
+            className="mt-8 w-full inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-indigo-600 bg-white hover:bg-indigo-50 sm:w-auto"
+          >
+            Start Free Trial
+          </Link>
         </div>
-      </section>
+      </div>
 
-      {/* Simple Modal */}
-      {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <Card className="w-full max-w-md mx-4">
-            <CardHeader>
-              <CardTitle className="text-center">
-                {modalType === "signin" ? "Sign In" : "Sign Up"}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="text-center text-gray-600">
-                <p>Authentication system is being set up.</p>
-                <p className="text-sm mt-2">This will redirect to the auth flow.</p>
-              </div>
-              <div className="flex space-x-3">
-                <Button 
-                  variant="outline" 
-                  className="flex-1"
-                  onClick={() => setShowModal(false)}
-                >
-                  Close
-                </Button>
-                <Button 
-                  className="flex-1"
-                  onClick={() => {
-                    // This will be replaced with actual auth logic
-                    window.location.href = modalType === "signin" ? "/handler/sign-in" : "/handler/sign-up";
-                  }}
-                >
-                  Continue
-                </Button>
-              </div>
-              <div className="text-center">
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                  onClick={() => setModalType(modalType === "signin" ? "signup" : "signin")}
-                >
-                  {modalType === "signin" 
-                    ? "Need an account? Sign up" 
-                    : "Have an account? Sign in"
-                  }
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+      {/* Footer */}
+      <footer className="bg-white">
+        <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 md:flex md:items-center md:justify-between lg:px-8">
+          <div className="flex justify-center space-x-6 md:order-2">
+            <a href="https://t.me/clixen_bot" className="text-gray-400 hover:text-gray-500">
+              <span className="sr-only">Telegram</span>
+              <span className="h-6 w-6 flex items-center">📱</span>
+            </a>
+          </div>
+          <div className="mt-8 md:mt-0 md:order-1">
+            <p className="text-center text-base text-gray-400">
+              &copy; 2024 Clixen AI. All rights reserved. Built with ❤️ using Next.js, NeonAuth & NeonDB.
+            </p>
+          </div>
         </div>
-      )}
+      </footer>
     </div>
   );
 }
