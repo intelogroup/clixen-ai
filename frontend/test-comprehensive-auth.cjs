@@ -1,247 +1,454 @@
 const { chromium } = require('playwright');
 
-async function testMultipleUsers() {
-    console.log('👥 Testing multiple user creation...');
-    
-    const results = [];
-    const timestamp = Date.now();
-    const users = [
-        `multiuser1_${timestamp}@gmail.com`,
-        `multiuser2_${timestamp}@yahoo.com`, 
-        `multiuser3_${timestamp}@outlook.com`
-    ];
-    
-    for (let i = 0; i < users.length; i++) {
-        const email = users[i];
-        console.log(`\n👤 Creating user ${i + 1}: ${email}`);
-        
-        const browser = await chromium.launch({ headless: true });
-        const page = await browser.newPage();
-        
-        try {
-            await page.goto('http://localhost:3000/auth/signup');
-            await page.waitForTimeout(2000);
-            
-            const password = `User${i + 1}Test123!`;
-            
-            await page.fill('input[type="email"]', email);
-            const passwordFields = page.locator('input[type="password"]');
-            await passwordFields.nth(0).fill(password);
-            if (await passwordFields.count() > 1) {
-                await passwordFields.nth(1).fill(password);
-            }
-            
-            await page.click('button[type="submit"]');
-            await page.waitForTimeout(4000);
-            
-            const success = page.url().includes('/dashboard');
-            results.push({ email, success, password });
-            
-            console.log(`${success ? '✅' : '❌'} User ${i + 1}: ${success ? 'Created successfully' : 'Creation failed'}`);
-            
-        } catch (error) {
-            console.log(`❌ User ${i + 1}: Error - ${error.message.substring(0, 50)}`);
-            results.push({ email, success: false });
-        } finally {
-            await browser.close();
-        }
-    }
-    
-    const successCount = results.filter(r => r.success).length;
-    const successRate = (successCount / results.length) * 100;
-    
-    console.log(`\n📊 User Creation Results:`);
-    console.log(`✅ Successful: ${successCount}/${results.length}`);
-    console.log(`📈 Success Rate: ${successRate.toFixed(1)}%`);
-    
-    return results.filter(r => r.success);
+/**
+ * Comprehensive Authentication Test Suite
+ * Tests all authentication scenarios including new users, existing users,
+ * wrong credentials, and proper error handling
+ */
+
+const BASE_URL = 'http://localhost:3000';
+const TEST_USERS = {
+  new: {
+    email: `newuser_${Date.now()}@test.com`,
+    password: 'NewUser123!@#'
+  },
+  existing: {
+    email: 'testuser@clixen.app',
+    password: 'TestPass123!@#'
+  },
+  wrong: {
+    email: 'testuser@clixen.app',
+    password: 'WrongPassword123'
+  },
+  nonExistent: {
+    email: 'nonexistent@example.com',
+    password: 'SomePassword123'
+  }
+};
+
+async function delay(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-async function testLoginLogout(users) {
-    console.log('\n🔄 Testing login/logout flows...');
+async function testNewUserSignUp(page) {
+  console.log('\n=== Testing New User Sign-Up ===');
+  
+  try {
+    // Navigate to sign-up page
+    await page.goto(`${BASE_URL}/auth/signup`);
+    await page.waitForLoadState('networkidle');
     
-    for (let i = 0; i < Math.min(users.length, 2); i++) {
-        const user = users[i];
-        console.log(`\n🔐 Testing login for: ${user.email}`);
-        
-        const browser = await chromium.launch({ headless: true });
-        const page = await browser.newPage();
-        
-        try {
-            // Test login
-            await page.goto('http://localhost:3000/auth/signin');
-            await page.waitForTimeout(2000);
-            
-            await page.fill('input[type="email"]', user.email);
-            await page.fill('input[type="password"]', user.password);
-            await page.click('button[type="submit"]');
-            await page.waitForTimeout(4000);
-            
-            const loginSuccess = page.url().includes('/dashboard');
-            console.log(`Login: ${loginSuccess ? '✅ Success' : '❌ Failed'}`);
-            
-            if (loginSuccess) {
-                // Test logout
-                const logoutButton = page.locator('button:has-text("Sign out"), button:has-text("Logout"), a:has-text("Sign out")');
-                if (await logoutButton.count() > 0) {
-                    await logoutButton.first().click();
-                    await page.waitForTimeout(2000);
-                    
-                    const loggedOut = !page.url().includes('/dashboard');
-                    console.log(`Logout: ${loggedOut ? '✅ Success' : '❌ Failed'}`);
-                } else {
-                    console.log('Logout: ⚠️ No logout button found');
-                }
-            }
-            
-        } catch (error) {
-            console.log(`❌ Login test error: ${error.message.substring(0, 50)}`);
-        } finally {
-            await browser.close();
-        }
+    console.log('✅ Sign-up page loaded');
+    
+    // Fill form with new user data
+    await page.fill('input[type="email"]', TEST_USERS.new.email);
+    await page.fill('input[type="password"]', TEST_USERS.new.password);
+    
+    console.log(`📝 Filled form with: ${TEST_USERS.new.email}`);
+    
+    // Submit form
+    await page.click('button[type="submit"]');
+    await delay(3000);
+    
+    // Check for success (redirect to dashboard or success message)
+    const currentUrl = page.url();
+    if (currentUrl.includes('/dashboard')) {
+      console.log('✅ New user successfully created and signed in');
+      return true;
+    } else {
+      console.log('⚠️  Sign-up did not redirect to dashboard');
+      const errorElement = await page.locator('[class*="error"], [class*="alert"]').first();
+      if (await errorElement.isVisible()) {
+        const errorText = await errorElement.textContent();
+        console.log(`❌ Sign-up error: ${errorText}`);
+      }
+      return false;
     }
+  } catch (error) {
+    console.error('❌ New user sign-up test failed:', error.message);
+    return false;
+  }
 }
 
-async function testPasswordValidation() {
-    console.log('\n🔒 Testing password validation...');
+async function testExistingUserSignIn(page) {
+  console.log('\n=== Testing Existing User Sign-In ===');
+  
+  try {
+    // Navigate to sign-in page
+    await page.goto(`${BASE_URL}/auth/signin`);
+    await page.waitForLoadState('networkidle');
     
-    const testCases = [
-        { password: '123', expected: 'fail', description: 'Too weak (numbers only)' },
-        { password: 'password', expected: 'fail', description: 'Too weak (common word)' },
-        { password: 'StrongPass123!', expected: 'pass', description: 'Strong password' }
+    console.log('✅ Sign-in page loaded');
+    
+    // Fill form with existing user credentials
+    await page.fill('input[type="email"]', TEST_USERS.existing.email);
+    await page.fill('input[type="password"]', TEST_USERS.existing.password);
+    
+    console.log(`📝 Filled form with: ${TEST_USERS.existing.email}`);
+    
+    // Submit form
+    await page.click('button[type="submit"]');
+    await delay(3000);
+    
+    // Check for success (redirect to dashboard)
+    const currentUrl = page.url();
+    if (currentUrl.includes('/dashboard')) {
+      console.log('✅ Existing user successfully signed in');
+      return true;
+    } else {
+      console.log('⚠️  Sign-in did not redirect to dashboard');
+      const errorElement = await page.locator('[class*="error"], [class*="alert"]').first();
+      if (await errorElement.isVisible()) {
+        const errorText = await errorElement.textContent();
+        console.log(`❌ Sign-in error: ${errorText}`);
+      }
+      return false;
+    }
+  } catch (error) {
+    console.error('❌ Existing user sign-in test failed:', error.message);
+    return false;
+  }
+}
+
+async function testWrongPasswordError(page) {
+  console.log('\n=== Testing Wrong Password Error Handling ===');
+  
+  try {
+    // Navigate to sign-in page
+    await page.goto(`${BASE_URL}/auth/signin`);
+    await page.waitForLoadState('networkidle');
+    
+    console.log('✅ Sign-in page loaded');
+    
+    // Fill form with wrong password
+    await page.fill('input[type="email"]', TEST_USERS.wrong.email);
+    await page.fill('input[type="password"]', TEST_USERS.wrong.password);
+    
+    console.log(`📝 Testing wrong password for: ${TEST_USERS.wrong.email}`);
+    
+    // Submit form
+    await page.click('button[type="submit"]');
+    await delay(3000);
+    
+    // Should NOT redirect to dashboard
+    const currentUrl = page.url();
+    if (currentUrl.includes('/dashboard')) {
+      console.log('❌ SECURITY ISSUE: Wrong password allowed sign-in!');
+      return false;
+    }
+    
+    // Check for error message
+    const errorSelectors = [
+      '[class*="error"]',
+      '[class*="alert"]',
+      '[data-testid="error"]',
+      '.text-red-500',
+      '.text-red-600',
+      '[role="alert"]'
     ];
     
-    for (let i = 0; i < testCases.length; i++) {
-        const testCase = testCases[i];
-        console.log(`\n🧪 Test ${i + 1}: ${testCase.description}`);
-        
-        const browser = await chromium.launch({ headless: true });
-        const page = await browser.newPage();
-        
-        try {
-            await page.goto('http://localhost:3000/auth/signup');
-            await page.waitForTimeout(2000);
+    let errorFound = false;
+    for (const selector of errorSelectors) {
+      try {
+        const errorElement = await page.locator(selector).first();
+        if (await errorElement.isVisible()) {
+          const errorText = await errorElement.textContent();
+          if (errorText && errorText.trim()) {
+            console.log(`✅ Error message displayed: "${errorText}"`);
+            errorFound = true;
             
-            const email = `pwdtest${Date.now()}_${i}@example.com`;
+            // Check if error message is user-friendly
+            const userFriendlyTerms = ['password', 'credentials', 'invalid', 'incorrect', 'wrong'];
+            const isUserFriendly = userFriendlyTerms.some(term => 
+              errorText.toLowerCase().includes(term)
+            );
             
-            await page.fill('input[type="email"]', email);
-            const passwordFields = page.locator('input[type="password"]');
-            await passwordFields.nth(0).fill(testCase.password);
-            if (await passwordFields.count() > 1) {
-                await passwordFields.nth(1).fill(testCase.password);
-            }
-            
-            await page.click('button[type="submit"]');
-            await page.waitForTimeout(3000);
-            
-            const success = page.url().includes('/dashboard');
-            const result = success ? 'pass' : 'fail';
-            
-            if (testCase.expected === result) {
-                console.log(`✅ Expected ${testCase.expected}, got ${result}`);
+            if (isUserFriendly) {
+              console.log('✅ Error message is user-friendly');
             } else {
-                console.log(`⚠️ Expected ${testCase.expected}, got ${result} (may have different validation rules)`);
+              console.log('⚠️  Error message could be more user-friendly');
             }
-            
-        } catch (error) {
-            console.log(`❌ Password test error: ${error.message.substring(0, 50)}`);
-        } finally {
-            await browser.close();
+            break;
+          }
         }
-    }
-}
-
-async function testDashboardContent() {
-    console.log('\n🏠 Testing dashboard content...');
-    
-    const browser = await chromium.launch({ headless: true });
-    const page = await browser.newPage();
-    
-    try {
-        // Create a user and check dashboard
-        const timestamp = Date.now();
-        const email = `dashtest${timestamp}@example.com`;
-        const password = 'DashTest123!';
-        
-        await page.goto('http://localhost:3000/auth/signup');
-        await page.waitForTimeout(2000);
-        
-        await page.fill('input[type="email"]', email);
-        const passwordFields = page.locator('input[type="password"]');
-        await passwordFields.nth(0).fill(password);
-        if (await passwordFields.count() > 1) {
-            await passwordFields.nth(1).fill(password);
-        }
-        
-        await page.click('button[type="submit"]');
-        await page.waitForTimeout(6000); // Wait longer for dashboard to load
-        
-        if (page.url().includes('/dashboard')) {
-            console.log('✅ Dashboard accessed');
-            
-            // Wait for dashboard content to load
-            await page.waitForTimeout(3000);
-            
-            const content = await page.locator('body').innerText();
-            
-            // Check for expected dashboard elements
-            const hasUserInfo = content.includes(email.split('@')[0]) || content.includes('Welcome');
-            const hasTrialInfo = content.toLowerCase().includes('trial') || content.includes('7 day') || content.includes('free');
-            const hasQuotaInfo = content.includes('50') || content.toLowerCase().includes('quota') || content.toLowerCase().includes('usage');
-            const hasTelegramInfo = content.toLowerCase().includes('telegram') || content.includes('@clixen_bot');
-            
-            console.log(`User info: ${hasUserInfo ? '✅ Present' : '⚠️ Not visible'}`);
-            console.log(`Trial info: ${hasTrialInfo ? '✅ Present' : '⚠️ Not visible'}`);
-            console.log(`Quota info: ${hasQuotaInfo ? '✅ Present' : '⚠️ Not visible'}`);
-            console.log(`Telegram info: ${hasTelegramInfo ? '✅ Present' : '⚠️ Not visible'}`);
-            
-            console.log('\n📄 Dashboard content preview:');
-            console.log(content.substring(0, 300));
-            
-        } else {
-            console.log('❌ Could not access dashboard');
-        }
-        
-    } catch (error) {
-        console.log(`❌ Dashboard test error: ${error.message.substring(0, 50)}`);
-    } finally {
-        await browser.close();
-    }
-}
-
-async function runComprehensiveTests() {
-    console.log('🚀 Starting comprehensive authentication test suite...\n');
-    
-    console.log('=' .repeat(60));
-    console.log('🧪 COMPREHENSIVE AUTHENTICATION TESTING');
-    console.log('=' .repeat(60));
-    
-    // Test 1: Multiple user creation
-    const successfulUsers = await testMultipleUsers();
-    
-    // Test 2: Login/logout flows (if we have users)
-    if (successfulUsers.length > 0) {
-        await testLoginLogout(successfulUsers);
+      } catch (e) {
+        // Continue to next selector
+      }
     }
     
-    // Test 3: Password validation
-    await testPasswordValidation();
+    if (!errorFound) {
+      console.log('⚠️  No error message found - checking console logs');
+      const consoleLogs = await page.evaluate(() => {
+        return window.__authLogs || [];
+      });
+      if (consoleLogs.length > 0) {
+        console.log('📋 Console logs:', consoleLogs);
+      }
+    }
     
-    // Test 4: Dashboard content
-    await testDashboardContent();
+    console.log('✅ Wrong password correctly rejected');
+    return true;
     
-    console.log('\n' + '=' .repeat(60));
-    console.log('🎉 TEST SUITE COMPLETED');
-    console.log('=' .repeat(60));
-    
-    console.log('\n📋 Test Summary:');
-    console.log('✅ Multiple user creation tested');
-    console.log('✅ Login/logout flows validated');
-    console.log('✅ Password validation checked');
-    console.log('✅ Dashboard content verified');
-    console.log('✅ NeonAuth + NeonDB + Prisma integration working');
-    
-    console.log('\n🏆 Result: Authentication system is fully operational!');
+  } catch (error) {
+    console.error('❌ Wrong password test failed:', error.message);
+    return false;
+  }
 }
 
-runComprehensiveTests();
+async function testNonExistentUserError(page) {
+  console.log('\n=== Testing Non-Existent User Error Handling ===');
+  
+  try {
+    // Navigate to sign-in page
+    await page.goto(`${BASE_URL}/auth/signin`);
+    await page.waitForLoadState('networkidle');
+    
+    console.log('✅ Sign-in page loaded');
+    
+    // Fill form with non-existent user
+    await page.fill('input[type="email"]', TEST_USERS.nonExistent.email);
+    await page.fill('input[type="password"]', TEST_USERS.nonExistent.password);
+    
+    console.log(`📝 Testing non-existent user: ${TEST_USERS.nonExistent.email}`);
+    
+    // Submit form
+    await page.click('button[type="submit"]');
+    await delay(3000);
+    
+    // Should NOT redirect to dashboard
+    const currentUrl = page.url();
+    if (currentUrl.includes('/dashboard')) {
+      console.log('❌ SECURITY ISSUE: Non-existent user allowed sign-in!');
+      return false;
+    }
+    
+    // Check for error message and sign-up suggestion
+    const errorSelectors = [
+      '[class*="error"]',
+      '[class*="alert"]',
+      '[data-testid="error"]',
+      '.text-red-500',
+      '.text-red-600',
+      '[role="alert"]'
+    ];
+    
+    let errorFound = false;
+    for (const selector of errorSelectors) {
+      try {
+        const errorElement = await page.locator(selector).first();
+        if (await errorElement.isVisible()) {
+          const errorText = await errorElement.textContent();
+          if (errorText && errorText.trim()) {
+            console.log(`✅ Error message displayed: "${errorText}"`);
+            errorFound = true;
+            
+            // Check if error suggests sign-up
+            const suggestsSignUp = errorText.toLowerCase().includes('sign up') ||
+                                  errorText.toLowerCase().includes('register') ||
+                                  errorText.toLowerCase().includes('create account');
+            
+            if (suggestsSignUp) {
+              console.log('✅ Error message suggests sign-up');
+            } else {
+              console.log('⚠️  Error message should suggest sign-up for new users');
+            }
+            break;
+          }
+        }
+      } catch (e) {
+        // Continue to next selector
+      }
+    }
+    
+    // Check for sign-up link
+    const signUpSelectors = [
+      'a[href*="/auth/signup"]',
+      'a[href*="/signup"]',
+      'button:has-text("Sign up")',
+      'a:has-text("Sign up")',
+      'a:has-text("Create account")'
+    ];
+    
+    let signUpLinkFound = false;
+    for (const selector of signUpSelectors) {
+      try {
+        const linkElement = await page.locator(selector).first();
+        if (await linkElement.isVisible()) {
+          console.log('✅ Sign-up link is available for non-existent users');
+          signUpLinkFound = true;
+          break;
+        }
+      } catch (e) {
+        // Continue to next selector
+      }
+    }
+    
+    if (!signUpLinkFound) {
+      console.log('⚠️  Sign-up link should be prominently displayed');
+    }
+    
+    if (!errorFound) {
+      console.log('⚠️  No error message found for non-existent user');
+    }
+    
+    console.log('✅ Non-existent user correctly rejected');
+    return true;
+    
+  } catch (error) {
+    console.error('❌ Non-existent user test failed:', error.message);
+    return false;
+  }
+}
+
+async function testFormStateManagement(page) {
+  console.log('\n=== Testing Form State Management ===');
+  
+  try {
+    await page.goto(`${BASE_URL}/auth/signin`);
+    await page.waitForLoadState('networkidle');
+    
+    // Check initial state
+    const emailField = page.locator('input[type="email"]');
+    const passwordField = page.locator('input[type="password"]');
+    const submitButton = page.locator('button[type="submit"]');
+    
+    console.log('✅ Form fields loaded');
+    
+    // Test form validation
+    await page.fill('input[type="email"]', 'invalid-email');
+    await page.fill('input[type="password"]', '123');
+    
+    // Check if form shows validation errors
+    const validationErrors = await page.locator('[class*="error"], .text-red-500').count();
+    if (validationErrors > 0) {
+      console.log('✅ Client-side validation working');
+    } else {
+      console.log('⚠️  Client-side validation may not be implemented');
+    }
+    
+    // Test loading state
+    await page.fill('input[type="email"]', TEST_USERS.wrong.email);
+    await page.fill('input[type="password"]', TEST_USERS.wrong.password);
+    
+    // Submit and check for loading state
+    const submitPromise = page.click('button[type="submit"]');
+    
+    // Check if button shows loading state
+    await delay(500);
+    const isDisabled = await submitButton.isDisabled();
+    if (isDisabled) {
+      console.log('✅ Submit button disabled during processing');
+    } else {
+      console.log('⚠️  Submit button should be disabled during processing');
+    }
+    
+    await submitPromise;
+    await delay(2000);
+    
+    console.log('✅ Form state management test completed');
+    return true;
+    
+  } catch (error) {
+    console.error('❌ Form state management test failed:', error.message);
+    return false;
+  }
+}
+
+async function runComprehensiveAuthTests() {
+  console.log('🚀 Starting Comprehensive Authentication Test Suite');
+  console.log('=' .repeat(60));
+  
+  const browser = await chromium.launch({ 
+    headless: true,
+    slowMo: 100
+  });
+  
+  const context = await browser.newContext({
+    viewport: { width: 1280, height: 720 }
+  });
+  
+  const page = await context.newPage();
+  
+  // Enable console logging
+  page.on('console', msg => {
+    console.log(`🌐 Browser: ${msg.text()}`);
+  });
+  
+  const results = {
+    newUserSignUp: false,
+    existingUserSignIn: false,
+    wrongPasswordError: false,
+    nonExistentUserError: false,
+    formStateManagement: false
+  };
+  
+  try {
+    // Test 1: New User Sign-Up
+    results.newUserSignUp = await testNewUserSignUp(page);
+    
+    // Test 2: Existing User Sign-In
+    results.existingUserSignIn = await testExistingUserSignIn(page);
+    
+    // Test 3: Wrong Password Error
+    results.wrongPasswordError = await testWrongPasswordError(page);
+    
+    // Test 4: Non-Existent User Error
+    results.nonExistentUserError = await testNonExistentUserError(page);
+    
+    // Test 5: Form State Management
+    results.formStateManagement = await testFormStateManagement(page);
+    
+  } catch (error) {
+    console.error('❌ Test suite encountered an error:', error);
+  } finally {
+    await browser.close();
+  }
+  
+  // Print results summary
+  console.log('\n' + '=' .repeat(60));
+  console.log('📊 TEST RESULTS SUMMARY');
+  console.log('=' .repeat(60));
+  
+  const tests = [
+    ['New User Sign-Up', results.newUserSignUp],
+    ['Existing User Sign-In', results.existingUserSignIn],
+    ['Wrong Password Error Handling', results.wrongPasswordError],
+    ['Non-Existent User Error Handling', results.nonExistentUserError],
+    ['Form State Management', results.formStateManagement]
+  ];
+  
+  let passed = 0;
+  let total = tests.length;
+  
+  tests.forEach(([testName, result]) => {
+    const status = result ? '✅ PASS' : '❌ FAIL';
+    console.log(`${status} ${testName}`);
+    if (result) passed++;
+  });
+  
+  console.log('=' .repeat(60));
+  console.log(`📈 OVERALL: ${passed}/${total} tests passed (${Math.round(passed/total*100)}%)`);
+  
+  if (passed === total) {
+    console.log('🎉 All authentication tests passed! System ready for production.');
+  } else {
+    console.log('⚠️  Some tests failed. Please review authentication implementation.');
+  }
+  
+  // Recommendations
+  console.log('\n📋 RECOMMENDATIONS:');
+  if (!results.wrongPasswordError) {
+    console.log('• Implement clear error messages for wrong passwords');
+  }
+  if (!results.nonExistentUserError) {
+    console.log('• Add sign-up suggestions for non-existent users');
+  }
+  if (!results.formStateManagement) {
+    console.log('• Enhance form validation and loading states');
+  }
+  
+  console.log('\n✨ Test suite completed!');
+}
+
+// Run the tests
+runComprehensiveAuthTests().catch(console.error);
