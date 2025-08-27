@@ -8,6 +8,7 @@ export const neonAuth = new StackServerApp({
     signUp: "/auth/signup", 
     afterSignIn: "/dashboard",
     afterSignUp: "/dashboard",
+    afterSignOut: "/auth/signin", // Redirect to signin after logout
     home: "/",
   }
 });

@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 
-// For now, no auth middleware - starting fresh with NeonAuth + NeonDB
 export async function middleware(request: NextRequest) {
-  // TODO: Implement NeonAuth middleware when ready
+  // For now, simplified middleware to avoid compilation issues
+  // TODO: Re-enable full auth middleware after testing
   return NextResponse.next();
 }
 

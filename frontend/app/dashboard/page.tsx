@@ -3,6 +3,7 @@ import { getUserData, createUserProfile } from "@/app/actions";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { UserButton } from "@stackframe/stack";
+import { LogoutButton } from "@/components/LogoutButton";
 
 export default async function Dashboard() {
   const user = await neonAuth.getUser();
@@ -35,7 +36,10 @@ export default async function Dashboard() {
             </div>
             <div className="flex items-center space-x-4">
               <span className="text-gray-700">Welcome, {user.displayName || user.primaryEmail}</span>
-              <UserButton />
+              <div className="flex items-center space-x-2">
+                <UserButton />
+                <LogoutButton className="text-gray-500 hover:text-gray-700 px-3 py-2 text-sm font-medium" />
+              </div>
             </div>
           </div>
         </div>
