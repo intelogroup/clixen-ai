@@ -1,0 +1,12 @@
+{
+  "timestamp": "2025-08-27T02:12:25.876Z",
+  "testsPassed": 0,
+  "testsWarning": 0,
+  "testsFailed": 1,
+  "features": {},
+  "performance": {},
+  "issues": [
+    "Critical error: page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"http://localhost:3000/auth/signin\", waiting until \"load\"\n"
+  ],
+  "recommendations": []
+}
