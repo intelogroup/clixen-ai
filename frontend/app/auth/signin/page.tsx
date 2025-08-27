@@ -4,13 +4,68 @@ import { SignIn } from "@stackframe/stack";
 import Link from "next/link";
 import { Suspense, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import FormField from "@/components/ui/form-field";
+import { validateEmail, validatePassword, validateAuthForm, createInitialFieldState, updateFieldState, type FieldState } from "@/lib/form-validation";
 
-// Enhanced error boundary for SignIn component with better error handling
+// Enhanced sign-in form with comprehensive validation
 function EnhancedSignInForm() {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [showStackAuth, setShowStackAuth] = useState(false);
   const router = useRouter();
   
+  // Form state with validation
+  const [emailField, setEmailField] = useState<FieldState>(createInitialFieldState());
+  const [passwordField, setPasswordField] = useState<FieldState>(createInitialFieldState());
+  const [useCustomForm, setUseCustomForm] = useState(true);
+  
+  // Form validation
+  const isFormValid = () => {
+    if (!useCustomForm) return true;
+    
+    const emailValid = emailField.validation.isValid && emailField.value.length > 0;
+    const passwordValid = passwordField.validation.isValid && passwordField.value.length > 0;
+    
+    return emailValid && passwordValid;
+  };
+
+  // Handle form submission
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setIsLoading(true);
+
+    try {
+      // Validate form
+      const validation = validateAuthForm(emailField.value, passwordField.value, false);
+      
+      if (!validation.isValid) {
+        const errorMessages = Object.values(validation.errors).join(', ');
+        setError(errorMessages);
+        setIsLoading(false);
+        return;
+      }
+
+      // Simulate authentication (replace with actual Stack Auth API call)
+      console.log('Attempting sign in with:', {
+        email: emailField.value,
+        password: '***hidden***'
+      });
+
+      // This would be replaced with actual Stack Auth authentication
+      await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate API call
+      
+      // For now, show error since we're not actually authenticating
+      setError('Custom authentication not yet implemented. Please use the Stack Auth form below.');
+      
+    } catch (error) {
+      console.error('Sign in error:', error);
+      setError('An unexpected error occurred. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
     // Monitor for authentication errors
     const handleAuthError = (event: any) => {
@@ -87,29 +142,98 @@ function EnhancedSignInForm() {
           </div>
         )}
         
-        {/* Stack Auth SignIn component with event handlers */}
-        <div 
-          onSubmit={() => setIsLoading(true)}
-          onClick={(e: any) => {
-            // Detect form submission
-            if (e.target.type === 'submit') {
-              setIsLoading(true);
-              setError(null);
-            }
-          }}
-        >
-          <SignIn 
-            afterSignIn={() => {
-              console.log('Sign in successful, redirecting...');
-              router.push('/dashboard');
+        {/* Custom form with validation or Stack Auth component */}
+        {useCustomForm ? (
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <FormField
+              id="email"
+              type="email"
+              label="Email address"
+              placeholder="Enter your email"
+              value={emailField.value}
+              onChange={(value) => setEmailField(
+                updateFieldState(emailField, { value, touched: true }, validateEmail)
+              )}
+              onBlur={() => setEmailField(prev => ({ ...prev, touched: true }))}
+              validation={emailField.touched ? emailField.validation : undefined}
+              disabled={isLoading}
+              autoComplete="email"
+            />
+            
+            <FormField
+              id="password"
+              type="password"
+              label="Password"
+              placeholder="Enter your password"
+              value={passwordField.value}
+              onChange={(value) => setPasswordField(
+                updateFieldState(passwordField, { value, touched: true }, (pwd) => validatePassword(pwd, false))
+              )}
+              onBlur={() => setPasswordField(prev => ({ ...prev, touched: true }))}
+              validation={passwordField.touched ? passwordField.validation : undefined}
+              disabled={isLoading}
+              autoComplete="current-password"
+            />
+            
+            <button
+              type="submit"
+              disabled={isLoading || !isFormValid()}
+              className={`
+                w-full flex justify-center py-2 px-4 border border-transparent 
+                rounded-md shadow-sm text-sm font-medium text-white
+                transition-all duration-200
+                ${
+                  isLoading || !isFormValid()
+                    ? 'bg-gray-400 cursor-not-allowed'
+                    : 'bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'
+                }
+              `}
+            >
+              {isLoading ? (
+                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              ) : null}
+              {isLoading ? 'Signing in...' : 'Sign in'}
+            </button>
+          </form>
+        ) : showStackAuth ? (
+          <div 
+            onSubmit={() => setIsLoading(true)}
+            onClick={(e: any) => {
+              if (e.target.type === 'submit') {
+                setIsLoading(true);
+                setError(null);
+              }
             }}
-          />
-        </div>
+          >
+            <SignIn 
+              afterSignIn={() => {
+                console.log('Sign in successful, redirecting...');
+                router.push('/dashboard');
+              }}
+            />
+          </div>
+        ) : null}
         
-        {/* Additional help text */}
-        <div className="mt-4 pt-4 border-t border-gray-200">
+        {/* Additional help and form toggle */}
+        <div className="mt-4 pt-4 border-t border-gray-200 space-y-2">
+          <div className="flex justify-center">
+            <button
+              type="button"
+              onClick={() => {
+                setUseCustomForm(!useCustomForm);
+                setShowStackAuth(!showStackAuth);
+                setError(null);
+              }}
+              className="text-xs text-indigo-600 hover:text-indigo-500 underline"
+            >
+              {useCustomForm ? 'Use Stack Auth form' : 'Use enhanced form'}
+            </button>
+          </div>
           <p className="text-xs text-gray-500 text-center">
-            Having trouble signing in? Try resetting your password or contact support.
+            Having trouble? Try resetting your password or contact support.
           </p>
         </div>
       </div>
