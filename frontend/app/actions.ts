@@ -12,25 +12,25 @@ export async function createUserProfile() {
     redirect("/auth/signin");
   }
 
-  // Check if profile already exists
-  const existingProfile = await prisma.profile.findUnique({
-    where: { neonAuthUserId: user.id }
+  // Use upsert for better performance - single database operation
+  await prisma.profile.upsert({
+    where: { neonAuthUserId: user.id },
+    update: {
+      // Update only essential fields to avoid unnecessary writes
+      lastActivityAt: new Date(),
+      email: user.primaryEmail!,
+      displayName: user.displayName || user.primaryEmail!
+    },
+    create: {
+      neonAuthUserId: user.id,
+      email: user.primaryEmail!,
+      displayName: user.displayName || user.primaryEmail!,
+      tier: "FREE",
+      trialActive: true,
+      quotaUsed: 0,
+      quotaLimit: 50,
+    }
   });
-
-  if (!existingProfile) {
-    // Create new profile using Prisma
-    await prisma.profile.create({
-      data: {
-        neonAuthUserId: user.id,
-        email: user.primaryEmail!,
-        displayName: user.displayName || user.primaryEmail!,
-        tier: "FREE",
-        trialActive: true,
-        quotaUsed: 0,
-        quotaLimit: 50,
-      }
-    });
-  }
 
   return user;
 }
@@ -42,8 +42,25 @@ export async function getUserData(): Promise<{user: any, profile: Profile | null
     return { user: null, profile: null };
   }
 
+  // Optimized query with specific field selection for better performance
   const profile = await prisma.profile.findUnique({
-    where: { neonAuthUserId: user.id }
+    where: { neonAuthUserId: user.id },
+    select: {
+      id: true,
+      neonAuthUserId: true,
+      email: true,
+      displayName: true,
+      telegramChatId: true,
+      telegramUsername: true,
+      tier: true,
+      trialStartedAt: true,
+      trialExpiresAt: true,
+      trialActive: true,
+      quotaUsed: true,
+      quotaLimit: true,
+      lastActivityAt: true,
+      createdAt: true
+    }
   });
 
   return { user, profile };
@@ -85,6 +102,10 @@ export async function linkTelegramAccount(chatId: string, username?: string, fir
   });
 }
 
+// Batch multiple usage logs for better performance
+const usageBatch: any[] = [];
+let batchTimeout: NodeJS.Timeout | null = null;
+
 export async function logUsage(action: string, success: boolean = true, errorMessage?: string, processingTime?: number, telegramChatId?: string, telegramMessageId?: bigint) {
   const user = await neonAuth.getUser();
   
@@ -92,16 +113,35 @@ export async function logUsage(action: string, success: boolean = true, errorMes
     return; // Skip logging for unauthenticated users
   }
 
-  await prisma.usageLog.create({
-    data: {
-      profileId: user.id,
-      neonAuthUserId: user.id,
-      action,
-      success,
-      errorMessage,
-      processingTimeMs: processingTime,
-      telegramChatId,
-      telegramMessageId,
-    }
+  // Add to batch for performance optimization
+  usageBatch.push({
+    profileId: user.id,
+    neonAuthUserId: user.id,
+    action,
+    success,
+    errorMessage,
+    processingTimeMs: processingTime,
+    telegramChatId,
+    telegramMessageId,
   });
+
+  // Batch write every 100ms to reduce database calls
+  if (batchTimeout) clearTimeout(batchTimeout);
+  batchTimeout = setTimeout(async () => {
+    if (usageBatch.length > 0) {
+      const logs = [...usageBatch];
+      usageBatch.length = 0; // Clear array
+      
+      try {
+        await prisma.usageLog.createMany({
+          data: logs,
+          skipDuplicates: true
+        });
+      } catch (error) {
+        console.error('Error batch logging usage:', error);
+        // Re-add failed logs to batch for retry
+        usageBatch.unshift(...logs);
+      }
+    }
+  }, 100);
 }

@@ -1,14 +1,34 @@
 /** @type {import('next').NextConfig} */
+
+// Bundle analyzer for performance tracking
+import bundleAnalyzer from '@next/bundle-analyzer';
+
+const withBundleAnalyzer = bundleAnalyzer({
+  enabled: process.env.ANALYZE === 'true',
+});
+
 const nextConfig = {
-  // Enable experimental features for better stability
+  // Server external packages for better performance
+  serverExternalPackages: ['@prisma/client'],
+  
+  // Enable experimental features for better performance
   experimental: {
-    // Removed lucide-react from optimizePackageImports to fix icon import issues
-    optimizePackageImports: ['@radix-ui/react-icons']
+    // Optimize package imports for smaller bundles
+    optimizePackageImports: [
+      '@radix-ui/react-icons',
+      '@radix-ui/react-avatar',
+      '@radix-ui/react-dialog', 
+      '@radix-ui/react-label',
+      '@radix-ui/react-progress',
+      '@radix-ui/react-separator',
+      '@radix-ui/react-slot',
+      'lucide-react'
+    ],
   },
 
-  // Webpack configuration
+  // Webpack configuration for performance optimization
   webpack: (config, { dev, isServer }) => {
-    // Fix for webpack HMR issues
+    // Development optimizations
     if (dev && !isServer) {
       config.watchOptions = {
         poll: 1000,
@@ -20,6 +40,29 @@ const nextConfig = {
       config.optimization = {
         ...config.optimization,
         moduleIds: 'deterministic',
+      }
+    }
+
+    // Production bundle optimizations
+    if (!dev) {
+      config.optimization = {
+        ...config.optimization,
+        splitChunks: {
+          chunks: 'all',
+          cacheGroups: {
+            vendor: {
+              test: /[\/\\]node_modules[\/\\]/,
+              name: 'vendors',
+              priority: 10,
+              reuseExistingChunk: true,
+            },
+            common: {
+              minChunks: 2,
+              priority: 5,
+              reuseExistingChunk: true,
+            },
+          },
+        },
       }
     }
 
@@ -88,13 +131,21 @@ const nextConfig = {
     compress: true,
     poweredByHeader: false,
     generateEtags: false,
+    swcMinify: true, // Use SWC for faster minification
     
-    // Image optimization
+    // Image optimization with performance focus
     images: {
       formats: ['image/webp', 'image/avif'],
-      minimumCacheTTL: 60,
+      minimumCacheTTL: 3600, // Cache for 1 hour
+      deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048],
+      imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    },
+    
+    // Additional performance optimizations
+    compiler: {
+      removeConsole: true, // Remove console.log in production
     },
   }),
 }
 
-export default nextConfig
+export default withBundleAnalyzer(nextConfig)

@@ -2,8 +2,59 @@ import { neonAuth } from "@/lib/neon-auth";
 import { getUserData, createUserProfile } from "@/app/actions";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { UserButton } from "@stackframe/stack";
-import { LogoutButton } from "@/components/LogoutButton";
+import { Suspense } from "react";
+import dynamic from "next/dynamic";
+import { DashboardSkeleton, CardSkeleton, ButtonSkeleton } from "@/components/ui/loading";
+
+// Dynamic imports for heavy components
+const UserButton = dynamic(() => import("@stackframe/stack").then(mod => ({ default: mod.UserButton })), {
+  loading: () => <ButtonSkeleton className="w-8 h-8 rounded-full" />,
+  ssr: false
+});
+
+const LogoutButton = dynamic(() => import("@/components/LogoutButton").then(mod => ({ default: mod.LogoutButton })), {
+  loading: () => <ButtonSkeleton className="px-3 py-2 text-sm" />,
+  ssr: false
+});
+
+// Dynamic imports for dashboard sections
+const DashboardCards = dynamic(() => import("@/components/dashboard/DashboardCards"), {
+  loading: () => (
+    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <CardSkeleton />
+      <CardSkeleton />
+      <CardSkeleton />
+    </div>
+  ),
+  ssr: false
+});
+
+const FeaturesSection = dynamic(() => import("@/components/dashboard/FeaturesSection"), {
+  loading: () => (
+    <div className="mt-8">
+      <div className="bg-white shadow rounded-lg animate-pulse">
+        <div className="px-6 py-4 border-b border-gray-200">
+          <div className="h-6 bg-gray-300 rounded w-1/3 mb-2"></div>
+          <div className="h-4 bg-gray-300 rounded w-2/3"></div>
+        </div>
+        <div className="p-6">
+          <div className="grid gap-4 md:grid-cols-2">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="flex items-start">
+                <div className="w-8 h-8 bg-gray-300 rounded mr-3"></div>
+                <div className="flex-1">
+                  <div className="h-4 bg-gray-300 rounded w-3/4 mb-1"></div>
+                  <div className="h-3 bg-gray-300 rounded w-full"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  ),
+  ssr: false
+});
 
 export default async function Dashboard() {
   const user = await neonAuth.getUser();
@@ -37,8 +88,12 @@ export default async function Dashboard() {
             <div className="flex items-center space-x-4">
               <span className="text-gray-700">Welcome, {user.displayName || user.primaryEmail}</span>
               <div className="flex items-center space-x-2">
-                <UserButton />
-                <LogoutButton className="text-gray-500 hover:text-gray-700 px-3 py-2 text-sm font-medium" />
+                <Suspense fallback={<ButtonSkeleton className="w-8 h-8 rounded-full" />}>
+                  <UserButton />
+                </Suspense>
+                <Suspense fallback={<ButtonSkeleton className="px-3 py-2 text-sm" />}>
+                  <LogoutButton className="text-gray-500 hover:text-gray-700 px-3 py-2 text-sm font-medium" />
+                </Suspense>
               </div>
             </div>
           </div>
@@ -99,174 +154,44 @@ export default async function Dashboard() {
         )}
 
         <div className="px-4 py-6 sm:px-0">
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            
-            {/* Account Overview Card */}
-            <div className="bg-white overflow-hidden shadow rounded-lg">
-              <div className="p-6">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0">
-                    <span className="text-2xl">👤</span>
-                  </div>
-                  <div className="ml-5 w-0 flex-1">
-                    <dl>
-                      <dt className="text-sm font-medium text-gray-500 truncate">
-                        Account Status
-                      </dt>
-                      <dd className="text-lg font-medium text-gray-900">
-                        {profile?.tier === 'FREE' ? 'Free Trial' : 
-                         profile?.tier === 'STARTER' ? 'Starter Plan' : 'Pro Plan'}
-                      </dd>
-                    </dl>
-                  </div>
-                </div>
-                <div className="mt-4">
-                  <div className="text-sm text-gray-600">
-                    <p><strong>Email:</strong> {user.primaryEmail}</p>
-                    {profile?.tier === 'FREE' && (
-                      <p><strong>Trial Days Left:</strong> {trialDaysLeft}</p>
-                    )}
-                  </div>
-                </div>
-              </div>
+          {/* Dashboard Cards - Optimized with Suspense */}
+          <Suspense fallback={
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              <CardSkeleton />
+              <CardSkeleton />
+              <CardSkeleton />
             </div>
+          }>
+            <DashboardCards user={user} profile={profile} />
+          </Suspense>
 
-            {/* Usage Statistics Card */}
-            <div className="bg-white overflow-hidden shadow rounded-lg">
-              <div className="p-6">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0">
-                    <span className="text-2xl">📊</span>
-                  </div>
-                  <div className="ml-5 w-0 flex-1">
-                    <dl>
-                      <dt className="text-sm font-medium text-gray-500 truncate">
-                        Usage This Month
-                      </dt>
-                      <dd className="text-lg font-medium text-gray-900">
-                        {profile?.quotaUsed || 0} / {profile?.quotaLimit === -1 ? '∞' : profile?.quotaLimit || 50}
-                      </dd>
-                    </dl>
-                  </div>
+          {/* Features Section - Optimized with Suspense */}
+          <Suspense fallback={
+            <div className="mt-8">
+              <div className="bg-white shadow rounded-lg animate-pulse">
+                <div className="px-6 py-4 border-b border-gray-200">
+                  <div className="h-6 bg-gray-300 rounded w-1/3 mb-2"></div>
+                  <div className="h-4 bg-gray-300 rounded w-2/3"></div>
                 </div>
-                <div className="mt-4">
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div
-                      className="bg-indigo-600 h-2 rounded-full"
-                      style={{
-                        width: profile?.quotaLimit === -1 ? '0%' : 
-                               `${Math.min(100, ((profile?.quotaUsed || 0) / (profile?.quotaLimit || 50)) * 100)}%`
-                      }}
-                    ></div>
+                <div className="p-6">
+                  <div className="grid gap-4 md:grid-cols-2">
+                    {Array.from({ length: 4 }).map((_, i) => (
+                      <div key={i} className="flex items-start">
+                        <div className="w-8 h-8 bg-gray-300 rounded mr-3"></div>
+                        <div className="flex-1">
+                          <div className="h-4 bg-gray-300 rounded w-3/4 mb-1"></div>
+                          <div className="h-3 bg-gray-300 rounded w-full"></div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                  <p className="text-xs text-gray-500 mt-1">
-                    Automation requests used
-                  </p>
                 </div>
               </div>
             </div>
+          }>
+            <FeaturesSection />
+          </Suspense>
 
-            {/* Telegram Integration Card */}
-            <div className="bg-white overflow-hidden shadow rounded-lg">
-              <div className="p-6">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0">
-                    <span className="text-2xl">💬</span>
-                  </div>
-                  <div className="ml-5 w-0 flex-1">
-                    <dl>
-                      <dt className="text-sm font-medium text-gray-500 truncate">
-                        Telegram Bot
-                      </dt>
-                      <dd className="text-lg font-medium text-gray-900">
-                        {profile?.telegramChatId ? 'Connected' : 'Not Connected'}
-                      </dd>
-                    </dl>
-                  </div>
-                </div>
-                <div className="mt-4">
-                  {profile?.telegramChatId ? (
-                    <div className="text-green-600">
-                      <p className="text-sm">✅ Telegram account linked!</p>
-                      <p className="text-xs text-gray-600 mt-2">
-                        Username: @{profile.telegramUsername || 'Unknown'}
-                      </p>
-                    </div>
-                  ) : (
-                    <div>
-                      <p className="text-yellow-600 text-sm mb-2">⚠️ Not linked</p>
-                      <a
-                        href="https://t.me/clixen_bot"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-xs bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1 rounded-md"
-                      >
-                        Connect to @clixen_bot
-                      </a>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Features Section */}
-          <div className="mt-8">
-            <div className="bg-white shadow rounded-lg">
-              <div className="px-6 py-4 border-b border-gray-200">
-                <h3 className="text-lg leading-6 font-medium text-gray-900">
-                  Available Features
-                </h3>
-                <p className="mt-1 text-sm text-gray-500">
-                  Use these automation features through @clixen_bot on Telegram
-                </p>
-              </div>
-              <div className="p-6">
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div className="flex items-start">
-                    <span className="text-2xl mr-3">🌤️</span>
-                    <div>
-                      <h4 className="font-medium text-gray-900">Weather Updates</h4>
-                      <p className="text-sm text-gray-500">Get current weather for any city</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-start">
-                    <span className="text-2xl mr-3">📧</span>
-                    <div>
-                      <h4 className="font-medium text-gray-900">Email Scanner</h4>
-                      <p className="text-sm text-gray-500">Scan inbox for invoices and spending</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-start">
-                    <span className="text-2xl mr-3">🌍</span>
-                    <div>
-                      <h4 className="font-medium text-gray-900">Text Translation</h4>
-                      <p className="text-sm text-gray-500">Translate between languages</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-start">
-                    <span className="text-2xl mr-3">📄</span>
-                    <div>
-                      <h4 className="font-medium text-gray-900">PDF Summarizer</h4>
-                      <p className="text-sm text-gray-500">AI-powered document summaries</p>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="mt-6 pt-4 border-t border-gray-200">
-                  <h4 className="font-medium text-gray-900 mb-2">How to use:</h4>
-                  <ol className="text-sm text-gray-600 space-y-1">
-                    <li>1. Message <a href="https://t.me/clixen_bot" target="_blank" className="text-indigo-600 hover:text-indigo-800">@clixen_bot</a> on Telegram</li>
-                    <li>2. Use natural language commands like "What's the weather in London?"</li>
-                    <li>3. Get instant results from our AI-powered workflows</li>
-                  </ol>
-                </div>
-              </div>
-            </div>
-          </div>
 
           {/* Upgrade Section */}
           {profile?.tier === 'FREE' && (

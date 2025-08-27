@@ -48,6 +48,11 @@ model Profile {
   // Relations
   usageLogs            UsageLog[]
   
+  // Performance indexes for common queries
+  @@index([telegramChatId], name: "idx_telegram_chat_id")
+  @@index([tier, trialExpiresAt], name: "idx_tier_trial_expires")
+  @@index([lastActivityAt], name: "idx_last_activity")
+  @@index([email], name: "idx_email")
   @@map("profiles")
 }
 
@@ -75,9 +80,13 @@ model UsageLog {
   // Relations
   profile              Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
   
-  @@index([profileId])
-  @@index([neonAuthUserId])
-  @@index([createdAt])
+  // Performance indexes for analytics and queries
+  @@index([profileId], name: "idx_profile_id")
+  @@index([neonAuthUserId], name: "idx_neon_auth_user_id")
+  @@index([createdAt], name: "idx_created_at")
+  @@index([action, createdAt], name: "idx_action_date")
+  @@index([telegramChatId, createdAt], name: "idx_telegram_date")
+  @@index([success, createdAt], name: "idx_success_date")
   @@map("usage_logs")
 }
 
@@ -95,6 +104,8 @@ model TelegramTempUser {
   
   context              Json     @default("{}") // Store conversation context
   
+  // Index for frequent lookups
+  @@index([lastInteractionAt], name: "idx_temp_last_interaction")
   @@map("telegram_temp_users")
 }
 
