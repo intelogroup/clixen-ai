@@ -378,7 +378,7 @@ export const withLogging = <T extends (...args: any[]) => any>(
 ): T => {
   return ((...args: Parameters<T>) => {
     const start = Date.now();
-    logger.trace(`Starting operation: ${operationName}`, { args });
+    logger.debug(`Starting operation: ${operationName}`, { args });
     
     try {
       const result = fn(...args);
@@ -388,7 +388,7 @@ export const withLogging = <T extends (...args: any[]) => any>(
         return result
           .then((data) => {
             const duration = Date.now() - start;
-            logger.trace(`Operation completed: ${operationName}`, { duration });
+            logger.debug(`Operation completed: ${operationName}`, { duration });
             return data;
           })
           .catch((error) => {
@@ -403,7 +403,7 @@ export const withLogging = <T extends (...args: any[]) => any>(
       
       // Handle synchronous functions
       const duration = Date.now() - start;
-      logger.trace(`Operation completed: ${operationName}`, { duration });
+      logger.debug(`Operation completed: ${operationName}`, { duration });
       return result;
     } catch (error) {
       const duration = Date.now() - start;

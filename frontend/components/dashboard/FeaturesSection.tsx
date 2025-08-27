@@ -1,1 +1,74 @@
-'use client';\n\n// Client-side features section for better performance\nimport { memo } from 'react';\nimport Link from 'next/link';\n\nconst features = [\n  {\n    emoji: '🌤️',\n    title: 'Weather Updates',\n    description: 'Get current weather for any city'\n  },\n  {\n    emoji: '📧', \n    title: 'Email Scanner',\n    description: 'Scan inbox for invoices and spending'\n  },\n  {\n    emoji: '🌍',\n    title: 'Text Translation', \n    description: 'Translate between languages'\n  },\n  {\n    emoji: '📄',\n    title: 'PDF Summarizer',\n    description: 'AI-powered document summaries'\n  }\n];\n\nconst FeatureItem = memo(({ feature }: { feature: typeof features[0] }) => (\n  <div className=\"flex items-start\">\n    <span className=\"text-2xl mr-3\" role=\"img\">{feature.emoji}</span>\n    <div>\n      <h4 className=\"font-medium text-gray-900\">{feature.title}</h4>\n      <p className=\"text-sm text-gray-500\">{feature.description}</p>\n    </div>\n  </div>\n));\n\nconst FeaturesSection = memo(() => (\n  <div className=\"mt-8\">\n    <div className=\"bg-white shadow rounded-lg\">\n      <div className=\"px-6 py-4 border-b border-gray-200\">\n        <h3 className=\"text-lg leading-6 font-medium text-gray-900\">\n          Available Features\n        </h3>\n        <p className=\"mt-1 text-sm text-gray-500\">\n          Use these automation features through @clixen_bot on Telegram\n        </p>\n      </div>\n      <div className=\"p-6\">\n        <div className=\"grid gap-4 md:grid-cols-2\">\n          {features.map((feature, index) => (\n            <FeatureItem key={index} feature={feature} />\n          ))}\n        </div>\n        \n        <div className=\"mt-6 pt-4 border-t border-gray-200\">\n          <h4 className=\"font-medium text-gray-900 mb-2\">How to use:</h4>\n          <ol className=\"text-sm text-gray-600 space-y-1\">\n            <li>1. Message <Link href=\"https://t.me/clixen_bot\" target=\"_blank\" className=\"text-indigo-600 hover:text-indigo-800 transition-colors\">@clixen_bot</Link> on Telegram</li>\n            <li>2. Use natural language commands like \"What's the weather in London?\"</li>\n            <li>3. Get instant results from our AI-powered workflows</li>\n          </ol>\n        </div>\n      </div>\n    </div>\n  </div>\n));\n\nFeatureItem.displayName = 'FeatureItem';\nFeaturesSection.displayName = 'FeaturesSection';\n\nexport default FeaturesSection;
+'use client';
+
+// Client-side features section for better performance
+import { memo } from 'react';
+import Link from 'next/link';
+
+const features = [
+  {
+    emoji: '🌤️',
+    title: 'Weather Updates',
+    description: 'Get current weather for any city'
+  },
+  {
+    emoji: '📧', 
+    title: 'Email Scanner',
+    description: 'Scan inbox for invoices and spending'
+  },
+  {
+    emoji: '🌍',
+    title: 'Text Translation', 
+    description: 'Translate between languages'
+  },
+  {
+    emoji: '📄',
+    title: 'PDF Summarizer',
+    description: 'AI-powered document summaries'
+  }
+];
+
+const FeatureItem = memo(({ feature }: { feature: typeof features[0] }) => (
+  <div className="flex items-start">
+    <span className="text-2xl mr-3" role="img">{feature.emoji}</span>
+    <div>
+      <h4 className="font-medium text-gray-900">{feature.title}</h4>
+      <p className="text-sm text-gray-500">{feature.description}</p>
+    </div>
+  </div>
+));
+
+const FeaturesSection = memo(() => (
+  <div className="mt-8">
+    <div className="bg-white shadow rounded-lg">
+      <div className="px-6 py-4 border-b border-gray-200">
+        <h3 className="text-lg leading-6 font-medium text-gray-900">
+          Available Features
+        </h3>
+        <p className="mt-1 text-sm text-gray-500">
+          Use these automation features through @clixen_bot on Telegram
+        </p>
+      </div>
+      <div className="p-6">
+        <div className="grid gap-4 md:grid-cols-2">
+          {features.map((feature, index) => (
+            <FeatureItem key={index} feature={feature} />
+          ))}
+        </div>
+        
+        <div className="mt-6 pt-4 border-t border-gray-200">
+          <h4 className="font-medium text-gray-900 mb-2">How to use:</h4>
+          <ol className="text-sm text-gray-600 space-y-1">
+            <li>1. Message <Link href="https://t.me/clixen_bot" target="_blank" className="text-indigo-600 hover:text-indigo-800 transition-colors">@clixen_bot</Link> on Telegram</li>
+            <li>2. Use natural language commands like "What's the weather in London?"</li>
+            <li>3. Get instant results from our AI-powered workflows</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+));
+
+FeatureItem.displayName = 'FeatureItem';
+FeaturesSection.displayName = 'FeaturesSection';
+
+export default FeaturesSection;

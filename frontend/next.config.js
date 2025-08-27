@@ -43,26 +43,12 @@ const nextConfig = {
       }
     }
 
-    // Production bundle optimizations
+    // Production bundle optimizations - simplified for Next.js 15
     if (!dev) {
+      // Let Next.js handle bundle splitting by default
       config.optimization = {
         ...config.optimization,
-        splitChunks: {
-          chunks: 'all',
-          cacheGroups: {
-            vendor: {
-              test: /[\/\\]node_modules[\/\\]/,
-              name: 'vendors',
-              priority: 10,
-              reuseExistingChunk: true,
-            },
-            common: {
-              minChunks: 2,
-              priority: 5,
-              reuseExistingChunk: true,
-            },
-          },
-        },
+        // Remove custom splitChunks to avoid SSR issues
       }
     }
 
@@ -131,7 +117,7 @@ const nextConfig = {
     compress: true,
     poweredByHeader: false,
     generateEtags: false,
-    swcMinify: true, // Use SWC for faster minification
+    // swcMinify is enabled by default in Next.js 15+
     
     // Image optimization with performance focus
     images: {

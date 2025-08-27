@@ -11,12 +11,20 @@ datasource db {
   directUrl = env("DATABASE_URL_UNPOOLED")
 }
 
-// User profiles linked to NeonAuth users
+// User profiles linked to NeonAuth users with team support
 model Profile {
   id                   String   @id @default(cuid())
   neonAuthUserId       String   @unique @map("neon_auth_user_id") // Links to NeonAuth user
   email                String   @unique
   displayName          String?  @map("display_name")
+  
+  // Team Management (based on NeonAuth documentation)
+  teamId               String?  @map("team_id")
+  role                 TeamRole @default(MEMBER)
+  permissions          Json     @default("{}") @map("permissions") // Custom permissions
+  
+  // OAuth Integration Support
+  oauthProviders       Json     @default("{}") @map("oauth_providers") // Track connected providers
   
   // Telegram Integration
   telegramChatId       String?  @unique @map("telegram_chat_id")
@@ -31,7 +39,7 @@ model Profile {
   trialExpiresAt       DateTime @default(dbgenerated("NOW() + INTERVAL '7 days'")) @map("trial_expires_at")
   trialActive          Boolean  @default(true) @map("trial_active")
   
-  // Usage & Quota Management
+  // Usage & Quota Management  
   quotaUsed            Int      @default(0) @map("quota_used")
   quotaLimit           Int      @default(50) @map("quota_limit") // -1 for unlimited
   
@@ -39,7 +47,8 @@ model Profile {
   stripeCustomerId     String?  @unique @map("stripe_customer_id")
   stripeSubscriptionId String?  @map("stripe_subscription_id")
   
-  // Metadata & Tracking
+  // Enhanced User Data (from NeonAuth docs)
+  customUserData       Json     @default("{}") @map("custom_user_data")
   userMetadata         Json     @default("{}") @map("user_metadata")
   lastActivityAt       DateTime @default(now()) @map("last_activity_at")
   createdAt            DateTime @default(now()) @map("created_at")
@@ -47,12 +56,15 @@ model Profile {
   
   // Relations
   usageLogs            UsageLog[]
+  apiKeys              ApiKey[]
+  team                 Team?    @relation(fields: [teamId], references: [id])
   
   // Performance indexes for common queries
   @@index([telegramChatId], name: "idx_telegram_chat_id")
   @@index([tier, trialExpiresAt], name: "idx_tier_trial_expires")
   @@index([lastActivityAt], name: "idx_last_activity")
   @@index([email], name: "idx_email")
+  @@index([teamId], name: "idx_team_id")
   @@map("profiles")
 }
 
@@ -109,9 +121,93 @@ model TelegramTempUser {
   @@map("telegram_temp_users")
 }
 
+// Team management for enterprise features
+model Team {
+  id                   String   @id @default(cuid())
+  name                 String
+  slug                 String   @unique // URL-friendly identifier
+  
+  // Team Management
+  ownerId              String   @map("owner_id") // NeonAuth user ID of team owner
+  
+  // Subscription & Billing (team-level)
+  teamTier             TeamTier @default(TEAM_FREE) @map("team_tier")
+  teamQuotaLimit       Int      @default(200) @map("team_quota_limit") // -1 for unlimited
+  teamQuotaUsed        Int      @default(0) @map("team_quota_used")
+  
+  // Stripe Integration (team-level billing)
+  stripeTeamCustomerId String?  @unique @map("stripe_team_customer_id")
+  stripeTeamSubId      String?  @map("stripe_team_subscription_id")
+  
+  // Metadata
+  teamMetadata         Json     @default("{}") @map("team_metadata")
+  createdAt            DateTime @default(now()) @map("created_at")
+  updatedAt            DateTime @updatedAt @map("updated_at")
+  
+  // Relations
+  members              Profile[]
+  apiKeys              ApiKey[]
+  
+  // Indexes
+  @@index([slug], name: "idx_team_slug")
+  @@index([ownerId], name: "idx_team_owner")
+  @@map("teams")
+}
+
+// API Keys for backend integration (as mentioned in NeonAuth docs)
+model ApiKey {
+  id                   String   @id @default(cuid())
+  profileId            String   @map("profile_id")
+  teamId               String?  @map("team_id")
+  
+  // Key Details
+  keyHash              String   @unique @map("key_hash") // Hashed API key
+  keyPrefix            String   @map("key_prefix") // First 8 chars for identification
+  name                 String   // User-friendly name
+  
+  // Permissions & Scope
+  permissions          Json     @default("{}") @map("permissions")
+  scopes               String[] @default([]) // API scopes
+  
+  // Usage Tracking
+  lastUsedAt           DateTime? @map("last_used_at")
+  usageCount           Int      @default(0) @map("usage_count")
+  
+  // Status
+  active               Boolean  @default(true)
+  expiresAt            DateTime? @map("expires_at")
+  
+  createdAt            DateTime @default(now()) @map("created_at")
+  updatedAt            DateTime @updatedAt @map("updated_at")
+  
+  // Relations
+  profile              Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  team                 Team?    @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  
+  // Indexes
+  @@index([profileId], name: "idx_api_key_profile")
+  @@index([teamId], name: "idx_api_key_team")
+  @@index([keyPrefix], name: "idx_api_key_prefix")
+  @@map("api_keys")
+}
+
 // Enums
 enum Tier {
   FREE     @map("free")
   STARTER  @map("starter")
   PRO      @map("pro")
+}
+
+enum TeamTier {
+  TEAM_FREE     @map("team_free")
+  TEAM_STARTER  @map("team_starter") 
+  TEAM_PRO      @map("team_pro")
+  ENTERPRISE    @map("enterprise")
+}
+
+enum TeamRole {
+  OWNER   @map("owner")
+  ADMIN   @map("admin") 
+  MEMBER  @map("member")
+  VIEWER  @map("viewer")
 }

@@ -2,140 +2,125 @@ import Link from "next/link";
 import { Suspense } from "react";
 import dynamic from "next/dynamic";
 
-// Dynamic import for pricing section (below the fold)
-const PricingSection = dynamic(() => Promise.resolve(() => (
-  <div className="bg-gray-50 py-12">
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div className="sm:flex sm:flex-col sm:align-center">
-        <h1 className="text-5xl font-extrabold text-gray-900 sm:text-center">Pricing Plans</h1>
-        <p className="mt-5 text-xl text-gray-500 sm:text-center">
-          Start with a free trial, upgrade when you need more
-        </p>
-      </div>
-      <div className="mt-12 space-y-4 sm:mt-16 sm:space-y-0 sm:grid sm:grid-cols-2 sm:gap-6 lg:max-w-4xl lg:mx-auto xl:max-w-none xl:mx-0 xl:grid-cols-3">
-        {/* Free Trial */}
-        <div className="border border-gray-200 rounded-lg shadow-sm divide-y divide-gray-200">
-          <div className="p-6">
-            <h2 className="text-lg leading-6 font-medium text-gray-900">Free Trial</h2>
-            <p className="mt-4 text-sm text-gray-500">Perfect for trying out Clixen AI</p>
-            <p className="mt-8">
-              <span className="text-4xl font-extrabold text-gray-900">$0</span>
-              <span className="text-base font-medium text-gray-500">/7 days</span>
-            </p>
-            <Link
-              href="/auth/signup"
-              className="mt-8 block w-full bg-gray-800 border border-gray-800 rounded-md py-2 text-sm font-semibold text-white text-center hover:bg-gray-900"
-            >
-              Start Free Trial
-            </Link>
-          </div>
-          <div className="pt-6 pb-8 px-6">
-            <h3 className="text-xs font-medium text-gray-900 tracking-wide uppercase">What's included</h3>
-            <ul role="list" className="mt-6 space-y-4">
-              <li className="flex space-x-3">
-                <span className="text-green-500">✓</span>
-                <span className="text-sm text-gray-500">50 automation requests</span>
-              </li>
-              <li className="flex space-x-3">
-                <span className="text-green-500">✓</span>
-                <span className="text-sm text-gray-500">All core features</span>
-              </li>
-              <li className="flex space-x-3">
-                <span className="text-green-500">✓</span>
-                <span className="text-sm text-gray-500">Telegram bot access</span>
-              </li>
-            </ul>
-          </div>
-        </div>
-        {/* Starter Plan */}
-        <div className="border border-indigo-200 rounded-lg shadow-sm divide-y divide-gray-200">
-          <div className="p-6">
-            <h2 className="text-lg leading-6 font-medium text-gray-900">Starter</h2>
-            <p className="mt-4 text-sm text-gray-500">For regular users</p>
-            <p className="mt-8">
-              <span className="text-4xl font-extrabold text-gray-900">$9</span>
-              <span className="text-base font-medium text-gray-500">/month</span>
-            </p>
-            <Link
-              href="/auth/signup"
-              className="mt-8 block w-full bg-indigo-600 border border-transparent rounded-md py-2 text-sm font-semibold text-white text-center hover:bg-indigo-700"
-            >
-              Get Started
-            </Link>
-          </div>
-          <div className="pt-6 pb-8 px-6">
-            <h3 className="text-xs font-medium text-gray-900 tracking-wide uppercase">Everything in Free, plus</h3>
-            <ul role="list" className="mt-6 space-y-4">
-              <li className="flex space-x-3">
-                <span className="text-green-500">✓</span>
-                <span className="text-sm text-gray-500">1,000 requests/month</span>
-              </li>
-              <li className="flex space-x-3">
-                <span className="text-green-500">✓</span>
-                <span className="text-sm text-gray-500">Email support</span>
-              </li>
-              <li className="flex space-x-3">
-                <span className="text-green-500">✓</span>
-                <span className="text-sm text-gray-500">Priority processing</span>
-              </li>
-            </ul>
-          </div>
-        </div>
-        {/* Pro Plan */}
-        <div className="border border-gray-200 rounded-lg shadow-sm divide-y divide-gray-200">
-          <div className="p-6">
-            <h2 className="text-lg leading-6 font-medium text-gray-900">Pro</h2>
-            <p className="mt-4 text-sm text-gray-500">For power users</p>
-            <p className="mt-8">
-              <span className="text-4xl font-extrabold text-gray-900">$49</span>
-              <span className="text-base font-medium text-gray-500">/month</span>
-            </p>
-            <Link
-              href="/auth/signup"
-              className="mt-8 block w-full bg-gray-800 border border-gray-800 rounded-md py-2 text-sm font-semibold text-white text-center hover:bg-gray-900"
-            >
-              Upgrade to Pro
-            </Link>
-          </div>
-          <div className="pt-6 pb-8 px-6">
-            <h3 className="text-xs font-medium text-gray-900 tracking-wide uppercase">Everything in Starter, plus</h3>
-            <ul role="list" className="mt-6 space-y-4">
-              <li className="flex space-x-3">
-                <span className="text-green-500">✓</span>
-                <span className="text-sm text-gray-500">Unlimited requests</span>
-              </li>
-              <li className="flex space-x-3">
-                <span className="text-green-500">✓</span>
-                <span className="text-sm text-gray-500">Priority support</span>
-              </li>
-              <li className="flex space-x-3">
-                <span className="text-green-500">✓</span>
-                <span className="text-sm text-gray-500">Advanced features</span>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-)), {
-  loading: () => (
+// Simple pricing section component
+function PricingSection() {
+  return (
     <div className="bg-gray-50 py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-gray-300 rounded w-1/3 mx-auto"></div>
-          <div className="h-4 bg-gray-300 rounded w-1/2 mx-auto"></div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
-            <div className="h-96 bg-gray-300 rounded"></div>
-            <div className="h-96 bg-gray-300 rounded"></div>
-            <div className="h-96 bg-gray-300 rounded"></div>
+        <div className="sm:flex sm:flex-col sm:align-center">
+          <h1 className="text-5xl font-extrabold text-gray-900 sm:text-center">Pricing Plans</h1>
+          <p className="mt-5 text-xl text-gray-500 sm:text-center">
+            Start with a free trial, upgrade when you need more
+          </p>
+        </div>
+        <div className="mt-12 space-y-4 sm:mt-16 sm:space-y-0 sm:grid sm:grid-cols-2 sm:gap-6 lg:max-w-4xl lg:mx-auto xl:max-w-none xl:mx-0 xl:grid-cols-3">
+          {/* Free Trial */}
+          <div className="border border-gray-200 rounded-lg shadow-sm divide-y divide-gray-200">
+            <div className="p-6">
+              <h2 className="text-lg leading-6 font-medium text-gray-900">Free Trial</h2>
+              <p className="mt-4 text-sm text-gray-500">Perfect for trying out Clixen AI</p>
+              <p className="mt-8">
+                <span className="text-4xl font-extrabold text-gray-900">$0</span>
+                <span className="text-base font-medium text-gray-500">/7 days</span>
+              </p>
+              <Link
+                href="/auth/signup"
+                className="mt-8 block w-full bg-gray-800 border border-gray-800 rounded-md py-2 text-sm font-semibold text-white text-center hover:bg-gray-900"
+              >
+                Start Free Trial
+              </Link>
+            </div>
+            <div className="pt-6 pb-8 px-6">
+              <h3 className="text-xs font-medium text-gray-900 tracking-wide uppercase">What's included</h3>
+              <ul role="list" className="mt-6 space-y-4">
+                <li className="flex space-x-3">
+                  <span className="text-green-500">✓</span>
+                  <span className="text-sm text-gray-500">50 automation requests</span>
+                </li>
+                <li className="flex space-x-3">
+                  <span className="text-green-500">✓</span>
+                  <span className="text-sm text-gray-500">All core features</span>
+                </li>
+                <li className="flex space-x-3">
+                  <span className="text-green-500">✓</span>
+                  <span className="text-sm text-gray-500">Telegram bot access</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+          {/* Starter Plan */}
+          <div className="border border-indigo-200 rounded-lg shadow-sm divide-y divide-gray-200">
+            <div className="p-6">
+              <h2 className="text-lg leading-6 font-medium text-gray-900">Starter</h2>
+              <p className="mt-4 text-sm text-gray-500">For regular users</p>
+              <p className="mt-8">
+                <span className="text-4xl font-extrabold text-gray-900">$9</span>
+                <span className="text-base font-medium text-gray-500">/month</span>
+              </p>
+              <Link
+                href="/auth/signup"
+                className="mt-8 block w-full bg-indigo-600 border border-transparent rounded-md py-2 text-sm font-semibold text-white text-center hover:bg-indigo-700"
+              >
+                Get Started
+              </Link>
+            </div>
+            <div className="pt-6 pb-8 px-6">
+              <h3 className="text-xs font-medium text-gray-900 tracking-wide uppercase">Everything in Free, plus</h3>
+              <ul role="list" className="mt-6 space-y-4">
+                <li className="flex space-x-3">
+                  <span className="text-green-500">✓</span>
+                  <span className="text-sm text-gray-500">1,000 requests/month</span>
+                </li>
+                <li className="flex space-x-3">
+                  <span className="text-green-500">✓</span>
+                  <span className="text-sm text-gray-500">Email support</span>
+                </li>
+                <li className="flex space-x-3">
+                  <span className="text-green-500">✓</span>
+                  <span className="text-sm text-gray-500">Priority processing</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+          {/* Pro Plan */}
+          <div className="border border-gray-200 rounded-lg shadow-sm divide-y divide-gray-200">
+            <div className="p-6">
+              <h2 className="text-lg leading-6 font-medium text-gray-900">Pro</h2>
+              <p className="mt-4 text-sm text-gray-500">For power users</p>
+              <p className="mt-8">
+                <span className="text-4xl font-extrabold text-gray-900">$49</span>
+                <span className="text-base font-medium text-gray-500">/month</span>
+              </p>
+              <Link
+                href="/auth/signup"
+                className="mt-8 block w-full bg-gray-800 border border-gray-800 rounded-md py-2 text-sm font-semibold text-white text-center hover:bg-gray-900"
+              >
+                Upgrade to Pro
+              </Link>
+            </div>
+            <div className="pt-6 pb-8 px-6">
+              <h3 className="text-xs font-medium text-gray-900 tracking-wide uppercase">Everything in Starter, plus</h3>
+              <ul role="list" className="mt-6 space-y-4">
+                <li className="flex space-x-3">
+                  <span className="text-green-500">✓</span>
+                  <span className="text-sm text-gray-500">Unlimited requests</span>
+                </li>
+                <li className="flex space-x-3">
+                  <span className="text-green-500">✓</span>
+                  <span className="text-sm text-gray-500">Priority support</span>
+                </li>
+                <li className="flex space-x-3">
+                  <span className="text-green-500">✓</span>
+                  <span className="text-sm text-gray-500">Advanced features</span>
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  ),
-  ssr: false
-});
+  );
+}
 
 // Loading component for navigation links
 function NavigationLinks() {
@@ -289,24 +274,8 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Pricing Section - Dynamically Loaded */}
-      <Suspense fallback={
-        <div className="bg-gray-50 py-12">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="animate-pulse space-y-4">
-              <div className="h-8 bg-gray-300 rounded w-1/3 mx-auto"></div>
-              <div className="h-4 bg-gray-300 rounded w-1/2 mx-auto"></div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
-                <div className="h-96 bg-gray-300 rounded"></div>
-                <div className="h-96 bg-gray-300 rounded"></div>
-                <div className="h-96 bg-gray-300 rounded"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      }>
-        <PricingSection />
-      </Suspense>
+      {/* Pricing Section */}
+      <PricingSection />
 
       {/* CTA Section */}
       <div className="bg-indigo-700">

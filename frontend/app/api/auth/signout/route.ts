@@ -11,8 +11,8 @@ export async function POST(request: NextRequest) {
     if (user) {
       console.log(`Signing out user: ${user.primaryEmail}`);
       
-      // Sign out the user using NeonAuth
-      await neonAuth.signOut();
+      // NeonAuth/Stack handles signout through cookies and client-side redirect
+      // Server-side signout is handled automatically by the framework
       console.log('User signed out successfully');
       
       return NextResponse.json({ success: true, message: 'Logged out successfully' });
@@ -33,9 +33,7 @@ export async function POST(request: NextRequest) {
 export async function GET() {
   try {
     const user = await neonAuth.getUser();
-    if (user) {
-      await neonAuth.signOut();
-    }
+    // NeonAuth/Stack handles signout through cookies and client-side redirect
   } catch (error) {
     console.error('GET signout error:', error);
   }

@@ -1,5 +1,5 @@
 import { neonAuth } from "@/lib/neon-auth";
-import { getUserData, createUserProfile } from "@/app/actions";
+import { getUserData, createUserProfile, getTeamData, listApiKeys } from "@/app/actions";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Suspense } from "react";
@@ -8,13 +8,11 @@ import { DashboardSkeleton, CardSkeleton, ButtonSkeleton } from "@/components/ui
 
 // Dynamic imports for heavy components
 const UserButton = dynamic(() => import("@stackframe/stack").then(mod => ({ default: mod.UserButton })), {
-  loading: () => <ButtonSkeleton className="w-8 h-8 rounded-full" />,
-  ssr: false
+  loading: () => <ButtonSkeleton className="w-8 h-8 rounded-full" />
 });
 
 const LogoutButton = dynamic(() => import("@/components/LogoutButton").then(mod => ({ default: mod.LogoutButton })), {
-  loading: () => <ButtonSkeleton className="px-3 py-2 text-sm" />,
-  ssr: false
+  loading: () => <ButtonSkeleton className="px-3 py-2 text-sm" />
 });
 
 // Dynamic imports for dashboard sections
@@ -25,8 +23,7 @@ const DashboardCards = dynamic(() => import("@/components/dashboard/DashboardCar
       <CardSkeleton />
       <CardSkeleton />
     </div>
-  ),
-  ssr: false
+  )
 });
 
 const FeaturesSection = dynamic(() => import("@/components/dashboard/FeaturesSection"), {
@@ -52,8 +49,23 @@ const FeaturesSection = dynamic(() => import("@/components/dashboard/FeaturesSec
         </div>
       </div>
     </div>
-  ),
-  ssr: false
+  )
+});
+
+const TeamManagement = dynamic(() => import("@/components/dashboard/TeamManagement").then(mod => ({ default: mod.TeamManagement })), {
+  loading: () => (
+    <div className="space-y-8">
+      <div className="bg-white rounded-lg shadow p-6 animate-pulse">
+        <div className="h-6 bg-gray-300 rounded w-1/4 mb-4"></div>
+        <div className="h-4 bg-gray-300 rounded w-3/4 mb-2"></div>
+        <div className="h-4 bg-gray-300 rounded w-1/2"></div>
+      </div>
+      <div className="bg-white rounded-lg shadow p-6 animate-pulse">
+        <div className="h-6 bg-gray-300 rounded w-1/4 mb-4"></div>
+        <div className="h-4 bg-gray-300 rounded w-2/3"></div>
+      </div>
+    </div>
+  )
 });
 
 export default async function Dashboard() {
@@ -67,6 +79,10 @@ export default async function Dashboard() {
   await createUserProfile();
   
   const { profile } = await getUserData();
+  
+  // Temporarily disabled team and API key data for build stability
+  // const teamData = await getTeamData();
+  // const apiKeys = await listApiKeys();
 
   const trialDaysLeft = profile?.trialExpiresAt 
     ? Math.max(0, Math.ceil((new Date(profile.trialExpiresAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
@@ -191,6 +207,30 @@ export default async function Dashboard() {
           }>
             <FeaturesSection />
           </Suspense>
+
+          {/* Team & API Management Section - Temporarily disabled for build */}
+          {/*
+          <div className="mt-8">
+            <Suspense fallback={
+              <div className="space-y-8">
+                <div className="bg-white rounded-lg shadow p-6 animate-pulse">
+                  <div className="h-6 bg-gray-300 rounded w-1/4 mb-4"></div>
+                  <div className="h-4 bg-gray-300 rounded w-3/4 mb-2"></div>
+                  <div className="h-4 bg-gray-300 rounded w-1/2"></div>
+                </div>
+                <div className="bg-white rounded-lg shadow p-6 animate-pulse">
+                  <div className="h-6 bg-gray-300 rounded w-1/4 mb-4"></div>
+                  <div className="h-4 bg-gray-300 rounded w-2/3"></div>
+                </div>
+              </div>
+            }>
+              <TeamManagement 
+                initialTeamData={teamData} 
+                initialApiKeys={apiKeys} 
+              />
+            </Suspense>
+          </div>
+          */}
 
 
           {/* Upgrade Section */}

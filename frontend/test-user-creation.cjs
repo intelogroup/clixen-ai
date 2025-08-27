@@ -1,109 +1,115 @@
-// Test script for creating a new user with provided credentials
-const { chromium } = require('playwright');
+const { chromium } = require("playwright");
 
 async function testUserCreation() {
+  console.log("🚀 Starting test user creation with performance monitoring...");
+  
   const browser = await chromium.launch({ headless: true });
   const context = await browser.newContext();
   const page = await context.newPage();
-
-  try {
-    console.log('🚀 Starting user creation test...');
-    
-    // Navigate to signup page
-    console.log('📝 Navigating to signup page...');
-    await page.goto('http://localhost:3000/auth/signup');
-    
-    // Wait for page to load
-    await page.waitForLoadState('networkidle');
-    
-    // Take screenshot of signup page
-    await page.screenshot({ path: 'signup-test-initial.png' });
-    console.log('📸 Screenshot taken: signup-test-initial.png');
-    
-    // Fill in the signup form
-    console.log('📧 Filling email: user1tester@email.com');
-    const emailField = await page.locator('input[type="email"], input[name="email"], input[placeholder*="email" i]').first();
-    await emailField.fill('user1tester@email.com');
-    
-    console.log('🔒 Filling password: Jimkali90#');
-    const passwordField = await page.locator('input[type="password"], input[name="password"]').first();
-    await passwordField.fill('Jimkali90#');
-    
-    // Look for confirm password field if it exists
-    const confirmPasswordFields = await page.locator('input[type="password"]').count();
-    if (confirmPasswordFields > 1) {
-      console.log('🔒 Filling confirm password...');
-      await page.locator('input[type="password"]').nth(1).fill('Jimkali90#');
+  
+  // Monitor network requests for performance
+  const performanceMetrics = {
+    loadTime: 0,
+    networkRequests: 0,
+    jsErrors: [],
+    bundleSize: 0
+  };
+  
+  page.on("response", (response) => {
+    performanceMetrics.networkRequests++;
+    if (response.url().includes(".js") || response.url().includes(".css")) {
+      console.log(`📦 Asset loaded: ${response.url()} (${response.status()})`);
     }
+  });
+  
+  page.on("pageerror", (error) => {
+    performanceMetrics.jsErrors.push(error.message);
+    console.log(`❌ JavaScript Error: ${error.message}`);
+  });
+  
+  try {
+    // Test landing page performance
+    console.log("\\n📊 Testing landing page performance...");
+    const startTime = Date.now();
     
-    // Take screenshot before submitting
-    await page.screenshot({ path: 'signup-test-filled.png' });
-    console.log('📸 Screenshot taken: signup-test-filled.png');
+    await page.goto("http://localhost:3000", { waitUntil: "networkidle" });
+    performanceMetrics.loadTime = Date.now() - startTime;
     
-    // Find and click signup button
-    console.log('🖱️ Clicking signup button...');
-    const signupButton = await page.locator('button[type="submit"], button:has-text("Sign up"), button:has-text("Create"), button:has-text("Register")').first();
+    console.log(`✅ Landing page loaded in ${performanceMetrics.loadTime}ms`);
+    
+    // Take screenshot of landing page
+    await page.screenshot({ path: "/root/repo/frontend/test-landing-optimized.png" });
+    
+    // Test navigation to signup
+    console.log("\\n🔄 Navigating to signup page...");
+    const signupStartTime = Date.now();
+    
+    // Click on "Get Started" or "Start Free Trial" button
+    const signupButton = page.locator("a[href=\"/auth/signup\"]").first();
     await signupButton.click();
     
-    // Wait for response
-    await page.waitForTimeout(3000);
+    // Wait for signup page to load
+    await page.waitForURL("**/auth/signup");
+    const signupLoadTime = Date.now() - signupStartTime;
     
-    // Take screenshot after submission
-    await page.screenshot({ path: 'signup-test-after-submit.png' });
-    console.log('📸 Screenshot taken: signup-test-after-submit.png');
+    console.log(`✅ Signup page loaded in ${signupLoadTime}ms`);
+    await page.screenshot({ path: "/root/repo/frontend/test-signup-page.png" });
     
-    // Check if we're redirected to dashboard or if there are errors
-    const currentUrl = page.url();
-    console.log('🌐 Current URL after signup:', currentUrl);
+    // Fill out the signup form
+    console.log("\\n📝 Testing user creation with credentials:");
+    console.log("   Email: Testo123@email.com");
+    console.log("   Password: Jimtest123r5");
     
-    if (currentUrl.includes('/dashboard')) {
-      console.log('✅ SUCCESS: User created and redirected to dashboard!');
+    // Look for email and password inputs
+    const emailInput = page.locator("input[type=\"email\"], input[name=\"email\"]");
+    const passwordInput = page.locator("input[type=\"password\"], input[name=\"password\"]");
+    
+    if (await emailInput.count() > 0 && await passwordInput.count() > 0) {
+      await emailInput.fill("Testo123@email.com");
+      await passwordInput.fill("Jimtest123r5");
       
-      // Take screenshot of dashboard
-      await page.screenshot({ path: 'signup-test-dashboard.png' });
-      console.log('📸 Screenshot taken: signup-test-dashboard.png');
-      
-      // Check for user info on dashboard
-      const userEmail = await page.locator('text=user1tester@email.com').first().textContent().catch(() => null);
-      if (userEmail) {
-        console.log('✅ Email confirmed on dashboard:', userEmail);
+      // Look for and click submit button
+      const submitButton = page.locator("button[type=\"submit\"], button:has-text(\"Sign Up\"), button:has-text(\"Create Account\")");
+      if (await submitButton.count() > 0) {
+        await submitButton.click();
+        
+        // Wait for either success redirect or error message
+        try {
+          await page.waitForURL("**/dashboard", { timeout: 10000 });
+          console.log("✅ User creation successful\! Redirected to dashboard");
+          
+          // Take screenshot of dashboard
+          await page.screenshot({ path: "/root/repo/frontend/test-dashboard-optimized.png" });
+          
+        } catch (error) {
+          console.log("⚠️ Checking for error messages or auth requirements");
+          
+          // Check for any error messages
+          const errorMessage = await page.locator("[role=\"alert\"], .error, .text-red-500, .text-red-600").textContent().catch(() => null);
+          if (errorMessage) {
+            console.log(`❌ Error message: ${errorMessage}`);
+          }
+        }
+      } else {
+        console.log("❌ No submit button found on signup page");
       }
-      
     } else {
-      console.log('⚠️ Not redirected to dashboard. Checking for errors...');
-      
-      // Look for error messages
-      const errorMessages = await page.locator('[class*="error"], [role="alert"], .text-red-500, .text-red-600').allTextContents();
-      if (errorMessages.length > 0) {
-        console.log('❌ Error messages found:', errorMessages);
-      }
-      
-      // Check if we're still on signup page
-      if (currentUrl.includes('/signup')) {
-        console.log('📝 Still on signup page - may need email verification');
-      }
+      console.log("❌ Email or password input not found on signup page");
     }
     
-    // Get all text content for debugging
-    const pageText = await page.locator('body').textContent();
-    console.log('📄 Page content preview:', pageText.substring(0, 500) + '...');
-    
-    console.log('✅ Test completed successfully!');
-    
   } catch (error) {
-    console.error('❌ Test failed:', error);
-    await page.screenshot({ path: 'signup-test-error.png' });
-    console.log('📸 Error screenshot taken: signup-test-error.png');
+    console.log(`❌ Test failed: ${error.message}`);
   } finally {
+    // Performance summary
+    console.log("\\n📈 Performance Summary:");
+    console.log(`   Landing page load time: ${performanceMetrics.loadTime}ms`);
+    console.log(`   Network requests: ${performanceMetrics.networkRequests}`);
+    console.log(`   JavaScript errors: ${performanceMetrics.jsErrors.length}`);
+    
     await browser.close();
+    console.log("\\n✅ Test completed\!");
   }
 }
 
 // Run the test
-testUserCreation().then(() => {
-  console.log('🏁 Test script finished');
-  process.exit(0);
-}).catch(error => {
-  console.error('💥 Script error:', error);
-  process.exit(1);
-});
+testUserCreation().catch(console.error);
