@@ -2,7 +2,8 @@
 const nextConfig = {
   // Enable experimental features for better stability
   experimental: {
-    optimizePackageImports: ['lucide-react', '@radix-ui/react-icons']
+    // Removed lucide-react from optimizePackageImports to fix icon import issues
+    optimizePackageImports: ['@radix-ui/react-icons']
   },
 
   // Webpack configuration

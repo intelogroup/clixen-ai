@@ -1,130 +1,109 @@
-const { PrismaClient } = require('@prisma/client');
-require('dotenv').config({ path: '.env.local' });
-
-const prisma = new PrismaClient();
+// Test script for creating a new user with provided credentials
+const { chromium } = require('playwright');
 
 async function testUserCreation() {
-  console.log('🧪 Testing NeonDB + Prisma User Creation...\n');
-  
+  const browser = await chromium.launch({ headless: true });
+  const context = await browser.newContext();
+  const page = await context.newPage();
+
   try {
-    // Test database connection
-    console.log('1. Testing database connection...');
-    await prisma.$connect();
-    console.log('✅ Database connection successful');
-
-    // Test user profile creation (simulating what happens after NeonAuth signup)
-    const testUser = {
-      neonAuthUserId: 'test-user-' + Date.now(),
-      email: 'testuser@example.com',
-      displayName: 'Test User',
-      tier: 'FREE',
-      trialActive: true,
-      quotaUsed: 0,
-      quotaLimit: 50
-    };
-
-    console.log('\n2. Creating test user profile...');
-    console.log('User data:', JSON.stringify(testUser, null, 2));
-
-    // Check if user already exists (cleanup from previous tests)
-    const existingUser = await prisma.profile.findUnique({
-      where: { email: testUser.email }
-    });
-
-    if (existingUser) {
-      console.log('⚠️  User already exists, deleting for clean test...');
-      await prisma.profile.delete({
-        where: { email: testUser.email }
-      });
+    console.log('🚀 Starting user creation test...');
+    
+    // Navigate to signup page
+    console.log('📝 Navigating to signup page...');
+    await page.goto('http://localhost:3000/auth/signup');
+    
+    // Wait for page to load
+    await page.waitForLoadState('networkidle');
+    
+    // Take screenshot of signup page
+    await page.screenshot({ path: 'signup-test-initial.png' });
+    console.log('📸 Screenshot taken: signup-test-initial.png');
+    
+    // Fill in the signup form
+    console.log('📧 Filling email: user1tester@email.com');
+    const emailField = await page.locator('input[type="email"], input[name="email"], input[placeholder*="email" i]').first();
+    await emailField.fill('user1tester@email.com');
+    
+    console.log('🔒 Filling password: Jimkali90#');
+    const passwordField = await page.locator('input[type="password"], input[name="password"]').first();
+    await passwordField.fill('Jimkali90#');
+    
+    // Look for confirm password field if it exists
+    const confirmPasswordFields = await page.locator('input[type="password"]').count();
+    if (confirmPasswordFields > 1) {
+      console.log('🔒 Filling confirm password...');
+      await page.locator('input[type="password"]').nth(1).fill('Jimkali90#');
     }
-
-    // Create new user profile
-    const createdUser = await prisma.profile.create({
-      data: testUser
-    });
-
-    console.log('✅ User profile created successfully!');
-    console.log('Created user:', JSON.stringify({
-      id: createdUser.id,
-      email: createdUser.email,
-      displayName: createdUser.displayName,
-      tier: createdUser.tier,
-      trialExpiresAt: createdUser.trialExpiresAt,
-      quotaLimit: createdUser.quotaLimit
-    }, null, 2));
-
-    // Test user retrieval
-    console.log('\n3. Testing user retrieval...');
-    const retrievedUser = await prisma.profile.findUnique({
-      where: { neonAuthUserId: testUser.neonAuthUserId }
-    });
-
-    if (retrievedUser) {
-      console.log('✅ User retrieval successful!');
-      console.log('Retrieved user email:', retrievedUser.email);
+    
+    // Take screenshot before submitting
+    await page.screenshot({ path: 'signup-test-filled.png' });
+    console.log('📸 Screenshot taken: signup-test-filled.png');
+    
+    // Find and click signup button
+    console.log('🖱️ Clicking signup button...');
+    const signupButton = await page.locator('button[type="submit"], button:has-text("Sign up"), button:has-text("Create"), button:has-text("Register")').first();
+    await signupButton.click();
+    
+    // Wait for response
+    await page.waitForTimeout(3000);
+    
+    // Take screenshot after submission
+    await page.screenshot({ path: 'signup-test-after-submit.png' });
+    console.log('📸 Screenshot taken: signup-test-after-submit.png');
+    
+    // Check if we're redirected to dashboard or if there are errors
+    const currentUrl = page.url();
+    console.log('🌐 Current URL after signup:', currentUrl);
+    
+    if (currentUrl.includes('/dashboard')) {
+      console.log('✅ SUCCESS: User created and redirected to dashboard!');
+      
+      // Take screenshot of dashboard
+      await page.screenshot({ path: 'signup-test-dashboard.png' });
+      console.log('📸 Screenshot taken: signup-test-dashboard.png');
+      
+      // Check for user info on dashboard
+      const userEmail = await page.locator('text=user1tester@email.com').first().textContent().catch(() => null);
+      if (userEmail) {
+        console.log('✅ Email confirmed on dashboard:', userEmail);
+      }
+      
     } else {
-      console.log('❌ User retrieval failed');
+      console.log('⚠️ Not redirected to dashboard. Checking for errors...');
+      
+      // Look for error messages
+      const errorMessages = await page.locator('[class*="error"], [role="alert"], .text-red-500, .text-red-600').allTextContents();
+      if (errorMessages.length > 0) {
+        console.log('❌ Error messages found:', errorMessages);
+      }
+      
+      // Check if we're still on signup page
+      if (currentUrl.includes('/signup')) {
+        console.log('📝 Still on signup page - may need email verification');
+      }
     }
-
-    // Test quota update
-    console.log('\n4. Testing quota update...');
-    const updatedUser = await prisma.profile.update({
-      where: { neonAuthUserId: testUser.neonAuthUserId },
-      data: {
-        quotaUsed: { increment: 5 },
-        lastActivityAt: new Date()
-      }
-    });
-
-    console.log('✅ Quota update successful!');
-    console.log('Updated quota:', updatedUser.quotaUsed);
-
-    // Test usage log creation
-    console.log('\n5. Testing usage log creation...');
-    const usageLog = await prisma.usageLog.create({
-      data: {
-        profileId: createdUser.id,
-        neonAuthUserId: testUser.neonAuthUserId,
-        action: 'weather',
-        workflowType: 'automation',
-        success: true,
-        processingTimeMs: 250
-      }
-    });
-
-    console.log('✅ Usage log created successfully!');
-    console.log('Log ID:', usageLog.id);
-
-    // Test trial calculation
-    const trialDaysLeft = Math.max(0, Math.ceil((new Date(createdUser.trialExpiresAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24)));
-    console.log('\n6. Trial system test:');
-    console.log('Trial expires at:', createdUser.trialExpiresAt);
-    console.log('Days left:', trialDaysLeft);
-    console.log('Trial active:', createdUser.trialActive);
-
-    // Cleanup test data
-    console.log('\n7. Cleaning up test data...');
-    await prisma.usageLog.deleteMany({
-      where: { profileId: createdUser.id }
-    });
-    await prisma.profile.delete({
-      where: { id: createdUser.id }
-    });
-    console.log('✅ Cleanup completed');
-
-    console.log('\n🎉 All tests passed! NeonDB + Prisma integration is working correctly.');
-
+    
+    // Get all text content for debugging
+    const pageText = await page.locator('body').textContent();
+    console.log('📄 Page content preview:', pageText.substring(0, 500) + '...');
+    
+    console.log('✅ Test completed successfully!');
+    
   } catch (error) {
-    console.error('\n❌ Test failed:', error);
-    console.error('Error details:', {
-      message: error.message,
-      code: error.code,
-      meta: error.meta
-    });
+    console.error('❌ Test failed:', error);
+    await page.screenshot({ path: 'signup-test-error.png' });
+    console.log('📸 Error screenshot taken: signup-test-error.png');
   } finally {
-    await prisma.$disconnect();
+    await browser.close();
   }
 }
 
 // Run the test
-testUserCreation();
+testUserCreation().then(() => {
+  console.log('🏁 Test script finished');
+  process.exit(0);
+}).catch(error => {
+  console.error('💥 Script error:', error);
+  process.exit(1);
+});

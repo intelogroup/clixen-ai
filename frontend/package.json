@@ -37,7 +37,7 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
     "dotenv": "^17.2.1",
-    "lucide-react": "^0.294.0",
+    "lucide-react": "^0.542.0",
     "n8n-mcp": "^2.10.5",
     "next": "15.1.6",
     "pg": "^8.16.3",
