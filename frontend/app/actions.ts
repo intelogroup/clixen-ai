@@ -5,6 +5,8 @@ import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import type { Profile, Team, ApiKey, TeamRole, TeamTier } from "@prisma/client";
 import crypto from 'crypto';
+import { getCachedUserProfile, invalidateUserCache } from "@/lib/cache";
+import { trackUserQuery } from "@/lib/performance";
 
 export async function createUserProfile() {
   const user = await neonAuth.getUser();
@@ -13,25 +15,28 @@ export async function createUserProfile() {
     redirect("/auth/signin");
   }
 
-  // Use upsert for better performance - single database operation
-  await prisma.profile.upsert({
-    where: { neonAuthUserId: user.id },
-    update: {
-      // Update only essential fields to avoid unnecessary writes
-      lastActivityAt: new Date(),
-      email: user.primaryEmail!,
-      displayName: user.displayName || user.primaryEmail!
-    },
-    create: {
-      neonAuthUserId: user.id,
-      email: user.primaryEmail!,
-      displayName: user.displayName || user.primaryEmail!,
-      tier: "FREE",
-      role: "MEMBER",
-      trialActive: true,
-      quotaUsed: 0,
-      quotaLimit: 50,
-    }
+  // Track performance of profile creation
+  await trackUserQuery('create_profile', async () => {
+    // Use upsert for better performance - single database operation
+    return prisma.profile.upsert({
+      where: { neonAuthUserId: user.id },
+      update: {
+        // Update only essential fields to avoid unnecessary writes
+        lastActivityAt: new Date(),
+        email: user.primaryEmail!,
+        displayName: user.displayName || user.primaryEmail!
+      },
+      create: {
+        neonAuthUserId: user.id,
+        email: user.primaryEmail!,
+        displayName: user.displayName || user.primaryEmail!,
+        tier: "FREE",
+        role: "MEMBER",
+        trialActive: true,
+        quotaUsed: 0,
+        quotaLimit: 50,
+      }
+    });
   });
 
   return user;
@@ -44,37 +49,39 @@ export async function getUserData(): Promise<{user: any, profile: Profile | null
     return { user: null, profile: null };
   }
 
-  // Optimized query with specific field selection for better performance
-  const profile = await prisma.profile.findUnique({
-    where: { neonAuthUserId: user.id },
-    select: {
-      id: true,
-      neonAuthUserId: true,
-      email: true,
-      displayName: true,
-      teamId: true,
-      role: true,
-      permissions: true,
-      oauthProviders: true,
-      telegramChatId: true,
-      telegramUsername: true,
-      telegramFirstName: true,
-      telegramLastName: true,
-      telegramLinkedAt: true,
-      tier: true,
-      trialStartedAt: true,
-      trialExpiresAt: true,
-      trialActive: true,
-      quotaUsed: true,
-      quotaLimit: true,
-      stripeCustomerId: true,
-      stripeSubscriptionId: true,
-      customUserData: true,
-      userMetadata: true,
-      lastActivityAt: true,
-      createdAt: true,
-      updatedAt: true
-    }
+  // Use cached profile for better performance
+  const profile = await getCachedUserProfile(user.id, async () => {
+    return prisma.profile.findUnique({
+      where: { neonAuthUserId: user.id },
+      select: {
+        id: true,
+        neonAuthUserId: true,
+        email: true,
+        displayName: true,
+        teamId: true,
+        role: true,
+        permissions: true,
+        oauthProviders: true,
+        telegramChatId: true,
+        telegramUsername: true,
+        telegramFirstName: true,
+        telegramLastName: true,
+        telegramLinkedAt: true,
+        tier: true,
+        trialStartedAt: true,
+        trialExpiresAt: true,
+        trialActive: true,
+        quotaUsed: true,
+        quotaLimit: true,
+        stripeCustomerId: true,
+        stripeSubscriptionId: true,
+        customUserData: true,
+        userMetadata: true,
+        lastActivityAt: true,
+        createdAt: true,
+        updatedAt: true
+      }
+    });
   });
 
   return { user, profile };
@@ -94,6 +101,9 @@ export async function updateUserQuota(amount: number = 1) {
       lastActivityAt: new Date(),
     }
   });
+  
+  // Invalidate cache when user data changes
+  invalidateUserCache(user.id);
 }
 
 export async function linkTelegramAccount(chatId: string, username?: string, firstName?: string, lastName?: string) {

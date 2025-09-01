@@ -80,6 +80,16 @@ export default async function Dashboard() {
   
   const { profile } = await getUserData();
   
+  // Serialize user data for client components (fix serialization error)
+  const userData = user ? {
+    id: user.id,
+    email: user.primaryEmail,
+    displayName: user.displayName,
+    emailVerified: user.primaryEmailVerified,
+    profileImageUrl: user.profileImageUrl,
+    signedUpAt: user.signedUpAt
+  } : null;
+  
   // Temporarily disabled team and API key data for build stability
   // const teamData = await getTeamData();
   // const apiKeys = await listApiKeys();
@@ -102,7 +112,7 @@ export default async function Dashboard() {
               </Link>
             </div>
             <div className="flex items-center space-x-4">
-              <span className="text-gray-700">Welcome, {user.displayName || user.primaryEmail}</span>
+              <span className="text-gray-700">Welcome, {userData?.displayName || userData?.email}</span>
               <div className="flex items-center space-x-2">
                 <Suspense fallback={<ButtonSkeleton className="w-8 h-8 rounded-full" />}>
                   <UserButton />
@@ -178,7 +188,7 @@ export default async function Dashboard() {
               <CardSkeleton />
             </div>
           }>
-            <DashboardCards user={user} profile={profile} />
+            <DashboardCards user={userData} profile={profile} />
           </Suspense>
 
           {/* Features Section - Optimized with Suspense */}
