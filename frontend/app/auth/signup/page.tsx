@@ -1,19 +1,19 @@
-import { SignUp } from "@stackframe/stack";
 import Link from "next/link";
 import { Suspense } from "react";
+import EnhancedSignupForm from "./enhanced-signup-form";
 
-// Error boundary for SignUp component
+// Enhanced signup form component with network handling
 function SignUpForm() {
-  console.log('SignUp form component rendering');
+  console.log('Enhanced SignUp form component rendering');
   
   try {
     return (
       <div className="bg-white py-8 px-6 shadow-lg rounded-xl border border-gray-100">
-        <SignUp />
+        <EnhancedSignupForm />
       </div>
     );
   } catch (error) {
-    console.error('Error rendering SignUp form:', error);
+    console.error('Error rendering Enhanced SignUp form:', error);
     return (
       <div className="bg-red-50 py-8 px-6 shadow-lg rounded-xl border border-red-200">
         <div className="text-center">
